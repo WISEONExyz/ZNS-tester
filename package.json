@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "zcashname-sdk": "^0.7.0"
+  }
+}

@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZNS Tester</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0f;
+      --surface: #141416;
+      --surface2: #1a1a1e;
+      --surface3: #202026;
+      --border: rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.12);
+      --text: #e8e8ec;
+      --muted: #7a7a8a;
+      --accent: #7c6af7;
+      --accent2: #5d4fd6;
+      --green: #3dd68c;
+      --red: #f25757;
+      --amber: #f5a623;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'IBM Plex Sans', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-text {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: 0.5px;
+    }
+
+    .logo-badge {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(124,106,247,0.15);
+      color: var(--accent);
+      border: 1px solid rgba(124,106,247,0.3);
+      font-family: var(--mono);
+    }
+
+    /* Network selector */
+    .net-group {
+      display: flex;
+      gap: 4px;
+      background: var(--bg);
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .net-btn {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 5px 14px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      background: transparent;
+      color: var(--muted);
+      transition: all 0.15s;
+    }
+
+    .net-btn.active {
+      background: var(--surface3);
+      color: var(--accent);
+      border: 1px solid rgba(124,106,247,0.3);
+    }
+
+    /* Layout */
+    .layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      height: calc(100vh - 57px);
+    }
+
+    /* Sidebar */
+    aside {
+      width: 200px;
+      min-width: 200px;
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+      padding: 12px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow-y: auto;
+    }
+
+    .aside-section {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 8px 10px 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--muted);
+      transition: all 0.12s;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+    }
+
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: rgba(124,106,247,0.1); color: var(--accent); }
+
+    .nav-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+
+    /* Main content */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel { display: none; flex-direction: column; height: 100%; overflow: hidden; }
+    .panel.active { display: flex; }
+
+    .panel-header {
+      padding: 16px 24px 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .panel-title {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .panel-desc {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .panel-body {
+      flex: 1;
+      padding: 20px 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Form controls */
+    .form-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex: 1;
+      min-width: 150px;
+    }
+
+    .field.narrow { flex: 0 0 80px; min-width: 80px; }
+
+    label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    input, select, textarea {
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 8px 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+      width: 100%;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(124,106,247,0.5);
+      box-shadow: 0 0 0 2px rgba(124,106,247,0.08);
+    }
+
+    select option { background: var(--surface3); }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+      line-height: 1.5;
+    }
+
+    .btn {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 8px 18px;
+      background: var(--accent2);
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover { background: var(--accent); }
+    .btn:active { transform: scale(0.97); }
+
+    .btn.loading { opacity: 0.6; cursor: not-allowed; }
+
+    /* Result box */
+    .result-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .result-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .copy-btn {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 3px 10px;
+      border-radius: 4px;
+      border: 1px solid var(--border2);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    .copy-btn:hover { color: var(--text); border-color: var(--border2); background: var(--surface3); }
+
+    .result-box {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.6;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: var(--text);
+      min-height: 180px;
+    }
+
+    .result-box.empty {
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .result-box .key { color: #7c9ef5; }
+    .result-box .str { color: #7dd3a0; }
+    .result-box .num { color: #f0c674; }
+    .result-box .null { color: var(--muted); }
+    .result-box .bool { color: #c792ea; }
+
+    /* Status cards */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .stat-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+
+    .stat-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+    }
+
+    .stat-val {
+      font-family: var(--mono);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* Availability indicator */
+    .avail-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 99px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .avail-pill.yes {
+      background: rgba(61,214,140,0.1);
+      border: 1px solid rgba(61,214,140,0.3);
+      color: var(--green);
+    }
+
+    .avail-pill.no {
+      background: rgba(242,87,87,0.1);
+      border: 1px solid rgba(242,87,87,0.3);
+      color: var(--red);
+    }
+
+    .cost-note {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .cost-note span { color: var(--amber); }
+    .help-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 12px;
+      line-height: 1.55;
+      color: var(--muted);
+    }
+    .help-card strong { color: var(--text); }
+
+    /* Error message */
+    .err-msg {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--red);
+      padding: 10px 14px;
+      background: rgba(242,87,87,0.08);
+      border: 1px solid rgba(242,87,87,0.2);
+      border-radius: 6px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--border2); }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      aside { width: 48px; min-width: 48px; }
+      .nav-item span { display: none; }
+      .aside-section { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">ZNS</div>
+    <span class="logo-text">ZNS Tester</span>
+    <span class="logo-badge">beta</span>
+  </div>
+  <div class="net-group">
+    <button class="net-btn active" onclick="setNet('testnet', this)">Testnet</button>
+    <button class="net-btn" onclick="setNet('mainnet', this)">Mainnet</button>
+  </div>
+</header>
+
+<div class="layout">
+  <aside>
+    <div class="aside-section">Queries</div>
+    <button class="nav-item active" onclick="showPanel('status', this)">
+      <div class="nav-dot"></div><span>Status</span>
+    </button>
+    <button class="nav-item" onclick="showPanel('resolve', this)">
+      <div class="nav-dot"></div><span>Resolve name</span>
+    </button>
+    <button class="nav-item" onclick="showPanel('revaddr', this)">
+      <div class="nav-dot"></div><span>Resolve address</span>
+    </button>
+    <button class="nav-item" onclick="showPanel('avail', this)">
+      <div class="nav-dot"></div><span>Availability</span>
+    </button>
+    <button class="nav-item" onclick="showPanel('listings', this)">
+      <div class="nav-dot"></div><span>Listings</span>
+    </button>
+    <button class="nav-item" onclick="showPanel('events', this)">
+      <div class="nav-dot"></div><span>Events</span>
+    </button>
+    <div class="aside-section">Advanced</div>
+    <button class="nav-item" onclick="showPanel('raw', this)">
+      <div class="nav-dot"></div><span>Raw RPC</span>
+    </button>
+    <button class="nav-item" onclick="showPanel('fuzz', this)">
+      <div class="nav-dot"></div><span>Fuzz Runner</span>
+    </button>
+  </aside>
+
+  <main>
+
+    <!-- STATUS -->
+    <div class="panel active" id="panel-status">
+      <div class="panel-header">
+        <div class="panel-title">status</div>
+        <div class="panel-desc">Indexer sync state, admin pubkey, pricing tiers, and UIVK</div>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <button class="btn" onclick="doStatus(this)">&#9654; Run</button>
+        </div>
+        <div class="stat-grid" id="stat-cards" style="display:none"></div>
+        <div class="result-wrap">
+          <div class="result-header">
+            <span class="result-label">Response</span>
+            <button class="copy-btn" onclick="copyResult('res-status')">Copy</button>
+          </div>
+          <div class="result-box empty" id="res-status">Hit Run to fetch indexer status</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESOLVE NAME -->
+    <div class="panel" id="panel-resolve">
+      <div class="panel-header">
+        <div class="panel-title">resolve › name</div>
+        <div class="panel-desc">Forward lookup: name string → registration object (or null if unclaimed)</div>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="field">
+            <label>Name (without .zcash)</label>
+            <input id="in-name" placeholder="alice" />
+          </div>
+          <button class="btn" onclick="doResolve(this)">&#9654; Run</button>
+        </div>
+        <div class="result-wrap">
+          <div class="result-header">
+            <span class="result-label">Response</span>
+            <button class="copy-btn" onclick="copyResult('res-resolve')">Copy</button>
+          </div>
+          <div class="result-box empty" id="res-resolve">Enter a name and hit Run</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESOLVE ADDRESS -->
+    <div class="panel" id="panel-revaddr">
+      <div class="panel-header">
+        <div class="panel-title">resolve › address</div>
+        <div class="panel-desc">Reverse lookup: unified address → all names pointing at it (paginated)</div>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="field">
+            <label>Unified address</label>
+            <input id="in-addr" placeholder="utest1..." />
+          </div>
+          <div class="field narrow">
+            <label>Limit</label>
+            <input id="in-addr-limit" value="50" type="number" />
+          </div>
+          <div class="field narrow">
+            <label>Offset</label>
+            <input id="in-addr-offset" value="0" type="number" />
+          </div>
+          <button class="btn" onclick="doResolveAddr(this)">&#9654; Run</button>
+        </div>
+        <div class="result-wrap">
+          <div class="result-header">
+            <span class="result-label">Response</span>
+            <button class="copy-btn" onclick="copyResult('res-revaddr')">Copy</button>
+          </div>
+          <div class="result-box empty" id="res-revaddr">Enter an address and hit Run</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AVAILABILITY -->
+    <div class="panel" id="panel-avail">
+      <div class="panel-header">
+        <div class="panel-title">isAvailable</div>
+        <div class="panel-desc">Check if a name is unclaimed and see its estimated claim cost</div>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="field">
+            <label>Name (without .zcash)</label>
+            <input id="in-avail" placeholder="satoshi" />
+          </div>
+          <button class="btn" onclick="doAvail(this)">&#9654; Run</button>
+        </div>
+        <div id="avail-result"></div>
+        <div class="result-wrap">
+          <div class="result-header">
+            <span class="result-label">Raw response</span>
+            <button class="copy-btn" onclick="copyResult('res-avail')">Copy</button>
+          </div>
+          <div class="result-box empty" id="res-avail">Enter a name and hit Run</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LISTINGS -->
+    <div class="panel" id="panel-listings">
+      <div class="panel-header">
+        <div class="panel-title">listings</div>
+        <div class="panel-desc">Active marketplace listings. Price is in zatoshis (1 ZEC = 100,000,000 zatoshis)</div>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="field narrow">
+            <label>Limit</label>
+            <input id="in-list-limit" value="20" type="number" />
+          </div>
+          <div class="field narrow">
+            <label>Offset</label>
+            <input id="in-list-offset" value="0" type="number" />
+          </div>
+          <button class="btn" onclick="doListings(this)">&#9654; Run</button>
+        </div>
+        <div class="result-wrap">
+          <div class="result-header">
+            <span class="result-label">Response</span>
+            <button class="copy-btn" onclick="copyResult('res-listings')">Copy</button>
+          </div>
+          <div class="result-box empty" id="res-listings">Hit Run to fetch listings</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EVENTS -->
+    <div class="panel" id="panel-events">
+      <div class="panel-header">
+        <div class="panel-title">events</div>
+        <div class="panel-desc">On-chain event log. Actions: CLAIM, LIST, DELIST, BUY, UPDATE, RELEASE, SETPRICE. Newest first.</div>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="field">
+            <label>Name filter (optional)</label>
+            <input id="in-ev-name" placeholder="alice" />
+          </div>
+          <div class="field">
+            <label>Action filter (optional)</label>
+            <select id="in-ev-action">
+              <option value="">All actions</option>
+              <option>CLAIM</option>
+              <option>LIST</option>
+              <option>DELIST</option>
+              <option>BUY</option>
+              <option>UPDATE</option>
+              <option>RELEASE</option>
+              <option>SETPRICE</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>Since height (optional, exclusive &gt;)</label>
+            <input id="in-ev-height" placeholder="3900000" type="number" />
+          </div>
+          <div class="field narrow">
+            <label>Limit</label>
+            <input id="in-ev-limit" value="20" type="number" />
+          </div>
+          <div class="field narrow">
+            <label>Offset</label>
+            <input id="in-ev-offset" value="0" type="number" />
+          </div>
+          <button class="btn" onclick="doEvents(this)">&#9654; Run</button>
+        </div>
+        <div class="result-wrap">
+          <div class="result-header">
+            <span class="result-label">Response</span>
+            <button class="copy-btn" onclick="copyResult('res-events')">Copy</button>
+          </div>
+          <div class="result-box empty" id="res-events">Hit Run to fetch events</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RAW RPC -->
+    <div class="panel" id="panel-raw">
+      <div class="panel-header">
+        <div class="panel-title">raw JSON-RPC</div>
+        <div class="panel-desc">Send any raw payload directly to the indexer. Methods: status, resolve, listings, events</div>
+      </div>
+      <div class="panel-body">
+        <div class="field" style="min-width:100%">
+          <label>Request body</label>
+          <textarea id="in-raw">{"jsonrpc":"2.0","id":1,"method":"status","params":{}}</textarea>
+        </div>
+        <div class="form-row">
+          <button class="btn" onclick="doRaw(this)">&#9654; Send</button>
+        </div>
+        <div class="result-wrap">
+          <div class="result-header">
+            <span class="result-label">Response</span>
+            <button class="copy-btn" onclick="copyResult('res-raw')">Copy</button>
+          </div>
+          <div class="result-box empty" id="res-raw">Edit the request and hit Send</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FUZZ RUNNER -->
+    <div class="panel" id="panel-fuzz">
+      <div class="panel-header">
+        <div class="panel-title">fuzz runner</div>
+        <div class="panel-desc">Run canned payload corpus and flag anomalies (slow, non-JSON, inconsistent behavior)</div>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="field narrow">
+            <label>Repetitions</label>
+            <input id="in-fuzz-reps" value="2" type="number" min="1" max="10" />
+          </div>
+          <div class="field narrow">
+            <label>Slow ms</label>
+            <input id="in-fuzz-slow" value="1200" type="number" min="100" />
+          </div>
+          <button class="btn" onclick="doFuzz(this)">&#9654; Run corpus</button>
+          <button class="btn" onclick="exportFuzzReport()">Export JSON</button>
+        </div>
+        <div class="field">
+          <label>Custom fuzz cases (JSON array, optional)</label>
+          <textarea id="in-fuzz-custom" placeholder='[{"name":"my-test","mode":"rpc","method":"status","params":{}},{"name":"raw-test","mode":"raw","body":"{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"status\",\"params\":{}}"}]'></textarea>
+        </div>
+        <div class="form-row">
+          <button class="btn" onclick="saveCustomCases()">Save custom cases</button>
+          <button class="btn" onclick="loadCustomCases()">Load custom cases</button>
+          <button class="btn" onclick="clearCustomCases()">Clear saved cases</button>
+        </div>
+        <div class="result-wrap">
+          <div class="result-header">
+            <span class="result-label">Report</span>
+            <button class="copy-btn" onclick="copyResult('res-fuzz')">Copy</button>
+          </div>
+          <div class="result-box empty" id="res-fuzz">Run the corpus to generate an anomaly report</div>
+        </div>
+        <div class="help-card" id="fuzz-explainer">
+          <strong>How to read this report</strong><br />
+          - <strong>ok / failed</strong>: total successful vs failed executions.<br />
+          - <strong>maxLatencyMs / avgLatencyMs</strong>: slowest and average request time.<br />
+          - <strong>anomalies.error</strong>: error/exception happened for at least one run.<br />
+          - <strong>anomalies.slow</strong>: a run exceeded your <strong>Slow ms</strong> threshold.<br />
+          - <strong>anomalies.inconsistent</strong>: same test returned different signatures across repetitions.<br />
+          Run with repetitions >= 3 for stronger inconsistency signals.
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const ENDPOINTS = {
+    testnet: 'https://light.zcash.me/zns-testnet',
+    mainnet: 'https://light.zcash.me/zns-mainnet-test'
+  };
+  let network = 'testnet';
+  let cachedStatus = null;
+  let lastFuzzReport = null;
+  const CUSTOM_FUZZ_STORAGE_KEY = 'znsTester.customFuzzCases.v1';
+
+  const FUZZ_CORPUS = [
+    { name: 'status-empty-params', mode: 'rpc', method: 'status', params: {} },
+    { name: 'status-null-params', mode: 'rpc', method: 'status', params: null },
+    { name: 'status-array-params', mode: 'rpc', method: 'status', params: [] },
+    { name: 'resolve-null-query', mode: 'rpc', method: 'resolve', params: { query: null } },
+    { name: 'resolve-empty-query', mode: 'rpc', method: 'resolve', params: { query: '' } },
+    { name: 'resolve-large-query', mode: 'rpc', method: 'resolve', params: { query: 'a'.repeat(4096) } },
+    { name: 'resolve-unicode-query', mode: 'rpc', method: 'resolve', params: { query: 'alice\u200d\u202e\u2066' } },
+    { name: 'resolve-object-query', mode: 'rpc', method: 'resolve', params: { query: { nested: 'bad' } } },
+    { name: 'resolveaddr-negative', mode: 'rpc', method: 'resolve', params: { query: 'utest1bad', limit: -1, offset: -1 } },
+    { name: 'resolveaddr-huge', mode: 'rpc', method: 'resolve', params: { query: 'utest1bad', limit: 2147483647, offset: 2147483647 } },
+    { name: 'listings-negative', mode: 'rpc', method: 'listings', params: { limit: -50, offset: -5 } },
+    { name: 'listings-huge', mode: 'rpc', method: 'listings', params: { limit: 999999999, offset: 999999999 } },
+    { name: 'events-odd-types', mode: 'rpc', method: 'events', params: { name: 12, action: false, since_height: '3900000', limit: '20', offset: {} } },
+    { name: 'raw-missing-jsonrpc', mode: 'raw', body: '{"id":1,"method":"status","params":{}}' },
+    { name: 'raw-invalid-json', mode: 'raw', body: '{"jsonrpc":"2.0","id":1,"method":"status","params":' },
+    { name: 'raw-unknown-method', mode: 'raw', body: '{"jsonrpc":"2.0","id":1,"method":"unknown_method","params":{}}' },
+    { name: 'raw-batch-mixed', mode: 'raw', body: '[{"jsonrpc":"2.0","id":1,"method":"status","params":{}},{"jsonrpc":"2.0","id":null,"method":"resolve","params":{"query":"alice"}}]' }
+  ];
+
+  function setNet(net, btn) {
+    network = net;
+    document.querySelectorAll('.net-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    cachedStatus = null;
+  }
+
+  function showPanel(id, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  async function rpc(method, params) {
+    const res = await fetch(ENDPOINTS[network], {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(JSON.stringify(data.error));
+    return data.result;
+  }
+
+  function formatForResult(data) {
+    if (typeof data === 'string') return data;
+    if (data === undefined) return 'undefined';
+    try {
+      return JSON.stringify(data, null, 2);
+    } catch {
+      return String(data);
+    }
+  }
+
+  function showResult(elId, data, isError) {
+    const el = document.getElementById(elId);
+    el.classList.remove('empty');
+    el.textContent = formatForResult(data);
+    el.style.color = isError ? 'var(--red)' : 'var(--text)';
+  }
+
+  function setLoading(btn, loading) {
+    btn.classList.toggle('loading', loading);
+    btn.disabled = loading;
+  }
+
+  function copyResult(elId) {
+    const text = document.getElementById(elId).innerText;
+    navigator.clipboard.writeText(text).catch(() => {});
+  }
+
+  function parseCustomCasesOrThrow() {
+    const raw = document.getElementById('in-fuzz-custom').value.trim();
+    if (!raw) return [];
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch (e) {
+      throw new Error('Custom cases JSON is invalid: ' + e.message);
+    }
+    if (!Array.isArray(parsed)) throw new Error('Custom cases must be a JSON array.');
+    for (const test of parsed) {
+      if (!test || typeof test !== 'object') throw new Error('Each custom case must be an object.');
+      if (typeof test.name !== 'string' || !test.name.trim()) throw new Error('Each custom case needs a non-empty string "name".');
+      if (test.mode !== 'rpc' && test.mode !== 'raw') throw new Error('Case "' + test.name + '" has invalid mode. Use "rpc" or "raw".');
+      if (test.mode === 'rpc') {
+        if (typeof test.method !== 'string' || !test.method.trim()) throw new Error('RPC case "' + test.name + '" needs a string "method".');
+        if (!Object.prototype.hasOwnProperty.call(test, 'params')) throw new Error('RPC case "' + test.name + '" must include "params".');
+      }
+      if (test.mode === 'raw' && typeof test.body !== 'string') {
+        throw new Error('Raw case "' + test.name + '" needs a string "body".');
+      }
+    }
+    return parsed;
+  }
+
+  function saveCustomCases() {
+    try {
+      const parsed = parseCustomCasesOrThrow();
+      localStorage.setItem(CUSTOM_FUZZ_STORAGE_KEY, JSON.stringify(parsed));
+      alert('Saved ' + parsed.length + ' custom fuzz case(s).');
+    } catch (e) {
+      alert(e.message);
+    }
+  }
+
+  function loadCustomCases() {
+    try {
+      const saved = localStorage.getItem(CUSTOM_FUZZ_STORAGE_KEY);
+      if (!saved) {
+        alert('No saved custom cases found.');
+        return;
+      }
+      const parsed = JSON.parse(saved);
+      document.getElementById('in-fuzz-custom').value = JSON.stringify(parsed, null, 2);
+      alert('Loaded ' + parsed.length + ' custom fuzz case(s).');
+    } catch (e) {
+      alert('Failed to load saved cases: ' + e.message);
+    }
+  }
+
+  function clearCustomCases() {
+    localStorage.removeItem(CUSTOM_FUZZ_STORAGE_KEY);
+    document.getElementById('in-fuzz-custom').value = '';
+    alert('Cleared saved custom cases.');
+  }
+
+  function exportFuzzReport() {
+    if (!lastFuzzReport) {
+      alert('No fuzz report available yet. Run the corpus first.');
+      return;
+    }
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = 'zns-fuzz-report-' + network + '-' + stamp + '.json';
+    const blob = new Blob([JSON.stringify(lastFuzzReport, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function updateFuzzExplainer(report) {
+    const el = document.getElementById('fuzz-explainer');
+    if (!el) return;
+    if (!report || !report.stats) return;
+    const stats = report.stats;
+    const anomalyCount = Array.isArray(report.anomalies) ? report.anomalies.length : 0;
+    const failureRate = report.executions ? ((stats.failed / report.executions) * 100).toFixed(1) : '0.0';
+    let risk = 'Low';
+    if (anomalyCount >= 4 || stats.failed >= 5) risk = 'High';
+    else if (anomalyCount >= 1 || stats.failed >= 1) risk = 'Medium';
+    el.innerHTML =
+      '<strong>How to read this report</strong><br />' +
+      'Quick view: <strong>' + stats.ok + ' ok</strong>, <strong>' + stats.failed + ' failed</strong> (' + failureRate + '% failure rate), ' +
+      '<strong>' + anomalyCount + ' anomalies</strong>, max latency <strong>' + stats.maxLatencyMs + ' ms</strong>.<br />' +
+      'Risk hint: <strong>' + risk + '</strong> (triage manually).<br />' +
+      '- <strong>error</strong>: endpoint/parser rejected request or threw.<br />' +
+      '- <strong>slow</strong>: payload may trigger expensive path / DoS risk.<br />' +
+      '- <strong>inconsistent</strong>: repeated identical input changed output; strongest bug signal.';
+  }
+
+  async function doStatus(btn) {
+    setLoading(btn, true);
+    try {
+      const r = await rpc('status', {});
+      cachedStatus = r;
+      const cards = document.getElementById('stat-cards');
+      cards.style.display = 'grid';
+      cards.textContent = '';
+      const statData = [
+        ['Synced height', r.synced_height?.toLocaleString() ?? '—'],
+        ['Registered', String(r.registered ?? '—')],
+        ['Listed', String(r.listed ?? '—')],
+        ['Network', network]
+      ];
+      for (const [label, value] of statData) {
+        const card = document.createElement('div');
+        card.className = 'stat-card';
+        const lbl = document.createElement('div');
+        lbl.className = 'stat-label';
+        lbl.textContent = label;
+        const val = document.createElement('div');
+        val.className = 'stat-val';
+        if (label === 'Network') val.style.cssText = 'font-size:14px;margin-top:2px;';
+        val.textContent = value;
+        card.appendChild(lbl);
+        card.appendChild(val);
+        cards.appendChild(card);
+      }
+      showResult('res-status', r, false);
+    } catch(e) {
+      showResult('res-status', 'Error: ' + e.message, true);
+    }
+    setLoading(btn, false);
+  }
+
+  async function doResolve(btn) {
+    const name = document.getElementById('in-name').value.trim().replace(/\.zcash$/, '');
+    if (!name) return;
+    setLoading(btn, true);
+    try {
+      const r = await rpc('resolve', { query: name });
+      showResult('res-resolve', r, false);
+    } catch(e) {
+      showResult('res-resolve', 'Error: ' + e.message, true);
+    }
+    setLoading(btn, false);
+  }
+
+  async function doResolveAddr(btn) {
+    const addr = document.getElementById('in-addr').value.trim();
+    if (!addr) return;
+    const limit = parseInt(document.getElementById('in-addr-limit').value) || 50;
+    const offset = parseInt(document.getElementById('in-addr-offset').value) || 0;
+    setLoading(btn, true);
+    try {
+      const r = await rpc('resolve', { query: addr, limit, offset });
+      showResult('res-revaddr', r, false);
+    } catch(e) {
+      showResult('res-revaddr', 'Error: ' + e.message, true);
+    }
+    setLoading(btn, false);
+  }
+
+  async function doAvail(btn) {
+    const name = document.getElementById('in-avail').value.trim().replace(/\.zcash$/, '');
+    if (!name) return;
+    setLoading(btn, true);
+    try {
+      if (!cachedStatus) cachedStatus = await rpc('status', {});
+      const r = await rpc('resolve', { query: name });
+      const available = r === null;
+      const tiers = cachedStatus?.pricing?.tiers;
+      let cost = null;
+      if (tiers) {
+        const idx = Math.min(name.length - 1, tiers.length - 1);
+        cost = tiers[idx];
+      }
+      const ar = document.getElementById('avail-result');
+      ar.textContent = '';
+      if (available) {
+        const pill = document.createElement('div');
+        pill.className = 'avail-pill yes';
+        pill.textContent = '\u2713 ' + name + '.zcash is available';
+        ar.appendChild(pill);
+        if (cost) {
+          const note = document.createElement('div');
+          note.className = 'cost-note';
+          note.textContent = 'Estimated cost: ' + (cost / 1e8).toFixed(4) + ' ZEC (' + cost.toLocaleString() + ' zatoshis)';
+          ar.appendChild(note);
+        }
+      } else {
+        const pill = document.createElement('div');
+        pill.className = 'avail-pill no';
+        pill.textContent = '\u2715 ' + name + '.zcash is taken';
+        ar.appendChild(pill);
+      }
+      showResult('res-avail', r, false);
+    } catch(e) {
+      document.getElementById('avail-result').innerHTML = '';
+      showResult('res-avail', 'Error: ' + e.message, true);
+    }
+    setLoading(btn, false);
+  }
+
+  async function doListings(btn) {
+    const limit = parseInt(document.getElementById('in-list-limit').value) || 20;
+    const offset = parseInt(document.getElementById('in-list-offset').value) || 0;
+    setLoading(btn, true);
+    try {
+      const r = await rpc('listings', { limit, offset });
+      showResult('res-listings', r, false);
+    } catch(e) {
+      showResult('res-listings', 'Error: ' + e.message, true);
+    }
+    setLoading(btn, false);
+  }
+
+  async function doEvents(btn) {
+    const name = document.getElementById('in-ev-name').value.trim();
+    const action = document.getElementById('in-ev-action').value;
+    const sinceRaw = document.getElementById('in-ev-height').value.trim();
+    const limit = parseInt(document.getElementById('in-ev-limit').value) || 20;
+    const offset = parseInt(document.getElementById('in-ev-offset').value) || 0;
+    const params = { limit, offset };
+    if (name) params.name = name;
+    if (action) params.action = action;
+    if (sinceRaw) params.since_height = parseInt(sinceRaw);
+    setLoading(btn, true);
+    try {
+      const r = await rpc('events', params);
+      showResult('res-events', r, false);
+    } catch(e) {
+      showResult('res-events', 'Error: ' + e.message, true);
+    }
+    setLoading(btn, false);
+  }
+
+  async function doRaw(btn) {
+    setLoading(btn, true);
+    try {
+      const body = document.getElementById('in-raw').value;
+      const res = await fetch(ENDPOINTS[network], {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body
+      });
+      const data = await res.json();
+      showResult('res-raw', data, false);
+    } catch(e) {
+      showResult('res-raw', 'Error: ' + e.message, true);
+    }
+    setLoading(btn, false);
+  }
+
+  async function rpcRawText(body) {
+    const started = performance.now();
+    const res = await fetch(ENDPOINTS[network], {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body
+    });
+    const elapsedMs = Math.round(performance.now() - started);
+    const text = await res.text();
+    let json = null;
+    let parseError = null;
+    try {
+      json = JSON.parse(text);
+    } catch (e) {
+      parseError = e.message;
+    }
+    return { status: res.status, elapsedMs, text, json, parseError };
+  }
+
+  async function runFuzzCase(test) {
+    const started = performance.now();
+    try {
+      if (test.mode === 'rpc') {
+        const result = await rpc(test.method, test.params);
+        return {
+          ok: true,
+          elapsedMs: Math.round(performance.now() - started),
+          signature: JSON.stringify(result).slice(0, 300),
+          details: { result }
+        };
+      }
+      const raw = await rpcRawText(test.body);
+      const rawOk = raw.status >= 200 && raw.status < 300 && raw.json && !raw.json.error;
+      return {
+        ok: !!rawOk,
+        elapsedMs: raw.elapsedMs,
+        signature: raw.parseError ? 'non-json-response' : JSON.stringify(raw.json).slice(0, 300),
+        details: raw
+      };
+    } catch (e) {
+      return {
+        ok: false,
+        elapsedMs: Math.round(performance.now() - started),
+        signature: 'thrown:' + e.message,
+        details: { error: e.message }
+      };
+    }
+  }
+
+  async function doFuzz(btn) {
+    const reps = Math.max(1, Math.min(10, parseInt(document.getElementById('in-fuzz-reps').value) || 2));
+    const slowMs = Math.max(100, parseInt(document.getElementById('in-fuzz-slow').value) || 1200);
+    let customCases = [];
+    try {
+      customCases = parseCustomCasesOrThrow();
+    } catch (e) {
+      showResult('res-fuzz', 'Error: ' + e.message, true);
+      return;
+    }
+    const corpus = FUZZ_CORPUS.concat(customCases);
+    setLoading(btn, true);
+    const results = [];
+    try {
+      for (let i = 0; i < reps; i++) {
+        for (const test of corpus) {
+          const r = await runFuzzCase(test);
+          results.push({ test: test.name, run: i + 1, ...r });
+        }
+      }
+
+      const byTest = {};
+      for (const r of results) {
+        if (!byTest[r.test]) byTest[r.test] = [];
+        byTest[r.test].push(r);
+      }
+
+      const anomalies = [];
+      for (const testName of Object.keys(byTest)) {
+        const arr = byTest[testName];
+        const sigs = new Set(arr.map(x => x.signature));
+        const hasSlow = arr.some(x => x.elapsedMs > slowMs);
+        const hasThrow = arr.some(x => !x.ok);
+        if (sigs.size > 1) anomalies.push({ kind: 'inconsistent', test: testName, detail: 'response signature changed across runs' });
+        if (hasSlow) anomalies.push({ kind: 'slow', test: testName, detail: 'at least one run exceeded ' + slowMs + 'ms' });
+        if (hasThrow) anomalies.push({ kind: 'error', test: testName, detail: 'at least one run returned error/exception' });
+      }
+
+      const report = {
+        network,
+        totalTests: corpus.length,
+        builtInTests: FUZZ_CORPUS.length,
+        customTests: customCases.length,
+        repetitions: reps,
+        executions: results.length,
+        slowThresholdMs: slowMs,
+        stats: {
+          ok: results.filter(x => x.ok).length,
+          failed: results.filter(x => !x.ok).length,
+          maxLatencyMs: Math.max(...results.map(x => x.elapsedMs)),
+          avgLatencyMs: Math.round(results.reduce((a, b) => a + b.elapsedMs, 0) / Math.max(1, results.length))
+        },
+        anomalies,
+        sampleFailures: results.filter(x => !x.ok).slice(0, 5)
+      };
+
+      lastFuzzReport = report;
+      showResult('res-fuzz', report, false);
+      updateFuzzExplainer(report);
+    } catch (e) {
+      lastFuzzReport = null;
+      showResult('res-fuzz', 'Error: ' + e.message, true);
+    }
+    setLoading(btn, false);
+  }
+
+  // Enter key support for inputs
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+      const panel = e.target.closest('.panel');
+      if (panel) {
+        const btn = panel.querySelector('.btn');
+        if (btn) btn.click();
+      }
+    }
+  });
+  loadCustomCases();
+</script>
+</body>
+</html>
