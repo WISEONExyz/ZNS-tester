@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZNS Log Analyser</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@400;600;700&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #080a0e; --surface: #0e1117; --surface2: #141820; --surface3: #1a1f2b;
+      --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.12);
+      --text: #dde1ec; --muted: #636a80;
+      --accent: #4f9cf9; --green: #3ecf8e; --red: #f25f5c; --amber: #f4a836; --purple: #b47cf8;
+      --mono: 'JetBrains Mono', monospace; --display: 'Syne', sans-serif;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--mono); font-size: 13px; min-height: 100vh; display: flex; flex-direction: column; }
+    header { padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .logo-mark { font-family: var(--display); font-size: 15px; font-weight: 700; color: var(--accent); }
+    .logo-sub { font-size: 11px; color: var(--muted); margin-left: 8px; }
+    .layout { display: flex; flex: 1; height: calc(100vh - 49px); overflow: hidden; }
+    .pane-input { width: 320px; min-width: 220px; border-right: 1px solid var(--border); display: flex; flex-direction: column; background: var(--surface); }
+    .pane-header { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; }
+    textarea#log-input { flex: 1; background: var(--bg); border: none; color: var(--text); font-family: var(--mono); font-size: 11px; padding: 12px 14px; resize: none; outline: none; line-height: 1.6; }
+    textarea#log-input::placeholder { color: var(--muted); }
+    .input-footer { padding: 8px 12px; border-top: 1px solid var(--border); display: flex; gap: 6px; }
+    .pane-output { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 14px; gap: 2px; overflow-x: auto; }
+    .tab { padding: 9px 12px; font-size: 11px; color: var(--muted); cursor: pointer; border: none; background: transparent; border-bottom: 2px solid transparent; transition: all 0.12s; white-space: nowrap; display: flex; align-items: center; gap: 5px; }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .badge { font-size: 9px; padding: 1px 5px; border-radius: 99px; background: var(--surface3); color: var(--muted); }
+    .tab.active .badge { background: rgba(79,156,249,0.15); color: var(--accent); }
+    .badge.red { background: rgba(242,95,92,0.15); color: var(--red); }
+    .tab-content { display: none; flex: 1; overflow-y: auto; padding: 14px 16px; }
+    .tab-content.active { display: block; }
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-bottom: 14px; }
+    .stat-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .sc-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 3px; }
+    .sc-val { font-family: var(--display); font-size: 22px; font-weight: 700; color: var(--text); }
+    .sc-val.red { color: var(--red); } .sc-val.amber { color: var(--amber); } .sc-val.green { color: var(--green); } .sc-val.accent { color: var(--accent); }
+    .section-title { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin: 14px 0 7px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
+    .req-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; margin-bottom: 6px; overflow: hidden; cursor: pointer; transition: border-color 0.12s; }
+    .req-card:hover { border-color: var(--border2); }
+    .req-card.expanded { border-color: rgba(79,156,249,0.3); }
+    .req-card.flag-red { border-left: 3px solid var(--red); }
+    .req-card.flag-amber { border-left: 3px solid var(--amber); }
+    .req-card.flag-green { border-left: 3px solid rgba(62,207,142,0.3); }
+    .req-head { padding: 8px 12px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .req-num { font-size: 9px; color: var(--muted); min-width: 22px; }
+    .pill { font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: 600; white-space: nowrap; }
+    .pill.blue { background: rgba(79,156,249,0.15); color: var(--accent); }
+    .pill.green { background: rgba(62,207,142,0.15); color: var(--green); }
+    .pill.red { background: rgba(242,95,92,0.15); color: var(--red); }
+    .pill.amber { background: rgba(244,168,54,0.12); color: var(--amber); }
+    .pill.purple { background: rgba(180,124,248,0.15); color: var(--purple); }
+    .pill.gray { background: rgba(99,106,128,0.15); color: var(--muted); }
+    .req-body-preview { font-size: 10px; color: var(--muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .req-detail { display: none; border-top: 1px solid var(--border); padding: 10px 12px; }
+    .req-card.expanded .req-detail { display: block; }
+    .sub-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin: 8px 0 4px; }
+    .sub-label:first-child { margin-top: 0; }
+    .json-block { background: var(--bg); border-radius: 5px; padding: 8px 10px; font-size: 11px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; max-height: 260px; overflow-y: auto; color: var(--text); border: 1px solid var(--border); }
+    .json-block .k { color: #7c9ef5; } .json-block .s { color: #7dd3a0; } .json-block .n { color: #f0c674; } .json-block .b { color: #c792ea; } .json-block .nl { color: var(--muted); } .json-block .undef { color: var(--red); font-weight: 600; }
+    .flag-item { display: flex; gap: 10px; padding: 10px 12px; background: var(--surface2); border-radius: 7px; margin-bottom: 7px; }
+    .flag-item.red { border-left: 3px solid var(--red); }
+    .flag-item.amber { border-left: 3px solid var(--amber); }
+    .flag-item.info { border-left: 3px solid var(--accent); }
+    .flag-sev { font-size: 14px; flex-shrink: 0; }
+    .flag-title { font-size: 12px; color: var(--text); font-weight: 500; margin-bottom: 2px; }
+    .flag-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+    .flag-code { font-size: 10px; color: var(--amber); margin-top: 5px; background: rgba(244,168,54,0.07); padding: 3px 7px; border-radius: 3px; display: inline-block; word-break: break-all; }
+    .tl-item { display: flex; gap: 10px; margin-bottom: 5px; align-items: flex-start; }
+    .tl-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+    .tl-dot.fetch { background: var(--accent); } .tl-dot.input { background: var(--muted); } .tl-dot.submit { background: var(--amber); } .tl-dot.flagged { background: var(--red); }
+    .tl-line { font-size: 11px; color: var(--text); line-height: 1.5; }
+    .tl-line .dim { color: var(--muted); }
+    .filter-bar { display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; }
+    .filter-btn { font-size: 10px; padding: 3px 9px; border-radius: 99px; border: 1px solid var(--border2); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.12s; }
+    .filter-btn:hover { color: var(--text); }
+    .filter-btn.active { background: rgba(79,156,249,0.12); border-color: rgba(79,156,249,0.3); color: var(--accent); }
+    .btn { font-family: var(--mono); font-size: 11px; padding: 6px 14px; border-radius: 5px; border: 1px solid var(--border2); cursor: pointer; background: transparent; color: var(--text); transition: all 0.12s; }
+    .btn:hover { background: var(--surface3); }
+    .btn.primary { background: rgba(79,156,249,0.15); border-color: rgba(79,156,249,0.4); color: var(--accent); }
+    .btn.primary:hover { background: rgba(79,156,249,0.25); }
+    .empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 12px; }
+    .empty .icon { font-size: 28px; margin-bottom: 10px; opacity: 0.3; }
+    .repeat-tag { margin-left: auto; font-size: 9px; padding: 2px 7px; border-radius: 4px; background: rgba(244,168,54,0.1); color: var(--amber); border: 1px solid rgba(244,168,54,0.2); }
+    ::-webkit-scrollbar { width: 5px; height: 5px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center">
+    <span class="logo-mark">ZNS</span>
+    <span class="logo-sub">Log Analyser v2 — tuned for your log format</span>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <button class="btn" onclick="loadBuiltIn()">Load your logs</button>
+    <button class="btn" onclick="clearAll()">Clear</button>
+    <button class="btn primary" onclick="analyse()">&#9654; Analyse</button>
+  </div>
+</header>
+
+<div class="layout">
+  <div class="pane-input">
+    <div class="pane-header">
+      <span>Paste console log</span>
+      <span id="char-count">0 chars</span>
+    </div>
+    <textarea id="log-input" placeholder="Paste the raw text from your console here.
+
+Handles your exact format:
+
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '[...]'}
+VM140:1 input InputEvent {data: 'f', ...}
+VM140:1 submit SubmitEvent {...}
+RPC response: {...}
+
+Click 'Load your logs' to pre-load the data from your zns-logs.json file."></textarea>
+    <div class="input-footer">
+      <button class="btn primary" onclick="analyse()" style="flex:1">&#9654; Analyse</button>
+      <button class="btn" onclick="clearAll()">Clear</button>
+    </div>
+  </div>
+
+  <div class="pane-output">
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('summary',this)">Summary <span class="badge" id="b-summary">—</span></button>
+      <button class="tab" onclick="showTab('timeline',this)">Timeline <span class="badge" id="b-timeline">0</span></button>
+      <button class="tab" onclick="showTab('requests',this)">Requests <span class="badge" id="b-requests">0</span></button>
+      <button class="tab" onclick="showTab('flags',this)">Flags <span class="badge red" id="b-flags">0</span></button>
+      <button class="tab" onclick="showTab('typed',this)">Typed text <span class="badge" id="b-typed">0</span></button>
+    </div>
+    <div class="tab-content active" id="tab-summary"><div id="summary-content"><div class="empty"><div class="icon">◈</div>Paste logs and click Analyse</div></div></div>
+    <div class="tab-content" id="tab-timeline"><div id="timeline-content"><div class="empty"><div class="icon">◈</div>No timeline yet</div></div></div>
+    <div class="tab-content" id="tab-requests">
+      <div class="filter-bar" id="req-filters"></div>
+      <div id="requests-content"><div class="empty"><div class="icon">◈</div>No requests yet</div></div>
+    </div>
+    <div class="tab-content" id="tab-flags"><div id="flags-content"><div class="empty"><div class="icon">◈</div>No flags yet</div></div></div>
+    <div class="tab-content" id="tab-typed"><div id="typed-content"><div class="empty"><div class="icon">◈</div>No input events yet</div></div></div>
+  </div>
+</div>
+
+<script>
+// ── PARSER ───────────────────────────────────────────────────────────────────
+function parseLog(raw) {
+  const lines = raw.split('\n');
+  const fetches = [], inputs = [], submits = [];
+  lines.forEach((line, idx) => {
+    const t = line.trim();
+
+    // FETCH lines with body
+    if (/FETCH:\s/.test(t) && t.includes("body:")) {
+      // body value sits between body: ' ... ' at end of line
+      const bm = t.match(/body:\s*'([\s\S]+?)'\s*\}?\s*$/);
+      let body = null, bodyRaw = '';
+      if (bm) {
+        bodyRaw = bm[1].replace(/&quot;/g,'"').replace(/&amp;/g,'&').replace(/&#39;/g,"'");
+        try { body = JSON.parse(bodyRaw); } catch(e) { body = bodyRaw; }
+      }
+      fetches.push({ lineNum: idx+1, raw: t, body, bodyRaw, res: null });
+      return;
+    }
+
+    // ZNS FETCH from capture script
+    if (t.startsWith('ZNS FETCH:')) {
+      try {
+        const e = JSON.parse(t.replace(/^ZNS FETCH:\s*/,''));
+        fetches.push({ lineNum: idx+1, raw: t, body: e.req, bodyRaw: JSON.stringify(e.req||''), res: e.res });
+      } catch(e) {}
+      return;
+    }
+
+    // RPC response — attach to last fetch without a res
+    if (t.startsWith('RPC response:')) {
+      try {
+        const d = JSON.parse(t.replace(/^RPC response:\s*/,''));
+        const last = [...fetches].reverse().find(f=>!f.res);
+        if (last) last.res = d;
+      } catch(e) {}
+      return;
+    }
+
+    // input events
+    const im = t.match(/input\s+InputEvent\s+\{.*?data:\s*'([^']*)'/);
+    if (im) { inputs.push({ lineNum: idx+1, char: im[1] }); return; }
+
+    // submit events
+    if (t.includes('SubmitEvent') && t.includes('submit')) {
+      const sm = t.match(/submitter:\s*([^\s,}]+)/);
+      submits.push({ lineNum: idx+1, submitter: sm?.[1]||'form' });
+    }
+  });
+  return { fetches, inputs, submits };
+}
+
+// ── CLASSIFY ─────────────────────────────────────────────────────────────────
+function classify(f) {
+  const b = f.body;
+  if (!b) return { action:'UNKNOWN', name:null, extra:{} };
+  if (Array.isArray(b)) {
+    const obj = b.find(x => x && typeof x === 'object' && !Array.isArray(x));
+    if (obj && obj.action) return { action: obj.action.toUpperCase(), name: obj.name||null, extra: obj };
+    const strs = b.filter(x => typeof x === 'string');
+    const acts = ['claim','list','delist','buy','update','release','setprice'];
+    const act = strs.find(s => acts.includes(s.toLowerCase()));
+    const net = ['mainnet','testnet'];
+    const name = strs.find(s => !net.includes(s.toLowerCase()) && !acts.includes(s.toLowerCase())) || null;
+    const optObj = b.find(x => x && typeof x === 'object');
+    if (act) return { action: act.toUpperCase(), name, extra: optObj||{} };
+    // checklist submission
+    if (obj && obj.stage && obj.itemId) return { action: 'CHECKLIST', name: obj.itemId, extra: obj };
+    // plain resolve poll ["name","mainnet"]
+    if (strs.length >= 1) return { action: 'RESOLVE', name: strs.find(s=>!net.includes(s.toLowerCase()))||null, extra:{} };
+  }
+  if (b && typeof b === 'object' && b.method) return { action: b.method.toUpperCase(), name:null, extra: b.params||{} };
+  return { action:'UNKNOWN', name:null, extra:{} };
+}
+
+// ── FLAGS ────────────────────────────────────────────────────────────────────
+function detectFlags(fetches) {
+  const flags = [];
+  const bs = f => JSON.stringify(f.body||'');
+
+  // Repeat detection
+  const bodyCount = {};
+  fetches.forEach(f => { const k = f.bodyRaw||''; bodyCount[k] = (bodyCount[k]||0)+1; });
+  const reported = new Set();
+  fetches.forEach((f, idx) => {
+    const k = f.bodyRaw||'';
+    if (bodyCount[k] >= 5 && !reported.has(k)) {
+      reported.add(k);
+      const { action } = classify(f);
+      flags.push({ severity:'red', reqIdx:idx,
+        title: `${action} repeated ${bodyCount[k]}× with identical payload`,
+        desc: `The exact same ${action} request body was sent ${bodyCount[k]} times. This suggests either a UI polling loop with no backoff, or the server isn't responding in a way that stops the loop. No rate-limiting appears to be enforced.`,
+        code: k.substring(0,120) });
+    }
+  });
+
+  fetches.forEach((f, idx) => {
+    const s = bs(f);
+    const { action } = classify(f);
+
+    // $undefined in any field
+    const undefMatches = [...s.matchAll(/"([^"]+)"\s*:\s*"\$undefined"/g)];
+    undefMatches.forEach(m => {
+      flags.push({ severity:'red', reqIdx:idx,
+        title: `"$undefined" in field: ${m[1]}`,
+        desc: `Request #${idx+1}: field "${m[1]}" was sent as the literal string "$undefined". A JS variable wasn't resolved before JSON serialisation. The server may accept, store, or crash on this value.`,
+        code: m[0] });
+    });
+
+    // OTP plaintext
+    const otpM = s.match(/"otp"\s*:\s*"(\d+)"/);
+    if (otpM) flags.push({ severity:'amber', reqIdx:idx,
+      title: `OTP "${otpM[1]}" visible in request body`,
+      desc: `The OTP code is sent in plaintext in the request body. Check: is it single-use? Can it be replayed with a different action? Is there brute-force protection?`,
+      code: `"otp":"${otpM[1]}"` });
+
+    // address $undefined on LIST
+    if (action === 'LIST' && s.includes('"address"') && s.includes('$undefined'))
+      flags.push({ severity:'red', reqIdx:idx,
+        title: 'LIST submitted with address="$undefined"',
+        desc: 'A listing was attempted with an unresolved address. If accepted server-side, this could create a corrupt listing with no valid owner address.',
+        code: s.substring(0,100) });
+
+    // priceZats $undefined
+    if (s.includes('"priceZats"') && s.includes('$undefined'))
+      flags.push({ severity:'red', reqIdx:idx,
+        title: 'priceZats sent as "$undefined"',
+        desc: 'The listing price was not resolved before sending. If the server accepts this, a listing with an invalid/missing price could be created.',
+        code: s.match(/"priceZats"\s*:\s*"[^"]+"/)?.[0]||'' });
+
+    // unlockCode $undefined
+    if (s.includes('"unlockCode"') && s.includes('$undefined'))
+      flags.push({ severity:'red', reqIdx:idx,
+        title: 'unlockCode sent as "$undefined"',
+        desc: 'The auth unlock code was not resolved. The server should reject this — but if it doesn\'t, the auth gate may be bypassable with a literal "$undefined" string.',
+        code: s.match(/"unlockCode"\s*:\s*"[^"]+"/)?.[0]||'' });
+
+    // checklist tracking
+    if (action === 'CHECKLIST')
+      flags.push({ severity:'info', reqIdx:idx,
+        title: 'Beta checklist state posted to server',
+        desc: `The site is sending your test completion state to the server: ${s.substring(0,80)}. Worth noting what data is stored and whether it's user-scoped.`,
+        code: s.substring(0,120) });
+  });
+
+  // Dedup
+  const seen = new Set();
+  return flags.filter(f => {
+    const key = f.title + (f.code||'').substring(0,40);
+    if (seen.has(key)) return false;
+    seen.add(key); return true;
+  });
+}
+
+// ── SYNTAX HIGHLIGHT ─────────────────────────────────────────────────────────
+function hl(obj) {
+  if (obj === null || obj === undefined) return '<span class="nl">null</span>';
+  const str = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2);
+  return str.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, m => {
+    let c = 'n';
+    if (/^"/.test(m)) c = /:$/.test(m) ? 'k' : 's';
+    else if (/true|false/.test(m)) c = 'b';
+    else if (/null/.test(m)) c = 'nl';
+    if (c === 's' && m.includes('$undefined')) c = 'undef';
+    return `<span class="${c}">${m}</span>`;
+  });
+}
+
+function pillColor(a) {
+  return {CLAIM:'green',LIST:'purple',DELIST:'amber',BUY:'blue',UPDATE:'amber',RELEASE:'amber',RESOLVE:'gray',STATUS:'gray',CHECKLIST:'amber',UNKNOWN:'gray'}[a?.toUpperCase()]||'gray';
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let _fetches=[], _flags=[], _inputs=[], _submits=[];
+
+// ── ANALYSE ───────────────────────────────────────────────────────────────────
+function analyse() {
+  const raw = document.getElementById('log-input').value;
+  if (!raw.trim()) return;
+  const { fetches, inputs, submits } = parseLog(raw);
+  _fetches = fetches; _inputs = inputs; _submits = submits;
+  const flags = detectFlags(fetches);
+  _flags = flags;
+
+  setBadge('b-summary', fetches.length+'r');
+  setBadge('b-timeline', fetches.length+inputs.length+submits.length);
+  setBadge('b-requests', fetches.length);
+  setBadge('b-flags', flags.length);
+  setBadge('b-typed', inputs.length);
+
+  renderSummary(fetches, flags, inputs, submits);
+  renderTimeline(fetches, inputs, submits, flags);
+  renderRequests(fetches, flags, 'all');
+  renderFlags(flags);
+  renderTyped(inputs, submits);
+
+  const actions = [...new Set(fetches.map(f=>classify(f).action))];
+  document.getElementById('req-filters').innerHTML =
+    `<button class="filter-btn active" onclick="setFilter('all',this)">All (${fetches.length})</button>`+
+    actions.map(a=>`<button class="filter-btn" onclick="setFilter('${a}',this)">${a}</button>`).join('');
+}
+
+function setBadge(id, v) { const e=document.getElementById(id); if(e) e.textContent=v; }
+
+// ── SUMMARY ───────────────────────────────────────────────────────────────────
+function renderSummary(fetches, flags, inputs, submits) {
+  const actions={};
+  fetches.forEach(f=>{ const {action}=classify(f); actions[action]=(actions[action]||0)+1; });
+  const red=flags.filter(f=>f.severity==='red').length;
+  const amber=flags.filter(f=>f.severity==='amber').length;
+  const typed=inputs.map(i=>i.char).join('');
+  const bodyCount={};
+  fetches.forEach(f=>{ const k=f.bodyRaw||''; bodyCount[k]=(bodyCount[k]||0)+1; });
+  const repeats=Object.values(bodyCount).filter(v=>v>=5).length;
+
+  document.getElementById('summary-content').innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-card"><div class="sc-label">Total fetches</div><div class="sc-val accent">${fetches.length}</div></div>
+      <div class="stat-card"><div class="sc-label">Critical flags</div><div class="sc-val red">${red}</div></div>
+      <div class="stat-card"><div class="sc-label">Warnings</div><div class="sc-val amber">${amber}</div></div>
+      <div class="stat-card"><div class="sc-label">Repeated reqs</div><div class="sc-val ${repeats>0?'amber':''}">${repeats}</div></div>
+      <div class="stat-card"><div class="sc-label">Input chars</div><div class="sc-val">${inputs.length}</div></div>
+      <div class="stat-card"><div class="sc-label">Typed</div><div class="sc-val" style="font-size:16px">"${typed}"</div></div>
+    </div>
+    <div class="section-title">Request breakdown</div>
+    ${Object.entries(actions).map(([k,v])=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface2);border-radius:5px;margin-bottom:5px;border:1px solid var(--border)">
+        <span class="pill ${pillColor(k)}">${k}</span>
+        <span style="font-size:12px;color:var(--muted)">×${v}</span>
+        ${v>=5?`<span class="repeat-tag">⚠ repeated ${v}×</span>`:''}
+      </div>`).join('')}
+    ${red>0?`
+    <div class="section-title" style="color:var(--red)">Critical findings</div>
+    ${flags.filter(f=>f.severity==='red').map(f=>`
+      <div class="flag-item red">
+        <div class="flag-sev">⚠</div>
+        <div><div class="flag-title">${f.title}</div><div class="flag-desc">${f.desc}</div>${f.code?`<div class="flag-code">${f.code.substring(0,160)}</div>`:''}</div>
+      </div>`).join('')}`:''}`;
+}
+
+// ── TIMELINE ──────────────────────────────────────────────────────────────────
+function renderTimeline(fetches, inputs, submits, flags) {
+  const events=[];
+  fetches.forEach(f=>{ const {action,name}=classify(f); events.push({line:f.lineNum,type:'fetch',action,name,raw:f.bodyRaw,flagged:(f.bodyRaw||'').includes('$undefined')}); });
+  inputs.forEach(i=>events.push({line:i.lineNum,type:'input',char:i.char}));
+  submits.forEach(s=>events.push({line:s.lineNum,type:'submit',submitter:s.submitter}));
+  events.sort((a,b)=>a.line-b.line);
+
+  // Collapse consecutive inputs
+  const collapsed=[];
+  let buf=[];
+  events.forEach(e=>{
+    if(e.type==='input'){buf.push(e.char);}
+    else{if(buf.length){collapsed.push({type:'input-group',text:buf.join('')});buf=[];}collapsed.push(e);}
+  });
+  if(buf.length) collapsed.push({type:'input-group',text:buf.join('')});
+
+  document.getElementById('timeline-content').innerHTML = collapsed.map(e=>{
+    if(e.type==='input-group') return `<div class="tl-item"><div class="tl-dot input"></div><div class="tl-line">User typed: <strong>"${e.text}"</strong></div></div>`;
+    if(e.type==='submit') return `<div class="tl-item"><div class="tl-dot submit"></div><div class="tl-line">Form submitted <span class="dim">via ${e.submitter}</span></div></div>`;
+    if(e.type==='fetch') return `<div class="tl-item"><div class="tl-dot ${e.flagged?'flagged':'fetch'}"></div><div class="tl-line"><span class="pill ${pillColor(e.action)}" style="margin-right:6px">${e.action}</span>${e.name?`<strong>${e.name}</strong>`:''} ${e.flagged?`<span style="color:var(--red);margin-left:6px">⚠ $undefined</span>`:''}</div></div>`;
+    return '';
+  }).join('');
+}
+
+// ── REQUESTS ──────────────────────────────────────────────────────────────────
+function renderRequests(fetches, flags, filter) {
+  const filtered = filter==='all' ? fetches : fetches.filter(f=>classify(f).action===filter);
+  if(!filtered.length){document.getElementById('requests-content').innerHTML='<div class="empty"><div class="icon">◈</div>No requests match</div>';return;}
+  const bodyCount={};
+  filtered.forEach(f=>{const k=f.bodyRaw||'';bodyCount[k]=(bodyCount[k]||0)+1;});
+
+  document.getElementById('requests-content').innerHTML = filtered.map((f,i)=>{
+    const {action,name}=classify(f);
+    const globalIdx=_fetches.indexOf(f);
+    const hasRed=flags.some(fl=>fl.reqIdx===globalIdx&&fl.severity==='red');
+    const hasAmber=flags.some(fl=>fl.reqIdx===globalIdx&&fl.severity==='amber');
+    const fc=hasRed?'flag-red':hasAmber?'flag-amber':'flag-green';
+    const isRepeat=(bodyCount[f.bodyRaw||'']||1)>1;
+    return `<div class="req-card ${fc}" onclick="this.classList.toggle('expanded')">
+      <div class="req-head">
+        <span class="req-num">#${i+1}</span>
+        <span class="pill ${pillColor(action)}">${action}</span>
+        ${name?`<span style="font-size:11px">${name}</span>`:''}
+        ${isRepeat?`<span class="pill amber">×${bodyCount[f.bodyRaw||'']}</span>`:''}
+        ${hasRed?`<span class="pill red">⚠</span>`:''}
+        ${hasAmber?`<span class="pill amber">△</span>`:''}
+      </div>
+      <div class="req-detail">
+        ${f.body!==null?`<div class="sub-label">Request body</div><div class="json-block">${hl(f.body)}</div>`:`<div class="sub-label">Raw</div><div class="json-block">${(f.bodyRaw||'').substring(0,300)}</div>`}
+        ${f.res?`<div class="sub-label">Response</div><div class="json-block">${hl(f.res)}</div>`:''}
+        <div class="sub-label">Log line</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Line ${f.lineNum}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── FLAGS ─────────────────────────────────────────────────────────────────────
+function renderFlags(flags) {
+  if(!flags.length){document.getElementById('flags-content').innerHTML='<div class="empty"><div class="icon">✓</div>No flags detected</div>';return;}
+  document.getElementById('flags-content').innerHTML = flags.map(f=>`
+    <div class="flag-item ${f.severity}">
+      <div class="flag-sev">${f.severity==='red'?'⚠':f.severity==='amber'?'△':'ℹ'}</div>
+      <div><div class="flag-title">${f.title}</div><div class="flag-desc">${f.desc}</div>${f.code?`<div class="flag-code">${f.code.substring(0,200)}</div>`:''}</div>
+    </div>`).join('');
+}
+
+// ── TYPED ─────────────────────────────────────────────────────────────────────
+function renderTyped(inputs, submits) {
+  if(!inputs.length){document.getElementById('typed-content').innerHTML='<div class="empty"><div class="icon">◈</div>No input events captured</div>';return;}
+  const text=inputs.map(i=>i.char).join('');
+  document.getElementById('typed-content').innerHTML = `
+    <div class="section-title">Reconstructed input</div>
+    <div class="json-block" style="font-size:20px;letter-spacing:2px;color:var(--green)">"${text}"</div>
+    <div class="section-title" style="margin-top:14px">Keystroke breakdown</div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:14px">
+      ${inputs.map(i=>`<span style="background:var(--surface3);padding:3px 7px;border-radius:4px;font-size:12px">${i.char||'⌫'}</span>`).join('')}
+    </div>
+    ${submits.length?`
+    <div class="section-title">Form submissions (${submits.length})</div>
+    ${submits.map(s=>`<div style="padding:6px 10px;background:var(--surface2);border-radius:5px;margin-bottom:4px;font-size:11px;color:var(--amber)">Submit → ${s.submitter} <span style="color:var(--muted)">(line ${s.lineNum})</span></div>`).join('')}`:''}`;
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+function setFilter(f, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderRequests(_fetches, _flags, f);
+}
+function clearAll() {
+  document.getElementById('log-input').value='';
+  document.getElementById('char-count').textContent='0 chars';
+  ['summary','timeline','requests','flags','typed'].forEach(id=>{
+    const c=document.getElementById('tab-'+id);
+    if(c) c.innerHTML='<div class="empty"><div class="icon">◈</div>Cleared</div>';
+  });
+}
+document.getElementById('log-input').addEventListener('input',function(){
+  document.getElementById('char-count').textContent=this.value.length.toLocaleString()+' chars';
+});
+
+// Pre-loaded from user's actual zns-logs.json
+function loadBuiltIn() {
+  document.getElementById('log-input').value = `lockdown-install.js:1 SES Removing unpermitted intrinsics
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["mainnet","tvrCDOkaiBun"]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["mainnet"]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["mainnet"]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["mainnet"]'}
+VM140:1 input InputEvent {isTrusted: true, data: 'f', isComposing: false, inputType: 'insertText', dataTransfer: null}
+VM140:1 input InputEvent {isTrusted: true, data: 'i', isComposing: false, inputType: 'insertText', dataTransfer: null}
+VM140:1 input InputEvent {isTrusted: true, data: 's', isComposing: false, inputType: 'insertText', dataTransfer: null}
+VM140:1 input InputEvent {isTrusted: true, data: 'h', isComposing: false, inputType: 'insertText', dataTransfer: null}
+VM140:1 input InputEvent {isTrusted: true, data: 'p', isComposing: false, inputType: 'insertText', dataTransfer: null}
+VM140:1 input InputEvent {isTrusted: true, data: 'i', isComposing: false, inputType: 'insertText', dataTransfer: null}
+VM140:1 input InputEvent {isTrusted: true, data: 'e', isComposing: false, inputType: 'insertText', dataTransfer: null}
+VM140:1 submit SubmitEvent {isTrusted: true, submitter: button.searchform-claim, type: 'submit', target: form.w-full.max-w-4xl.text-left}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet"]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '[{"name":"fishpie","action":"claim","address":"u1g...","unlockCode":"$undefined","authMode":"default"}]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet"]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","claim",{"address":"u1gnft6aa...s30vflgrvpkurwv4vst99","priceZats":"$undefined"}]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet"]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","claim",{"address":"u1gnft6aa...s30vflgrvpkurwv4vst99","priceZats":"$undefined"}]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet"]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","claim",{"address":"u1gnft6aa...s30vflgrvpkurwv4vst99","priceZats":"$undefined"}]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet"]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","claim",{"address":"u1gnft6aa...s30vflgrvpkurwv4vst99","priceZats":"$undefined"}]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet"]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","claim",{"address":"u1gnft6aa...s30vflgrvpkurwv4vst99","priceZats":"$undefined"}]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet"]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","claim",{"address":"u1gnft6aa...s30vflgrvpkurwv4vst99","priceZats":"$undefined"}]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet"]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '[{"name":"fishpie","action":"list","address":"$undefined","otp":"612282","authMode":"otp"}]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet"]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","list",{"address":"$undefined","priceZats":100000000000}]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","list",{"address":"$undefined","priceZats":100000000000}]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","list",{"address":"$undefined","priceZats":100000000000}]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","list",{"address":"$undefined","priceZats":100000000000}]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","list",{"address":"$undefined","priceZats":100000000000}]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '[{"stage":"mainnet","itemId":"ux-a3","completed":true}]'}`;
+  document.getElementById('char-count').textContent = document.getElementById('log-input').value.length.toLocaleString()+' chars';
+  analyse();
+}
+</script>
+</body>
+</html>
