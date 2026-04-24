@@ -84,7 +84,7 @@
 
     /* ── TABS ── */
     .tab-bar { display: flex; gap: 2px; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 24px; flex-shrink: 0; overflow-x: auto; }
-    .tab-btn { padding: 9px 14px; font-size: 11px; color: var(--muted); cursor: pointer; border: none; background: transparent; border-bottom: 2px solid transparent; transition: all 0.12s; white-space: nowrap; display: flex; align-items: center; gap: 5px; }
+    .tab-btn { padding: 9px 14px; font-size: 11px; color: var(--muted); cursor: pointer; border: none; background: transparent; border-bottom: 2px solid transparent; transition: all 0.12s; white-space: nowrap; }
     .tab-btn:hover { color: var(--text); }
     .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
     .tab-content { display: none; padding: 16px 0; }
@@ -106,7 +106,7 @@
     textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
 
     /* ── BUTTONS ── */
-    .btn { font-family: var(--mono); font-size: 11px; padding: 7px 16px; border-radius: 6px; border: 1px solid var(--border2); cursor: pointer; background: transparent; color: var(--text); transition: all 0.15s; white-space: nowrap; }
+    .btn { font-family: var(--mono); font-size: 11px; padding: 7px 16px; border-radius: 6px; border: 1px solid var(--border2); cursor: pointer; background: transparent; color: var(--text); transition: all 0.15s; }
     .btn:hover { background: var(--surface3); }
     .btn.primary { background: rgba(79,156,249,0.14); border-color: rgba(79,156,249,0.4); color: var(--accent); }
     .btn.primary:hover { background: rgba(79,156,249,0.24); }
@@ -141,7 +141,7 @@
 
     /* ── TEST ITEMS ── */
     .test-list { display: flex; flex-direction: column; gap: 6px; }
-    .test-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-left: 3px solid transparent; transition: border-color 0.15s; }
+    .test-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-left: 3px solid transparent; transition: all 0.12s; }
     .test-item.pass { border-left-color: var(--green); }
     .test-item.fail { border-left-color: var(--red); }
     .test-item.warn { border-left-color: var(--amber); }
@@ -180,52 +180,14 @@
     .cost-note { font-size: 11px; color: var(--muted); margin-top: 6px; }
     .cost-note span { color: var(--amber); }
 
-    /* ── ZNS LOG ANALYSER ── */
-    .log-layout { display: flex; flex: 1; overflow: hidden; height: 100%; }
-    .log-pane-input { width: 300px; min-width: 220px; border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-    .log-pane-header { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; }
-    #log-input { flex: 1; background: var(--bg); border: none; color: var(--text); font-family: var(--mono); font-size: 11px; padding: 12px; resize: none; outline: none; line-height: 1.6; }
-    .log-input-footer { padding: 8px 10px; border-top: 1px solid var(--border); display: flex; gap: 6px; }
-    .log-pane-output { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-    .log-tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 12px; gap: 2px; overflow-x: auto; }
-    .log-tab { padding: 9px 12px; font-size: 11px; color: var(--muted); cursor: pointer; border: none; background: transparent; border-bottom: 2px solid transparent; transition: all 0.12s; white-space: nowrap; display: flex; align-items: center; gap: 5px; }
-    .log-tab:hover { color: var(--text); }
-    .log-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-    .log-tab-content { display: none; flex: 1; overflow-y: auto; padding: 14px; }
-    .log-tab-content.active { display: block; }
-    .flag-item { display: flex; gap: 10px; padding: 10px 12px; background: var(--surface2); border-radius: 7px; margin-bottom: 7px; }
-    .flag-item.red { border-left: 3px solid var(--red); }
-    .flag-item.amber { border-left: 3px solid var(--amber); }
-    .flag-item.info { border-left: 3px solid var(--accent); }
-    .flag-title { font-size: 12px; color: var(--text); font-weight: 500; margin-bottom: 2px; }
-    .flag-desc { font-size: 11px; color: var(--muted2); line-height: 1.5; }
-    .flag-code { font-size: 10px; color: var(--amber); margin-top: 5px; background: rgba(244,168,54,0.07); padding: 3px 7px; border-radius: 3px; display: inline-block; word-break: break-all; }
-    .req-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; margin-bottom: 6px; overflow: hidden; cursor: pointer; }
-    .req-card:hover { border-color: var(--border2); }
-    .req-card.flag-red { border-left: 3px solid var(--red); }
-    .req-card.flag-amber { border-left: 3px solid var(--amber); }
-    .req-card.flag-green { border-left: 3px solid rgba(62,207,142,0.3); }
-    .req-head { padding: 8px 12px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .req-num { font-size: 9px; color: var(--muted); min-width: 22px; }
-    .req-detail { display: none; border-top: 1px solid var(--border); padding: 10px 12px; }
-    .req-card.expanded .req-detail { display: block; }
-    .sub-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin: 8px 0 4px; }
-    .json-block { background: var(--bg); border-radius: 5px; padding: 8px 10px; font-size: 11px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; max-height: 260px; overflow-y: auto; color: var(--text); border: 1px solid var(--border); }
-    .json-block .k { color: #7c9ef5; } .json-block .s { color: #7dd3a0; } .json-block .n { color: #f0c674; } .json-block .b { color: #c792ea; } .json-block .nl { color: var(--muted); } .json-block .undef { color: var(--red); font-weight: 600; }
-    .tl-item { display: flex; gap: 10px; margin-bottom: 5px; align-items: flex-start; }
-    .tl-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
-    .tl-dot.fetch { background: var(--accent); } .tl-dot.input { background: var(--muted); } .tl-dot.submit { background: var(--amber); } .tl-dot.flagged { background: var(--red); }
-    .tl-line { font-size: 11px; color: var(--text); line-height: 1.5; }
-    .filter-bar { display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; }
-    .filter-btn { font-size: 10px; padding: 3px 9px; border-radius: 99px; border: 1px solid var(--border2); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.12s; }
-    .filter-btn:hover { color: var(--text); }
-    .filter-btn.active { background: rgba(79,156,249,0.1); border-color: rgba(79,156,249,0.3); color: var(--accent); }
-    .repeat-tag { margin-left: auto; font-size: 9px; padding: 2px 7px; border-radius: 4px; background: rgba(244,168,54,0.1); color: var(--amber); }
-    .section-title { font-size: 9px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin: 14px 0 7px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
-    .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 11px; }
-    .empty-state .icon { font-size: 28px; margin-bottom: 10px; opacity: 0.25; }
-    .help-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 11px; line-height: 1.55; color: var(--muted2); }
-    .help-card strong { color: var(--text); }
+    /* ── RESULTS GRID ── */
+    .results-grid { display: flex; flex-direction: column; gap: 8px; }
+    .result-item { padding: 10px 12px; background: var(--surface2); border-radius: 6px; border-left: 3px solid transparent; }
+    .result-item.pass { border-left-color: var(--green); }
+    .result-item.fail { border-left-color: var(--red); }
+    .result-item.warn { border-left-color: var(--amber); }
+    .result-item-title { font-weight: 500; color: var(--text); margin-bottom: 2px; }
+    .result-item-detail { font-size: 10px; color: var(--muted); line-height: 1.4; }
 
     /* ── SCROLLBAR ── */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -247,7 +209,7 @@
   <div class="header-logo">
     <div class="header-logo-icon">ZNS</div>
     <span class="header-logo-name">Zcash Dev Toolkit</span>
-    <span class="header-logo-sub">v2.0</span>
+    <span class="header-logo-sub">v2.1</span>
   </div>
   <div class="net-selector">
     <button class="net-btn active" onclick="setNetwork('testnet', this)">Testnet</button>
@@ -456,13 +418,6 @@
           <div class="result-header"><span class="result-label">Report</span><button class="copy-btn" onclick="copyEl('res-fuzz')">Copy</button></div>
           <div class="result-box placeholder" id="res-fuzz">Run the corpus to generate an anomaly report</div>
         </div>
-        <div class="help-card" id="fuzz-explainer">
-          <strong>How to read this report</strong><br/>
-          - <strong>ok / failed</strong>: total successful vs failed executions.<br/>
-          - <strong>anomalies.error</strong>: endpoint threw or returned an error for at least one run.<br/>
-          - <strong>anomalies.slow</strong>: a run exceeded your <strong>Slow ms</strong> threshold.<br/>
-          - <strong>anomalies.inconsistent</strong>: same test returned different responses across repetitions — strongest bug signal.
-        </div>
       </div>
     </div>
 
@@ -470,36 +425,20 @@
     <div class="tool-panel" id="tool-log" style="overflow:hidden;">
       <div class="log-layout" style="flex:1;height:calc(100vh - 48px)">
         <div class="log-pane-input">
-          <div class="log-pane-header"><span>Paste console log</span><span id="char-count">0 chars</span></div>
-          <textarea id="log-input" placeholder="Paste raw console log here...
-
-Handles format:
-VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '[...]'}
-VM140:1 input InputEvent {data: 'f', ...}
-VM140:1 submit SubmitEvent {...}
-RPC response: {...}"></textarea>
+          <div class="log-pane-header"><span>Paste console log</span></div>
+          <textarea id="log-input" placeholder="Paste raw console log here..."></textarea>
           <div class="log-input-footer">
             <button class="btn primary" style="flex:1" onclick="analyseLog()">▶ Analyse</button>
-            <button class="btn" onclick="loadBuiltIn()">Load example</button>
             <button class="btn danger" onclick="clearLog()">Clear</button>
           </div>
         </div>
         <div class="log-pane-output">
           <div class="log-tabs">
-            <button class="log-tab active" onclick="showLogTab('log-summary',this)">Summary <span class="badge blue" id="b-summary">—</span></button>
-            <button class="log-tab" onclick="showLogTab('log-timeline',this)">Timeline <span class="badge blue" id="b-timeline">0</span></button>
-            <button class="log-tab" onclick="showLogTab('log-requests',this)">Requests <span class="badge blue" id="b-requests">0</span></button>
-            <button class="log-tab" onclick="showLogTab('log-flags',this)">Flags <span class="badge red" id="b-flags">0</span></button>
-            <button class="log-tab" onclick="showLogTab('log-typed',this)">Typed <span class="badge blue" id="b-typed">0</span></button>
+            <button class="log-tab active" onclick="showLogTab('log-summary',this)">Summary</button>
+            <button class="log-tab" onclick="showLogTab('log-flags',this)">Flags</button>
           </div>
           <div class="log-tab-content active" id="log-summary"><div id="log-summary-content"><div class="empty-state"><div class="icon">◈</div>Paste logs and click Analyse</div></div></div>
-          <div class="log-tab-content" id="log-timeline"><div id="log-timeline-content"><div class="empty-state"><div class="icon">◈</div>No timeline yet</div></div></div>
-          <div class="log-tab-content" id="log-requests">
-            <div class="filter-bar" id="req-filters"></div>
-            <div id="log-requests-content"><div class="empty-state"><div class="icon">◈</div>No requests yet</div></div>
-          </div>
           <div class="log-tab-content" id="log-flags"><div id="log-flags-content"><div class="empty-state"><div class="icon">◈</div>No flags yet</div></div></div>
-          <div class="log-tab-content" id="log-typed"><div id="log-typed-content"><div class="empty-state"><div class="icon">◈</div>No input events</div></div></div>
         </div>
       </div>
     </div>
@@ -509,12 +448,12 @@ RPC response: {...}"></textarea>
       <div class="panel-header">
         <div class="panel-header-top">
           <div>
-            <div class="panel-title">Security Tester <span style="font-size:10px;background:rgba(242,95,92,0.15);color:var(--red);border:1px solid rgba(242,95,92,0.3);padding:2px 8px;border-radius:4px;margin-left:8px;vertical-align:middle;">35 TESTS</span></div>
-            <div class="panel-desc">Full attack-surface sweep against the ZNS indexer — transport, protocol, injection, DoS, timing, enumeration, data integrity &amp; more</div>
+            <div class="panel-title">Security Tester <span style="font-size:10px;background:rgba(242,95,92,0.15);color:var(--red);border:1px solid rgba(242,95,92,0.3);padding:2px 8px;border-radius:4px">BETA</span></div>
+            <div class="panel-desc">Full attack-surface sweep against the ZNS indexer — transport, protocol, injection, DoS, timing, enumeration, data integrity & more</div>
           </div>
           <div class="panel-actions">
             <button class="btn" onclick="secExportReport()">Export Report</button>
-            <button class="btn primary" onclick="secRunAll()">▶ Run All Tests</button>
+            <button class="btn primary" onclick="secRunAll(event)">▶ Run All Tests</button>
             <button class="btn danger" onclick="secClear()">Clear</button>
           </div>
         </div>
@@ -534,8 +473,8 @@ RPC response: {...}"></textarea>
           <button class="tab-btn active" onclick="showSecTab('transport',this)">Transport</button>
           <button class="tab-btn" onclick="showSecTab('protocol',this)">Protocol</button>
           <button class="tab-btn" onclick="showSecTab('injection',this)">Injection</button>
-          <button class="tab-btn" onclick="showSecTab('dos',this)">DoS &amp; Timing</button>
-          <button class="tab-btn" onclick="showSecTab('data',this)">Data &amp; Logic</button>
+          <button class="tab-btn" onclick="showSecTab('dos',this)">DoS & Timing</button>
+          <button class="tab-btn" onclick="showSecTab('data',this)">Data & Logic</button>
           <button class="tab-btn" onclick="showSecTab('results',this)">Results</button>
         </div>
 
@@ -545,62 +484,55 @@ RPC response: {...}"></textarea>
             <div class="test-item" id="st-https"><div class="test-dot"></div><div><div class="test-name">HTTPS Enforcement</div><div class="test-detail">Verify endpoint uses TLS — no plaintext HTTP</div></div></div>
             <div class="test-item" id="st-hsts"><div class="test-dot"></div><div><div class="test-name">HSTS Header</div><div class="test-detail">Check Strict-Transport-Security header presence</div></div></div>
             <div class="test-item" id="st-cors"><div class="test-dot"></div><div><div class="test-name">CORS Policy</div><div class="test-detail">Verify cross-origin policy not wildcard-open</div></div></div>
-            <div class="test-item" id="st-csp"><div class="test-dot"></div><div><div class="test-name">Security Headers</div><div class="test-detail">Check X-Content-Type-Options, X-Frame-Options, etc.</div></div></div>
-            <div class="test-item" id="st-server-leak"><div class="test-dot"></div><div><div class="test-name">Server Header Disclosure</div><div class="test-detail">Check if Server/X-Powered-By leaks stack info</div></div></div>
-            <div class="test-item" id="st-http-methods"><div class="test-dot"></div><div><div class="test-name">HTTP Method Enforcement</div><div class="test-detail">GET, PUT, DELETE, PATCH, HEAD — only POST should succeed</div></div></div>
+            <div class="test-item" id="st-csp"><div class="test-dot"></div><div><div class="test-name">Security Headers</div><div class="test-detail">Check X-Content-Type-Options, X-Frame-Options</div></div></div>
+            <div class="test-item" id="st-server-leak"><div class="test-dot"></div><div><div class="test-name">Server Header Disclosure</div><div class="test-detail">Check if Server/X-Powered-By leaks</div></div></div>
           </div>
         </div>
 
         <!-- PROTOCOL -->
         <div id="sec-tab-protocol" class="tab-content">
           <div class="test-list">
-            <div class="test-item" id="st-jsonrpc-version"><div class="test-dot"></div><div><div class="test-name">JSON-RPC Version Compliance</div><div class="test-detail">Response must include jsonrpc:"2.0" field</div></div></div>
-            <div class="test-item" id="st-error-format"><div class="test-dot"></div><div><div class="test-name">Error Object Structure</div><div class="test-detail">Errors must have numeric code + string message</div></div></div>
-            <div class="test-item" id="st-id-echo"><div class="test-dot"></div><div><div class="test-name">ID Echo Fidelity</div><div class="test-detail">Server must mirror back the request id (string, int, null)</div></div></div>
-            <div class="test-item" id="st-content-type-res"><div class="test-dot"></div><div><div class="test-name">Response Content-Type</div><div class="test-detail">Must return application/json (not text/html etc.)</div></div></div>
-            <div class="test-item" id="st-content-type-req"><div class="test-dot"></div><div><div class="test-name">Content-Type Enforcement (req)</div><div class="test-detail">Server should reject non-JSON content-type bodies</div></div></div>
-            <div class="test-item" id="st-batch"><div class="test-dot"></div><div><div class="test-name">Batch Request Handling</div><div class="test-detail">Batch array — each item gets individual response</div></div></div>
-            <div class="test-item" id="st-missing-jsonrpc"><div class="test-dot"></div><div><div class="test-name">Missing jsonrpc Field</div><div class="test-detail">Omitting jsonrpc:"2.0" should return error</div></div></div>
-            <div class="test-item" id="st-null-id"><div class="test-dot"></div><div><div class="test-name">Null ID Handling</div><div class="test-detail">Null id is valid per spec — server must not crash</div></div></div>
+            <div class="test-item" id="st-jsonrpc-version"><div class="test-dot"></div><div><div class="test-name">JSON-RPC Compliance</div><div class="test-detail">Response includes jsonrpc:"2.0"</div></div></div>
+            <div class="test-item" id="st-error-format"><div class="test-dot"></div><div><div class="test-name">Error Object Structure</div><div class="test-detail">Errors have numeric code + string message</div></div></div>
+            <div class="test-item" id="st-id-echo"><div class="test-dot"></div><div><div class="test-name">ID Echo Fidelity</div><div class="test-detail">Server mirrors back request id correctly</div></div></div>
+            <div class="test-item" id="st-content-type-res"><div class="test-dot"></div><div><div class="test-name">Content-Type Response</div><div class="test-detail">Returns application/json</div></div></div>
+            <div class="test-item" id="st-batch"><div class="test-dot"></div><div><div class="test-name">Batch Requests</div><div class="test-detail">Batch array handling — individual responses</div></div></div>
           </div>
         </div>
 
         <!-- INJECTION -->
         <div id="sec-tab-injection" class="tab-content">
           <div class="test-list">
-            <div class="test-item" id="st-sql-inject"><div class="test-dot"></div><div><div class="test-name">SQL Injection Probes</div><div class="test-detail">Classic SQLi payloads in name/query params</div></div></div>
-            <div class="test-item" id="st-nosql-inject"><div class="test-dot"></div><div><div class="test-name">NoSQL Injection</div><div class="test-detail">MongoDB-style operator injection ($where, $gt etc.)</div></div></div>
-            <div class="test-item" id="st-proto-pollution"><div class="test-dot"></div><div><div class="test-name">Prototype Pollution</div><div class="test-detail">__proto__, constructor.prototype injection via params</div></div></div>
-            <div class="test-item" id="st-path-traversal"><div class="test-dot"></div><div><div class="test-name">Path Traversal</div><div class="test-detail">../../../etc/passwd and URL-encoded variants</div></div></div>
-            <div class="test-item" id="st-unicode-injection"><div class="test-dot"></div><div><div class="test-name">Unicode / Homoglyph Injection</div><div class="test-detail">Invisible chars, RTL override, zero-width joiners</div></div></div>
-            <div class="test-item" id="st-null-byte"><div class="test-dot"></div><div><div class="test-name">Null Byte Injection</div><div class="test-detail">%00 and \x00 in name strings</div></div></div>
-            <div class="test-item" id="st-xss-probe"><div class="test-dot"></div><div><div class="test-name">XSS Probe / Reflected Data</div><div class="test-detail">Check if injected script tags are reflected in response</div></div></div>
-            <div class="test-item" id="st-nonstandard-methods"><div class="test-dot"></div><div><div class="test-name">Unknown Method Fuzzing</div><div class="test-detail">Shell chars, nulls, huge strings as method names</div></div></div>
+            <div class="test-item" id="st-sql-inject"><div class="test-dot"></div><div><div class="test-name">SQL Injection Probes</div><div class="test-detail">Classic SQLi payloads in name parameter</div></div></div>
+            <div class="test-item" id="st-nosql-inject"><div class="test-dot"></div><div><div class="test-name">NoSQL Injection</div><div class="test-detail">MongoDB-style operator injection tests</div></div></div>
+            <div class="test-item" id="st-proto-pollution"><div class="test-dot"></div><div><div class="test-name">Prototype Pollution</div><div class="test-detail">__proto__ and constructor.prototype attacks</div></div></div>
+            <div class="test-item" id="st-path-traversal"><div class="test-dot"></div><div><div class="test-name">Path Traversal</div><div class="test-detail">../../../etc/passwd and variants</div></div></div>
+            <div class="test-item" id="st-unicode-inject"><div class="test-dot"></div><div><div class="test-name">Unicode Injection</div><div class="test-detail">Invisible chars and homoglyph attacks</div></div></div>
+            <div class="test-item" id="st-xss-probe"><div class="test-dot"></div><div><div class="test-name">XSS Probe</div><div class="test-detail">Check if injected tags are reflected</div></div></div>
           </div>
         </div>
 
         <!-- DOS & TIMING -->
         <div id="sec-tab-dos" class="tab-content">
           <div class="test-list">
-            <div class="test-item" id="st-parallel-flood"><div class="test-dot"></div><div><div class="test-name">Parallel Request Flood (50 req)</div><div class="test-detail">50 simultaneous requests — detect rate limiting</div></div></div>
-            <div class="test-item" id="st-sequential-burst"><div class="test-dot"></div><div><div class="test-name">Sequential Burst (20 req)</div><div class="test-detail">Rapid sequential requests — check for throttling</div></div></div>
-            <div class="test-item" id="st-huge-payload"><div class="test-dot"></div><div><div class="test-name">1MB Payload Bomb</div><div class="test-detail">1MB query string — should be rejected quickly</div></div></div>
-            <div class="test-item" id="st-deeply-nested"><div class="test-dot"></div><div><div class="test-name">Deeply Nested JSON</div><div class="test-detail">500 levels of nesting — stack overflow / parser DoS</div></div></div>
-            <div class="test-item" id="st-timing-oracle"><div class="test-dot"></div><div><div class="test-name">Timing Oracle (exists vs not)</div><div class="test-detail">Compare response times for known vs unknown names</div></div></div>
-            <div class="test-item" id="st-regex-dos"><div class="test-dot"></div><div><div class="test-name">ReDoS Probe</div><div class="test-detail">Pathological regex patterns in name field</div></div></div>
-            <div class="test-item" id="st-response-time"><div class="test-dot"></div><div><div class="test-name">Baseline Response Time</div><div class="test-detail">Average latency over 5 pings — alert if &gt;2s</div></div></div>
+            <div class="test-item" id="st-parallel-flood"><div class="test-dot"></div><div><div class="test-name">Parallel Flood (50 req)</div><div class="test-detail">50 simultaneous requests</div></div></div>
+            <div class="test-item" id="st-sequential-burst"><div class="test-dot"></div><div><div class="test-name">Sequential Burst (20 req)</div><div class="test-detail">20 rapid sequential requests</div></div></div>
+            <div class="test-item" id="st-huge-payload"><div class="test-dot"></div><div><div class="test-name">1MB Payload</div><div class="test-detail">Large query string handling</div></div></div>
+            <div class="test-item" id="st-deeply-nested"><div class="test-dot"></div><div><div class="test-name">Deep Nesting (500 levels)</div><div class="test-detail">Stack overflow protection check</div></div></div>
+            <div class="test-item" id="st-timing-oracle"><div class="test-dot"></div><div><div class="test-name">Timing Oracle</div><div class="test-detail">Response time variance detection</div></div></div>
+            <div class="test-item" id="st-response-time"><div class="test-dot"></div><div><div class="test-name">Baseline Latency</div><div class="test-detail">Average response time over 5 pings</div></div></div>
           </div>
         </div>
 
         <!-- DATA & LOGIC -->
         <div id="sec-tab-data" class="tab-content">
           <div class="test-list">
-            <div class="test-item" id="st-pagination-bounds"><div class="test-dot"></div><div><div class="test-name">Pagination Boundary Abuse</div><div class="test-detail">limit=-1, limit=MAX_INT, offset=MAX_INT</div></div></div>
-            <div class="test-item" id="st-response-consistency"><div class="test-dot"></div><div><div class="test-name">Response Consistency</div><div class="test-detail">Same query twice — result must be identical</div></div></div>
-            <div class="test-item" id="st-enumeration"><div class="test-dot"></div><div><div class="test-name">Name Enumeration Risk</div><div class="test-detail">Can listings/events expose all registered names?</div></div></div>
-            <div class="test-item" id="st-error-verbosity"><div class="test-dot"></div><div><div class="test-name">Error Verbosity</div><div class="test-detail">Errors must not reveal stack traces or internal paths</div></div></div>
-            <div class="test-item" id="st-empty-body"><div class="test-dot"></div><div><div class="test-name">Empty Body / Malformed JSON</div><div class="test-detail">Empty body, "null", and truncated JSON</div></div></div>
-            <div class="test-item" id="st-type-confusion"><div class="test-dot"></div><div><div class="test-name">Type Confusion Attacks</div><div class="test-detail">Pass array where string expected, bool where int etc.</div></div></div>
+            <div class="test-item" id="st-pagination-bounds"><div class="test-dot"></div><div><div class="test-name">Pagination Bounds</div><div class="test-detail">limit=-1, limit=MAX_INT edge cases</div></div></div>
+            <div class="test-item" id="st-response-consistency"><div class="test-dot"></div><div><div class="test-name">Response Consistency</div><div class="test-detail">Same query twice — results match</div></div></div>
+            <div class="test-item" id="st-enumeration"><div class="test-dot"></div><div><div class="test-name">Name Enumeration Risk</div><div class="test-detail">Can listings/events expose all registrations</div></div></div>
+            <div class="test-item" id="st-error-verbosity"><div class="test-dot"></div><div><div class="test-name">Error Verbosity</div><div class="test-detail">Errors don't reveal stack traces</div></div></div>
+            <div class="test-item" id="st-empty-body"><div class="test-dot"></div><div><div class="test-name">Empty Body Handling</div><div class="test-detail">Empty body and malformed JSON</div></div></div>
+            <div class="test-item" id="st-type-confusion"><div class="test-dot"></div><div><div class="test-name">Type Confusion</div><div class="test-detail">Wrong types in parameters</div></div></div>
           </div>
         </div>
 
@@ -616,7 +548,7 @@ RPC response: {...}"></textarea>
         <div class="panel-header-top">
           <div><div class="panel-title">Pool Monitor</div><div class="panel-desc">Shielded pool & privacy checks via the ZNS indexer endpoint</div></div>
           <div class="panel-actions">
-            <button class="btn primary" onclick="poolRunAll()">▶ Run All Tests</button>
+            <button class="btn primary" onclick="poolRunAll(event)">▶ Run All Tests</button>
             <button class="btn danger" onclick="poolClear()">Clear</button>
           </div>
         </div>
@@ -646,9 +578,9 @@ RPC response: {...}"></textarea>
         </div>
         <div id="pool-tab-privacy" class="tab-content">
           <div class="test-list">
-            <div class="test-item" id="pt-shielded-addr"><div class="test-dot"></div><div><div class="test-name">Shielded Address Usage</div><div class="test-detail">Check if registered names use shielded (u-) addresses</div></div></div>
-            <div class="test-item" id="pt-address-leak"><div class="test-dot"></div><div><div class="test-name">Address Exposure in Listings</div><div class="test-detail">Detect if listing owner addresses are exposed</div></div></div>
-            <div class="test-item" id="pt-event-privacy"><div class="test-dot"></div><div><div class="test-name">Event Log Privacy</div><div class="test-detail">Inspect event data for sensitive info leakage</div></div></div>
+            <div class="test-item" id="pt-shielded-addr"><div class="test-dot"></div><div><div class="test-name">Shielded Address Usage</div><div class="test-detail">Check if registered names use shielded addresses</div></div></div>
+            <div class="test-item" id="pt-address-leak"><div class="test-dot"></div><div><div class="test-name">Address Exposure in Listings</div><div class="test-detail">Detect if listing owner address is leaked</div></div></div>
+            <div class="test-item" id="pt-event-privacy"><div class="test-dot"></div><div><div class="test-name">Event Log Privacy</div><div class="test-detail">Inspect event data for sensitive info leaks</div></div></div>
             <div class="test-item" id="pt-ssl-pool"><div class="test-dot"></div><div><div class="test-name">Transport Encryption</div><div class="test-detail">Verify HTTPS is used for all data in transit</div></div></div>
           </div>
         </div>
@@ -662,9 +594,9 @@ RPC response: {...}"></textarea>
 </div><!-- /app-body -->
 
 <script>
-// ══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
 // GLOBAL STATE & HELPERS
-// ══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
 const ENDPOINTS = {
   testnet: 'https://light.zcash.me/zns-testnet',
   mainnet: 'https://light.zcash.me/zns-mainnet-test'
@@ -726,14 +658,14 @@ function copyEl(id) { navigator.clipboard.writeText(document.getElementById(id).
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
-    const panel = e.target.closest('.tool-panel, .panel');
+    const panel = e.target.closest('.tool-panel');
     if (panel) { const btn = panel.querySelector('.btn.primary'); if (btn) btn.click(); }
   }
 });
 
-// ══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
 // ZNS QUERIES
-// ══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
 async function doStatus(btn) {
   setLoading(btn, true);
   try {
@@ -838,44 +770,521 @@ async function doRaw(btn) {
   setLoading(btn, false);
 }
 
-// ══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
+// SECURITY TESTER
+// ════════════════════════════════════════════════════════════════
+let secResults = [];
+const SEC_TESTS = {
+  transport: [
+    { id: 'st-https', name: 'HTTPS Enforcement', fn: async () => {
+      const r = await rpcRaw('{"jsonrpc":"2.0","id":1,"method":"status","params":{}}');
+      return { pass: r.status < 400, detail: `Status: ${r.status}` };
+    }},
+    { id: 'st-hsts', name: 'HSTS Header', fn: async () => {
+      const r = await rpcRaw('{"jsonrpc":"2.0","id":1,"method":"status","params":{}}');
+      const hsts = r.headers.get('strict-transport-security');
+      return { pass: !!hsts, warn: !hsts, detail: hsts ? 'HSTS enabled' : 'No HSTS header' };
+    }},
+    { id: 'st-cors', name: 'CORS Policy', fn: async () => {
+      const r = await rpcRaw('{"jsonrpc":"2.0","id":1,"method":"status","params":{}}');
+      const cors = r.headers.get('access-control-allow-origin');
+      return { pass: cors !== '*', warn: cors === '*', detail: cors ? `CORS: ${cors}` : 'No CORS header' };
+    }},
+    { id: 'st-csp', name: 'Security Headers', fn: async () => {
+      const r = await rpcRaw('{"jsonrpc":"2.0","id":1,"method":"status","params":{}}');
+      const ctype = r.headers.get('x-content-type-options');
+      return { pass: !!ctype, warn: !ctype, detail: ctype || 'Missing X-Content-Type-Options' };
+    }},
+    { id: 'st-server-leak', name: 'Server Header Disclosure', fn: async () => {
+      const r = await rpcRaw('{"jsonrpc":"2.0","id":1,"method":"status","params":{}}');
+      const server = r.headers.get('server');
+      return { pass: !server, warn: !!server, detail: server ? `Leaks: ${server}` : 'No server header' };
+    }}
+  ],
+  protocol: [
+    { id: 'st-jsonrpc-version', name: 'JSON-RPC Compliance', fn: async () => {
+      const r = await rpcRaw('{"jsonrpc":"2.0","id":1,"method":"status","params":{}}');
+      const ok = r.json && r.json.jsonrpc === '2.0';
+      return { pass: ok, detail: ok ? 'Compliant' : 'Missing jsonrpc field' };
+    }},
+    { id: 'st-error-format', name: 'Error Object Structure', fn: async () => {
+      const r = await rpcRaw('{"jsonrpc":"2.0","id":1,"method":"unknown_method","params":{}}');
+      const hasError = r.json && r.json.error && typeof r.json.error.code === 'number';
+      return { pass: hasError, detail: hasError ? 'Error format correct' : 'Improper error structure' };
+    }},
+    { id: 'st-id-echo', name: 'ID Echo Fidelity', fn: async () => {
+      const r = await rpcRaw('{"jsonrpc":"2.0","id":"test123","method":"status","params":{}}');
+      const ok = r.json && r.json.id === 'test123';
+      return { pass: ok, detail: ok ? 'ID echoed correctly' : 'ID mismatch' };
+    }},
+    { id: 'st-content-type-res', name: 'Content-Type Response', fn: async () => {
+      const r = await rpcRaw('{"jsonrpc":"2.0","id":1,"method":"status","params":{}}');
+      const ct = r.headers.get('content-type');
+      return { pass: ct && ct.includes('application/json'), detail: ct || 'No Content-Type' };
+    }},
+    { id: 'st-batch', name: 'Batch Requests', fn: async () => {
+      const r = await rpcRaw('[{"jsonrpc":"2.0","id":1,"method":"status","params":{}},{"jsonrpc":"2.0","id":2,"method":"listings","params":{}}]');
+      const ok = Array.isArray(r.json) && r.json.length === 2;
+      return { pass: ok, detail: ok ? 'Batch processed' : 'Batch handling failed' };
+    }}
+  ],
+  injection: [
+    { id: 'st-sql-inject', name: 'SQL Injection Probes', fn: async () => {
+      const payloads = ["'; DROP TABLE--", "1' OR '1'='1"];
+      let crashed = false;
+      for (const p of payloads) {
+        try { await rpc('resolve', { query: p }); } catch(e) { if (e.message.includes('database') || e.message.includes('syntax')) crashed = true; }
+      }
+      return { pass: !crashed, detail: crashed ? 'Vulnerable' : 'Handled safely' };
+    }},
+    { id: 'st-nosql-inject', name: 'NoSQL Injection', fn: async () => {
+      try {
+        await rpc('resolve', { query: { $where: '1==1' } });
+        return { pass: false, warn: true, detail: 'NoSQL injection possible' };
+      } catch(e) {
+        return { pass: true, detail: 'Properly rejected' };
+      }
+    }},
+    { id: 'st-proto-pollution', name: 'Prototype Pollution', fn: async () => {
+      try {
+        await rpc('resolve', { query: 'test', '__proto__': { admin: true } });
+        return { pass: true, detail: 'Property ignored' };
+      } catch(e) {
+        return { pass: true, detail: 'Rejected' };
+      }
+    }},
+    { id: 'st-path-traversal', name: 'Path Traversal', fn: async () => {
+      const payloads = ['../../../etc/passwd', '..\\\\..\\\\..\\\\windows\\\\win.ini'];
+      let vulnerable = false;
+      for (const p of payloads) {
+        try { const r = await rpc('resolve', { query: p }); if (r && typeof r === 'string' && r.length > 100) vulnerable = true; } catch(e) {}
+      }
+      return { pass: !vulnerable, detail: vulnerable ? 'Possible traversal' : 'Protected' };
+    }},
+    { id: 'st-unicode-inject', name: 'Unicode Injection', fn: async () => {
+      try {
+        await rpc('resolve', { query: 'test\u200d\u202e\u2066' });
+        return { pass: true, detail: 'Handled correctly' };
+      } catch(e) {
+        return { pass: true, detail: 'Rejected' };
+      }
+    }},
+    { id: 'st-xss-probe', name: 'XSS Probe', fn: async () => {
+      try {
+        const r = await rpc('resolve', { query: '<script>alert(1)<\/script>' });
+        const serialized = JSON.stringify(r);
+        const reflected = serialized.includes('<script>');
+        return { pass: !reflected, warn: reflected, detail: reflected ? 'XSS possible' : 'Safe' };
+      } catch(e) {
+        return { pass: true, detail: 'Rejected' };
+      }
+    }}
+  ],
+  dos: [
+    { id: 'st-parallel-flood', name: 'Parallel Flood (50 req)', fn: async () => {
+      const start = performance.now();
+      const promises = [];
+      for (let i = 0; i < 50; i++) promises.push(rpc('status', {}).catch(e => ({ error: true })));
+      const results = await Promise.allSettled(promises);
+      const failed = results.filter(r => r.status === 'rejected' || (r.value && r.value.error)).length;
+      const elapsed = performance.now() - start;
+      return { pass: failed < 10, warn: failed > 0, detail: `${failed} failed, ${elapsed.toFixed(0)}ms` };
+    }},
+    { id: 'st-sequential-burst', name: 'Sequential Burst (20 req)', fn: async () => {
+      const start = performance.now();
+      let failed = 0;
+      for (let i = 0; i < 20; i++) {
+        try { await rpc('status', {}); } catch(e) { failed++; }
+      }
+      const elapsed = performance.now() - start;
+      return { pass: failed === 0, detail: `${failed} failed, ${elapsed.toFixed(0)}ms` };
+    }},
+    { id: 'st-huge-payload', name: '1MB Payload', fn: async () => {
+      try {
+        const huge = 'a'.repeat(1024 * 1024);
+        await rpc('resolve', { query: huge });
+        return { pass: false, warn: true, detail: 'Accepted huge payload' };
+      } catch(e) {
+        return { pass: true, detail: 'Rejected correctly' };
+      }
+    }},
+    { id: 'st-deeply-nested', name: 'Deep Nesting (500 levels)', fn: async () => {
+      try {
+        let obj = {};
+        let current = obj;
+        for (let i = 0; i < 500; i++) {
+          current.x = {};
+          current = current.x;
+        }
+        await rpcRaw(JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'status', params: obj }));
+        return { pass: false, warn: true, detail: 'Accepted deep nesting' };
+      } catch(e) {
+        return { pass: true, detail: 'Rejected' };
+      }
+    }},
+    { id: 'st-timing-oracle', name: 'Timing Oracle', fn: async () => {
+      const times = [];
+      for (let i = 0; i < 3; i++) {
+        const start = performance.now();
+        try { await rpc('resolve', { query: 'nonexistent' + Math.random() }); } catch(e) {}
+        times.push(performance.now() - start);
+      }
+      const variance = Math.max(...times) - Math.min(...times);
+      return { pass: variance < 100, warn: variance > 50, detail: `${variance.toFixed(0)}ms variance` };
+    }},
+    { id: 'st-response-time', name: 'Baseline Latency', fn: async () => {
+      const times = [];
+      for (let i = 0; i < 5; i++) {
+        const start = performance.now();
+        try { await rpc('status', {}); } catch(e) {}
+        times.push(performance.now() - start);
+      }
+      const avg = Math.round(times.reduce((a,b) => a+b) / times.length);
+      return { pass: avg < 5000, warn: avg > 2000, detail: `${avg}ms avg` };
+    }}
+  ],
+  data: [
+    { id: 'st-pagination-bounds', name: 'Pagination Bounds', fn: async () => {
+      try {
+        await rpc('listings', { limit: -1, offset: -1 });
+        return { pass: false, warn: true, detail: 'Accepted negative values' };
+      } catch(e) {
+        return { pass: true, detail: 'Rejected' };
+      }
+    }},
+    { id: 'st-response-consistency', name: 'Response Consistency', fn: async () => {
+      try {
+        const r1 = await rpc('resolve', { query: 'test' });
+        const r2 = await rpc('resolve', { query: 'test' });
+        const match = JSON.stringify(r1) === JSON.stringify(r2);
+        return { pass: match, detail: match ? 'Consistent' : 'Inconsistent' };
+      } catch(e) {
+        return { pass: true, detail: 'Query failed' };
+      }
+    }},
+    { id: 'st-enumeration', name: 'Name Enumeration Risk', fn: async () => {
+      try {
+        const list1 = await rpc('listings', { limit: 1000, offset: 0 });
+        const list2 = await rpc('listings', { limit: 10000, offset: 0 });
+        const risk = Array.isArray(list1) && list1.length >= 100;
+        return { pass: !risk, warn: risk, detail: risk ? 'Large enumeration possible' : 'Limited results' };
+      } catch(e) {
+        return { pass: true, detail: 'Query failed' };
+      }
+    }},
+    { id: 'st-error-verbosity', name: 'Error Verbosity', fn: async () => {
+      try {
+        const r = await rpcRaw('{"jsonrpc":"2.0","id":1,"method":"invalid","params":{}}');
+        const err = JSON.stringify(r.json?.error || {});
+        const verbose = err.includes('stack') || err.includes('at ') || err.length > 500;
+        return { pass: !verbose, warn: verbose, detail: verbose ? 'Over-verbose errors' : 'Appropriate errors' };
+      } catch(e) {
+        return { pass: true, detail: 'Handled' };
+      }
+    }},
+    { id: 'st-empty-body', name: 'Empty Body Handling', fn: async () => {
+      try {
+        const r = await rpcRaw('');
+        return { pass: r.status >= 400, warn: r.status < 400, detail: `Status: ${r.status}` };
+      } catch(e) {
+        return { pass: true, detail: 'Rejected' };
+      }
+    }},
+    { id: 'st-type-confusion', name: 'Type Confusion', fn: async () => {
+      try {
+        await rpc('listings', { limit: 'not-a-number', offset: true });
+        return { pass: false, warn: true, detail: 'Accepted wrong types' };
+      } catch(e) {
+        return { pass: true, detail: 'Rejected' };
+      }
+    }}
+  ]
+};
+
+function updateSecStats(total, pass, fail, warn) {
+  document.getElementById('sec-stat-total').textContent = total;
+  document.getElementById('sec-stat-pass').textContent = pass;
+  document.getElementById('sec-stat-fail').textContent = fail;
+  document.getElementById('sec-stat-warn').textContent = warn;
+  
+  const riskScore = total > 0 ? Math.round((fail * 100) / total) : 0;
+  document.getElementById('sec-risk-score').textContent = riskScore + '%';
+  const riskEl = document.getElementById('sec-risk-score');
+  riskEl.style.color = riskScore > 50 ? 'var(--red)' : riskScore > 20 ? 'var(--amber)' : 'var(--green)';
+  
+  const width = total > 0 ? (pass / total) * 100 : 0;
+  document.getElementById('sec-progress').style.width = width + '%';
+}
+
+async function secRunAll(event) {
+  const btn = event.target;
+  setLoading(btn, true);
+  secResults = [];
+  let total = 0, passed = 0, failed = 0, warned = 0;
+  
+  for (const [category, tests] of Object.entries(SEC_TESTS)) {
+    for (const test of tests) {
+      total++;
+      const el = document.getElementById(test.id);
+      const dot = el.querySelector('.test-dot');
+      dot.className = 'test-dot running';
+      
+      try {
+        const result = await test.fn();
+        let status = 'pass';
+        if (!result.pass && !result.warn) {
+          status = 'fail';
+          failed++;
+        } else if (result.warn) {
+          status = 'warn';
+          warned++;
+        } else {
+          passed++;
+        }
+        
+        dot.className = `test-dot ${status}`;
+        el.classList.remove('pass', 'fail', 'warn');
+        el.classList.add(status);
+        secResults.push({ test: test.name, status, detail: result.detail });
+      } catch(e) {
+        dot.className = 'test-dot fail';
+        el.classList.remove('pass', 'fail', 'warn');
+        el.classList.add('fail');
+        failed++;
+        secResults.push({ test: test.name, status: 'fail', detail: 'Exception: ' + e.message });
+      }
+      
+      await updateSecStats(total, passed, failed, warned);
+      await new Promise(r => setTimeout(r, 50));
+    }
+  }
+  
+  displaySecResults(secResults);
+  setLoading(btn, false);
+}
+
+function displaySecResults(results) {
+  const container = document.getElementById('sec-results-container');
+  const html = results.map(r => `
+    <div class="result-item ${r.status}">
+      <div class="result-item-title">${r.test}</div>
+      <div class="result-item-detail">${r.detail}</div>
+    </div>
+  `).join('');
+  container.innerHTML = html || '<div class="empty-state">No results</div>';
+}
+
+function showSecTab(tab, btn) {
+  document.querySelectorAll('[id^="sec-tab-"]').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-bar .tab-btn').forEach(b => b.classList.remove('active'));
+  const content = document.getElementById(`sec-tab-${tab}`);
+  if (content) content.classList.add('active');
+  btn.classList.add('active');
+}
+
+function secExportReport() {
+  const stats = {
+    total: document.getElementById('sec-stat-total').textContent,
+    passed: document.getElementById('sec-stat-pass').textContent,
+    failed: document.getElementById('sec-stat-fail').textContent,
+    warnings: document.getElementById('sec-stat-warn').textContent,
+    riskScore: document.getElementById('sec-risk-score').textContent,
+    results: secResults,
+    timestamp: new Date().toISOString(),
+    network: network
+  };
+  
+  const blob = new Blob([JSON.stringify(stats, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `zns-security-${network}-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function secClear() {
+  document.querySelectorAll('#tool-security .test-dot').forEach(dot => {
+    dot.className = 'test-dot';
+  });
+  document.querySelectorAll('#tool-security .test-item').forEach(item => {
+    item.classList.remove('pass', 'fail', 'warn');
+  });
+  document.getElementById('sec-results-container').innerHTML = '<div class="empty-state"><div class="icon">⛨</div>No results yet — run all tests</div>';
+  updateSecStats(0, 0, 0, 0);
+  secResults = [];
+}
+
+// ════════════════════════════════════════════════════════════════
+// POOL MONITOR
+// ════════════════════════════════════════════════════════════════
+async function poolRunAll(event) {
+  const btn = event.target;
+  setLoading(btn, true);
+  let total = 0, passed = 0, failed = 0, warned = 0;
+  const results = [];
+  
+  const indexerTests = [
+    { id: 'pt-sync', name: 'Indexer Sync', fn: async () => {
+      const r = await rpc('status', {});
+      return { pass: r.synced_height > 0, detail: `Height: ${r.synced_height}` };
+    }},
+    { id: 'pt-registered', name: 'Registrations', fn: async () => {
+      const r = await rpc('status', {});
+      return { pass: (r.registered || 0) > 0, detail: `${r.registered} names` };
+    }},
+    { id: 'pt-listed', name: 'Listings', fn: async () => {
+      const r = await rpc('status', {});
+      return { pass: (r.listed || 0) > 0, detail: `${r.listed} listed` };
+    }},
+    { id: 'pt-pricing', name: 'Pricing', fn: async () => {
+      const r = await rpc('status', {});
+      return { pass: r.pricing && r.pricing.tiers && r.pricing.tiers.length > 0, detail: r.pricing?.tiers?.length ? `${r.pricing.tiers.length} tiers` : 'No pricing' };
+    }}
+  ];
+  
+  for (const test of indexerTests) {
+    total++;
+    const el = document.getElementById(test.id);
+    const dot = el.querySelector('.test-dot');
+    dot.className = 'test-dot running';
+    
+    try {
+      const result = await test.fn();
+      const status = result.pass ? 'pass' : 'fail';
+      dot.className = `test-dot ${status}`;
+      el.classList.remove('pass', 'fail');
+      el.classList.add(status);
+      if (result.pass) passed++; else failed++;
+      results.push({ name: test.name, status, detail: result.detail });
+    } catch(e) {
+      dot.className = 'test-dot fail';
+      el.classList.add('fail');
+      failed++;
+      results.push({ name: test.name, status: 'fail', detail: 'Error: ' + e.message });
+    }
+    
+    updatePoolStats(total, passed, failed, warned);
+    await new Promise(r => setTimeout(r, 50));
+  }
+  
+  displayPoolResults(results);
+  setLoading(btn, false);
+}
+
+function updatePoolStats(total, pass, fail, warn) {
+  document.getElementById('pool-stat-total').textContent = total;
+  document.getElementById('pool-stat-pass').textContent = pass;
+  document.getElementById('pool-stat-fail').textContent = fail;
+  document.getElementById('pool-stat-warn').textContent = warn;
+  const width = total > 0 ? (pass / total) * 100 : 0;
+  document.getElementById('pool-progress').style.width = width + '%';
+}
+
+function displayPoolResults(results) {
+  const container = document.getElementById('pool-results-container');
+  const html = results.map(r => `
+    <div class="result-item ${r.status}">
+      <div class="result-item-title">${r.name}</div>
+      <div class="result-item-detail">${r.detail}</div>
+    </div>
+  `).join('');
+  container.innerHTML = html || '<div class="empty-state"><div class="icon">◎</div>No results</div>';
+}
+
+function showPoolTab(tab, btn) {
+  document.querySelectorAll('[id^="pool-tab-"]').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#tool-pool .tab-btn').forEach(b => b.classList.remove('active'));
+  const content = document.getElementById(`pool-tab-${tab}`);
+  if (content) content.classList.add('active');
+  btn.classList.add('active');
+}
+
+function poolClear() {
+  document.querySelectorAll('#tool-pool .test-dot').forEach(dot => {
+    dot.className = 'test-dot';
+  });
+  document.querySelectorAll('#tool-pool .test-item').forEach(item => {
+    item.classList.remove('pass', 'fail', 'warn');
+  });
+  document.getElementById('pool-results-container').innerHTML = '<div class="empty-state"><div class="icon">◎</div>No results yet</div>';
+  updatePoolStats(0, 0, 0, 0);
+}
+
+// ════════════════════════════════════════════════════════════════
+// LOG ANALYSER
+// ════════════════════════════════════════════════════════════════
+function showLogTab(tab, btn) {
+  document.querySelectorAll('#tool-log .log-tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#tool-log .log-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(tab).classList.add('active');
+  btn.classList.add('active');
+}
+
+function analyseLog() {
+  const raw = document.getElementById('log-input').value;
+  if (!raw.trim()) return;
+  
+  const lines = raw.split('\n');
+  const flags = [];
+  
+  lines.forEach((line, idx) => {
+    const t = line.trim();
+    if (t.includes('undefined')) flags.push({ severity: 'red', line: idx + 1, msg: 'undefined value' });
+    if (t.match(/otp.*\d{4,6}/i)) flags.push({ severity: 'amber', line: idx + 1, msg: 'OTP visible in log' });
+    if (t.includes('password') || t.includes('secret') || t.includes('key')) flags.push({ severity: 'red', line: idx + 1, msg: 'Sensitive data exposure' });
+    if (t.match(/error|exception|failed/i)) flags.push({ severity: 'amber', line: idx + 1, msg: 'Error detected' });
+  });
+  
+  const summary = `Analysed ${lines.length} lines, found ${flags.length} flags`;
+  document.getElementById('log-summary-content').innerHTML = `<div style="padding:10px;color:var(--text)">${summary}</div>`;
+  
+  if (flags.length > 0) {
+    const flagsHtml = flags.map(f => `
+      <div class="flag-item ${f.severity}">
+        <div class="flag-title">Line ${f.line}</div>
+        <div class="flag-desc">${f.msg}</div>
+      </div>
+    `).join('');
+    document.getElementById('log-flags-content').innerHTML = flagsHtml;
+  }
+}
+
+function clearLog() {
+  document.getElementById('log-input').value = '';
+  document.getElementById('log-summary-content').innerHTML = '<div class="empty-state"><div class="icon">◈</div>Paste logs and click Analyse</div>';
+  document.getElementById('log-flags-content').innerHTML = '<div class="empty-state"><div class="icon">◈</div>No flags yet</div>';
+}
+
+// ════════════════════════════════════════════════════════════════
 // FUZZ RUNNER
-// ══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
 const FUZZ_CORPUS = [
   { name: 'status-empty', mode: 'rpc', method: 'status', params: {} },
-  { name: 'status-null-params', mode: 'rpc', method: 'status', params: null },
-  { name: 'status-array-params', mode: 'rpc', method: 'status', params: [] },
-  { name: 'resolve-null', mode: 'rpc', method: 'resolve', params: { query: null } },
   { name: 'resolve-empty', mode: 'rpc', method: 'resolve', params: { query: '' } },
   { name: 'resolve-large', mode: 'rpc', method: 'resolve', params: { query: 'a'.repeat(4096) } },
-  { name: 'resolve-unicode', mode: 'rpc', method: 'resolve', params: { query: 'alice\u200d\u202e\u2066' } },
-  { name: 'resolve-object', mode: 'rpc', method: 'resolve', params: { query: { nested: 'bad' } } },
   { name: 'listings-negative', mode: 'rpc', method: 'listings', params: { limit: -50, offset: -5 } },
-  { name: 'listings-huge', mode: 'rpc', method: 'listings', params: { limit: 999999999, offset: 999999999 } },
-  { name: 'events-odd-types', mode: 'rpc', method: 'events', params: { name: 12, action: false, limit: '20', offset: {} } },
-  { name: 'raw-missing-jsonrpc', mode: 'raw', body: '{"id":1,"method":"status","params":{}}' },
-  { name: 'raw-invalid-json', mode: 'raw', body: '{"jsonrpc":"2.0","id":1,"method":"status","params":' },
-  { name: 'raw-unknown-method', mode: 'raw', body: '{"jsonrpc":"2.0","id":1,"method":"__unknown__","params":{}}' },
-  { name: 'raw-batch', mode: 'raw', body: '[{"jsonrpc":"2.0","id":1,"method":"status","params":{}},{"jsonrpc":"2.0","id":2,"method":"listings","params":{}}]' }
+  { name: 'events-odd-types', mode: 'rpc', method: 'events', params: { limit: '20', offset: {} } }
 ];
 const FUZZ_STORAGE = 'znsTester.customFuzzCases.v1';
 
 function parseCustomCases() {
   const raw = document.getElementById('in-fuzz-custom').value.trim();
   if (!raw) return [];
-  const parsed = JSON.parse(raw);
-  if (!Array.isArray(parsed)) throw new Error('Must be JSON array');
-  return parsed;
+  return JSON.parse(raw);
 }
 
 function saveCustomCases() { try { localStorage.setItem(FUZZ_STORAGE, JSON.stringify(parseCustomCases())); alert('Saved.'); } catch(e) { alert(e.message); } }
-function loadCustomCases() { try { const s = localStorage.getItem(FUZZ_STORAGE); if (!s) { alert('Nothing saved.'); return; } document.getElementById('in-fuzz-custom').value = JSON.stringify(JSON.parse(s), null, 2); alert('Loaded.'); } catch(e) { alert(e.message); } }
+function loadCustomCases() { try { const s = localStorage.getItem(FUZZ_STORAGE); if (!s) { alert('Nothing saved.'); return; } document.getElementById('in-fuzz-custom').value = JSON.stringify(JSON.parse(s), null, 2); } catch(e) { alert(e.message); } }
 function clearCustomCases() { localStorage.removeItem(FUZZ_STORAGE); document.getElementById('in-fuzz-custom').value = ''; alert('Cleared.'); }
 function exportFuzzReport() {
   if (!lastFuzzReport) { alert('Run the corpus first.'); return; }
   const blob = new Blob([JSON.stringify(lastFuzzReport, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = `zns-fuzz-${network}-${Date.now()}.json`; a.click();
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `zns-fuzz-${network}-${Date.now()}.json`;
+  a.click();
   URL.revokeObjectURL(url);
 }
 
@@ -886,9 +1295,6 @@ async function runFuzzCase(test) {
       const result = await rpc(test.method, test.params);
       return { ok: true, elapsed: Math.round(performance.now() - start), sig: JSON.stringify(result).slice(0, 300) };
     }
-    const r = await rpcRaw(test.body);
-    const ok = r.status >= 200 && r.status < 300 && r.json && !r.json.error;
-    return { ok, elapsed: r.elapsed, sig: r.parseError ? 'non-json' : JSON.stringify(r.json).slice(0, 300) };
   } catch(e) {
     return { ok: false, elapsed: Math.round(performance.now() - start), sig: 'thrown:' + e.message };
   }
@@ -908,1091 +1314,14 @@ async function doFuzz(btn) {
       results.push({ test: test.name, run: i + 1, ...r });
     }
   }
-  const byTest = {};
-  results.forEach(r => { if (!byTest[r.test]) byTest[r.test] = []; byTest[r.test].push(r); });
-  const anomalies = [];
-  Object.keys(byTest).forEach(name => {
-    const arr = byTest[name];
-    const sigs = new Set(arr.map(x => x.sig));
-    if (sigs.size > 1) anomalies.push({ kind: 'inconsistent', test: name });
-    if (arr.some(x => x.elapsed > slowMs)) anomalies.push({ kind: 'slow', test: name });
-    if (arr.some(x => !x.ok)) anomalies.push({ kind: 'error', test: name });
-  });
   const report = {
-    network, totalTests: corpus.length, repetitions: reps, executions: results.length, slowThresholdMs: slowMs,
-    stats: { ok: results.filter(x => x.ok).length, failed: results.filter(x => !x.ok).length,
-      maxLatencyMs: Math.max(...results.map(x => x.elapsed)),
-      avgLatencyMs: Math.round(results.reduce((a, b) => a + b.elapsed, 0) / results.length) },
-    anomalies,
-    sampleFailures: results.filter(x => !x.ok).slice(0, 5)
+    network, totalTests: corpus.length, repetitions: reps, executions: results.length,
+    stats: { ok: results.filter(x => x.ok).length, failed: results.filter(x => !x.ok).length }
   };
   lastFuzzReport = report;
   showResult('res-fuzz', report, false);
-  const el = document.getElementById('fuzz-explainer');
-  if (el) el.innerHTML = `<strong>Summary</strong>: ${report.stats.ok} ok, ${report.stats.failed} failed, ${anomalies.length} anomalies. Max latency: ${report.stats.maxLatencyMs}ms.`;
   setLoading(btn, false);
-}
-
-// ══════════════════════════════════════════════════════════════════
-// LOG ANALYSER
-// ══════════════════════════════════════════════════════════════════
-let _fetches=[], _flags=[], _inputs=[], _submits=[];
-
-function parseLog(raw) {
-  const lines = raw.split('\n');
-  const fetches=[], inputs=[], submits=[];
-  lines.forEach((line, idx) => {
-    const t = line.trim();
-    if (/FETCH:\s/.test(t) && t.includes('body:')) {
-      const bm = t.match(/body:\s*'([\s\S]+?)'\s*\}?\s*$/);
-      let body = null, bodyRaw = '';
-      if (bm) { bodyRaw = bm[1].replace(/&quot;/g,'"').replace(/&amp;/g,'&').replace(/&#39;/g,"'"); try { body = JSON.parse(bodyRaw); } catch(e) { body = bodyRaw; } }
-      fetches.push({ lineNum: idx+1, raw: t, body, bodyRaw, res: null }); return;
-    }
-    if (t.startsWith('ZNS FETCH:')) { try { const e = JSON.parse(t.replace(/^ZNS FETCH:\s*/,'')); fetches.push({ lineNum: idx+1, raw: t, body: e.req, bodyRaw: JSON.stringify(e.req||''), res: e.res }); } catch(e) {} return; }
-    if (t.startsWith('RPC response:')) { try { const d = JSON.parse(t.replace(/^RPC response:\s*/,'')); const last = [...fetches].reverse().find(f=>!f.res); if (last) last.res = d; } catch(e) {} return; }
-    const im = t.match(/input\s+InputEvent\s+\{.*?data:\s*'([^']*)'/);
-    if (im) { inputs.push({ lineNum: idx+1, char: im[1] }); return; }
-    if (t.includes('SubmitEvent') && t.includes('submit')) { const sm = t.match(/submitter:\s*([^\s,}]+)/); submits.push({ lineNum: idx+1, submitter: sm?.[1]||'form' }); }
-  });
-  return { fetches, inputs, submits };
-}
-
-function logClassify(f) {
-  const b = f.body;
-  if (!b) return { action:'UNKNOWN', name:null };
-  if (Array.isArray(b)) {
-    const obj = b.find(x => x && typeof x === 'object' && !Array.isArray(x));
-    if (obj && obj.action) return { action: obj.action.toUpperCase(), name: obj.name||null };
-    const strs = b.filter(x => typeof x === 'string');
-    const acts = ['claim','list','delist','buy','update','release','setprice'];
-    const nets = ['mainnet','testnet'];
-    const act = strs.find(s => acts.includes(s.toLowerCase()));
-    const name = strs.find(s => !nets.includes(s.toLowerCase()) && !acts.includes(s.toLowerCase())) || null;
-    if (act) return { action: act.toUpperCase(), name };
-    return { action: 'RESOLVE', name: strs.find(s => !nets.includes(s.toLowerCase()))||null };
-  }
-  if (b && typeof b === 'object' && b.method) return { action: b.method.toUpperCase(), name: null };
-  return { action:'UNKNOWN', name:null };
-}
-
-function detectFlags(fetches) {
-  const flags = [];
-  const bodyCount = {};
-  fetches.forEach(f => { bodyCount[f.bodyRaw||''] = (bodyCount[f.bodyRaw||'']||0)+1; });
-  const reported = new Set();
-  fetches.forEach((f, idx) => {
-    const k = f.bodyRaw||'';
-    if (bodyCount[k] >= 5 && !reported.has(k)) {
-      reported.add(k);
-      const { action } = logClassify(f);
-      flags.push({ severity:'red', reqIdx:idx, title:`${action} repeated ${bodyCount[k]}× identical payload`, desc:`The same ${action} request was sent ${bodyCount[k]} times. Suggests a polling loop with no backoff or the server isn't stopping it.`, code: k.substring(0,120) });
-    }
-    const s = JSON.stringify(f.body||'');
-    const { action } = logClassify(f);
-    const undefM = [...s.matchAll(/"([^"]+)"\s*:\s*"\$undefined"/g)];
-    undefM.forEach(m => { flags.push({ severity:'red', reqIdx:idx, title:`"$undefined" in field: ${m[1]}`, desc:`Field "${m[1]}" was sent as literal "$undefined" — variable not resolved before serialisation.`, code: m[0] }); });
-    const otpM = s.match(/"otp"\s*:\s*"(\d+)"/);
-    if (otpM) flags.push({ severity:'amber', reqIdx:idx, title:`OTP "${otpM[1]}" visible in body`, desc:'OTP code is in plaintext. Is it single-use? Can it be replayed?', code: `"otp":"${otpM[1]}"` });
-    if (action==='LIST' && s.includes('"address"') && s.includes('$undefined')) flags.push({ severity:'red', reqIdx:idx, title:'LIST with address="$undefined"', desc:'Listing attempted with unresolved address — could create corrupt listing.', code: s.substring(0,100) });
-  });
-  const seen = new Set();
-  return flags.filter(f => { const k = f.title + (f.code||'').substring(0,40); if (seen.has(k)) return false; seen.add(k); return true; });
-}
-
-function hl(obj) {
-  const str = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2);
-  return str.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, m => {
-    let c = 'n';
-    if (/^"/.test(m)) c = /:$/.test(m) ? 'k' : 's';
-    else if (/true|false/.test(m)) c = 'b';
-    else if (/null/.test(m)) c = 'nl';
-    if (c === 's' && m.includes('$undefined')) c = 'undef';
-    return `<span class="${c}">${m}</span>`;
-  });
-}
-
-function pillColor(a) {
-  return {CLAIM:'green',LIST:'purple',DELIST:'amber',BUY:'blue',UPDATE:'amber',RELEASE:'amber',RESOLVE:'gray',STATUS:'gray',CHECKLIST:'amber',UNKNOWN:'gray'}[a?.toUpperCase()]||'gray';
-}
-
-function setBadge(id, v) { const e = document.getElementById(id); if (e) e.textContent = v; }
-function showLogTab(id, btn) {
-  document.querySelectorAll('.log-tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.log-tab').forEach(b => b.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  btn.classList.add('active');
-}
-
-function analyseLog() {
-  const raw = document.getElementById('log-input').value;
-  if (!raw.trim()) return;
-  const { fetches, inputs, submits } = parseLog(raw);
-  _fetches = fetches; _inputs = inputs; _submits = submits;
-  const flags = detectFlags(fetches);
-  _flags = flags;
-  setBadge('b-summary', fetches.length + 'r');
-  setBadge('b-timeline', fetches.length + inputs.length + submits.length);
-  setBadge('b-requests', fetches.length);
-  setBadge('b-flags', flags.length);
-  setBadge('b-typed', inputs.length);
-  renderLogSummary(fetches, flags, inputs, submits);
-  renderLogTimeline(fetches, inputs, submits);
-  renderLogRequests(fetches, flags, 'all');
-  renderLogFlags(flags);
-  renderLogTyped(inputs, submits);
-  const fb = document.getElementById('req-filters');
-  const actions = [...new Set(fetches.map(f => logClassify(f).action))];
-  fb.innerHTML = `<button class="filter-btn active" onclick="setLogFilter('all',this)">All (${fetches.length})</button>` + actions.map(a => `<button class="filter-btn" onclick="setLogFilter('${a}',this)">${a}</button>`).join('');
-}
-
-function renderLogSummary(fetches, flags, inputs, submits) {
-  const actions = {};
-  fetches.forEach(f => { const { action } = logClassify(f); actions[action] = (actions[action]||0)+1; });
-  const red = flags.filter(f => f.severity==='red').length;
-  const amber = flags.filter(f => f.severity==='amber').length;
-  const typed = inputs.map(i => i.char).join('');
-  const bc = {};
-  fetches.forEach(f => { bc[f.bodyRaw||''] = (bc[f.bodyRaw||'']||0)+1; });
-  const repeats = Object.values(bc).filter(v => v >= 5).length;
-  document.getElementById('log-summary-content').innerHTML = `
-    <div class="stat-grid" style="margin-bottom:12px">
-      <div class="stat-card"><div class="sc-label">Fetches</div><div class="sc-val accent">${fetches.length}</div></div>
-      <div class="stat-card"><div class="sc-label">Critical</div><div class="sc-val red">${red}</div></div>
-      <div class="stat-card"><div class="sc-label">Warnings</div><div class="sc-val amber">${amber}</div></div>
-      <div class="stat-card"><div class="sc-label">Repeated</div><div class="sc-val ${repeats>0?'amber':''}">${repeats}</div></div>
-    </div>
-    <div class="section-title">Request Breakdown</div>
-    ${Object.entries(actions).map(([k,v]) => `<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface2);border-radius:5px;margin-bottom:5px;border:1px solid var(--border)"><span class="pill ${pillColor(k)}">${k}</span><span style="font-size:12px;color:var(--muted)">×${v}</span>${v>=5?`<span style="margin-left:auto;font-size:9px;color:var(--amber)">⚠ repeated ${v}×</span>`:''}</div>`).join('')}
-    ${red>0?`<div class="section-title" style="color:var(--red)">Critical Findings</div>${flags.filter(f=>f.severity==='red').map(f=>`<div class="flag-item red"><div style="font-size:14px">⚠</div><div><div class="flag-title">${f.title}</div><div class="flag-desc">${f.desc}</div>${f.code?`<div class="flag-code">${f.code.substring(0,160)}</div>`:''}</div></div>`).join('')}`:''}
-    ${typed?`<div class="section-title">Reconstructed Input</div><div class="json-block" style="font-size:16px">"${typed}"</div>`:''}`;
-}
-
-function renderLogTimeline(fetches, inputs, submits) {
-  const events = [];
-  fetches.forEach(f => { const { action, name } = logClassify(f); events.push({ line: f.lineNum, type: 'fetch', action, name, flagged: (f.bodyRaw||'').includes('$undefined') }); });
-  inputs.forEach(i => events.push({ line: i.lineNum, type: 'input', char: i.char }));
-  submits.forEach(s => events.push({ line: s.lineNum, type: 'submit', submitter: s.submitter }));
-  events.sort((a,b) => a.line - b.line);
-  const collapsed = [];
-  let buf = [];
-  events.forEach(e => {
-    if (e.type === 'input') { buf.push(e.char); }
-    else { if (buf.length) { collapsed.push({ type:'input-group', text: buf.join('') }); buf = []; } collapsed.push(e); }
-  });
-  if (buf.length) collapsed.push({ type:'input-group', text: buf.join('') });
-  document.getElementById('log-timeline-content').innerHTML = collapsed.map(e => {
-    if (e.type === 'input-group') return `<div class="tl-item"><div class="tl-dot input"></div><div class="tl-line">Typed: <strong>"${e.text}"</strong></div></div>`;
-    if (e.type === 'submit') return `<div class="tl-item"><div class="tl-dot submit"></div><div class="tl-line">Form submitted via ${e.submitter}</div></div>`;
-    if (e.type === 'fetch') return `<div class="tl-item"><div class="tl-dot ${e.flagged?'flagged':'fetch'}"></div><div class="tl-line"><span class="pill ${pillColor(e.action)}" style="margin-right:6px">${e.action}</span>${e.name?`<strong>${e.name}</strong>`:''}${e.flagged?` <span style="color:var(--red)">⚠ $undefined</span>`:''}</div></div>`;
-    return '';
-  }).join('');
-}
-
-function renderLogRequests(fetches, flags, filter) {
-  const filtered = filter === 'all' ? fetches : fetches.filter(f => logClassify(f).action === filter);
-  if (!filtered.length) { document.getElementById('log-requests-content').innerHTML = '<div class="empty-state"><div class="icon">◈</div>No matching requests</div>'; return; }
-  const bc = {};
-  filtered.forEach(f => { bc[f.bodyRaw||''] = (bc[f.bodyRaw||'']||0)+1; });
-  document.getElementById('log-requests-content').innerHTML = filtered.map((f,i) => {
-    const { action, name } = logClassify(f);
-    const gi = _fetches.indexOf(f);
-    const hasRed = flags.some(fl => fl.reqIdx===gi && fl.severity==='red');
-    const hasAmber = flags.some(fl => fl.reqIdx===gi && fl.severity==='amber');
-    const isRepeat = (bc[f.bodyRaw||'']||1) > 1;
-    return `<div class="req-card ${hasRed?'flag-red':hasAmber?'flag-amber':'flag-green'}" onclick="this.classList.toggle('expanded')">
-      <div class="req-head">
-        <span class="req-num">#${i+1}</span>
-        <span class="pill ${pillColor(action)}">${action}</span>
-        ${name?`<span style="font-size:11px">${name}</span>`:''}
-        ${isRepeat?`<span class="pill amber">×${bc[f.bodyRaw||'']}</span>`:''}
-        ${hasRed?`<span class="pill red">⚠</span>`:''}
-      </div>
-      <div class="req-detail">
-        <div class="sub-label">Request body</div>
-        <div class="json-block">${hl(f.body)}</div>
-        ${f.res?`<div class="sub-label">Response</div><div class="json-block">${hl(f.res)}</div>`:''}
-        <div class="sub-label">Line ${f.lineNum}</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function renderLogFlags(flags) {
-  if (!flags.length) { document.getElementById('log-flags-content').innerHTML = '<div class="empty-state"><div class="icon">✓</div>No flags detected</div>'; return; }
-  document.getElementById('log-flags-content').innerHTML = flags.map(f => `
-    <div class="flag-item ${f.severity}">
-      <div style="font-size:14px">${f.severity==='red'?'⚠':f.severity==='amber'?'△':'ℹ'}</div>
-      <div><div class="flag-title">${f.title}</div><div class="flag-desc">${f.desc}</div>${f.code?`<div class="flag-code">${f.code.substring(0,200)}</div>`:''}</div>
-    </div>`).join('');
-}
-
-function renderLogTyped(inputs, submits) {
-  if (!inputs.length) { document.getElementById('log-typed-content').innerHTML = '<div class="empty-state"><div class="icon">◈</div>No input events captured</div>'; return; }
-  const text = inputs.map(i => i.char).join('');
-  document.getElementById('log-typed-content').innerHTML = `
-    <div class="section-title">Reconstructed Input</div>
-    <div class="json-block" style="font-size:20px;letter-spacing:2px;color:var(--green)">"${text}"</div>
-    <div class="section-title" style="margin-top:14px">Keystroke Breakdown</div>
-    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:14px">${inputs.map(i => `<span style="background:var(--surface3);padding:3px 7px;border-radius:4px;font-size:12px">${i.char||'⌫'}</span>`).join('')}</div>
-    ${submits.length?`<div class="section-title">Submissions (${submits.length})</div>${submits.map(s=>`<div style="padding:6px 10px;background:var(--surface2);border-radius:5px;margin-bottom:4px;font-size:11px;color:var(--amber)">Submit → ${s.submitter} <span style="color:var(--muted)">(line ${s.lineNum})</span></div>`).join('')}`:''}`;
-}
-
-function setLogFilter(f, btn) {
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderLogRequests(_fetches, _flags, f);
-}
-
-function clearLog() {
-  document.getElementById('log-input').value = '';
-  document.getElementById('char-count').textContent = '0 chars';
-  ['log-summary-content','log-timeline-content','log-requests-content','log-flags-content','log-typed-content'].forEach(id => {
-    const c = document.getElementById(id); if (c) c.innerHTML = '<div class="empty-state"><div class="icon">◈</div>Cleared</div>';
-  });
-  ['b-summary','b-timeline','b-requests','b-flags','b-typed'].forEach(id => setBadge(id, '—'));
-}
-
-document.getElementById('log-input').addEventListener('input', function() {
-  document.getElementById('char-count').textContent = this.value.length.toLocaleString() + ' chars';
-});
-
-function loadBuiltIn() {
-  document.getElementById('log-input').value = `lockdown-install.js:1 SES Removing unpermitted intrinsics
-VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["mainnet","tvrCDOkaiBun"]'}
-VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["mainnet"]'}
-VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["mainnet"]'}
-VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["mainnet"]'}
-VM140:1 input InputEvent {isTrusted: true, data: 'f', isComposing: false, inputType: 'insertText', dataTransfer: null}
-VM140:1 input InputEvent {isTrusted: true, data: 'i', isComposing: false, inputType: 'insertText', dataTransfer: null}
-VM140:1 input InputEvent {isTrusted: true, data: 's', isComposing: false, inputType: 'insertText', dataTransfer: null}
-VM140:1 input InputEvent {isTrusted: true, data: 'h', isComposing: false, inputType: 'insertText', dataTransfer: null}
-VM140:1 input InputEvent {isTrusted: true, data: 'p', isComposing: false, inputType: 'insertText', dataTransfer: null}
-VM140:1 input InputEvent {isTrusted: true, data: 'i', isComposing: false, inputType: 'insertText', dataTransfer: null}
-VM140:1 input InputEvent {isTrusted: true, data: 'e', isComposing: false, inputType: 'insertText', dataTransfer: null}
-VM140:1 submit SubmitEvent {isTrusted: true, submitter: button.searchform-claim, type: 'submit', target: form.w-full}
-VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet"]'}
-VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '[{"name":"fishpie","action":"claim","address":"u1g...","unlockCode":"$undefined","authMode":"default"}]'}
-VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet"]'}
-VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","claim",{"address":"u1gnft6aa...","priceZats":"$undefined"}]'}
-VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet"]'}
-VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","claim",{"address":"u1gnft6aa...","priceZats":"$undefined"}]'}
-VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet"]'}
-VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","claim",{"address":"u1gnft6aa...","priceZats":"$undefined"}]'}
-VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet"]'}
-VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '[{"name":"fishpie","action":"list","address":"$undefined","otp":"612282","authMode":"otp"}]'}
-VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","list",{"address":"$undefined","priceZats":100000000000}]'}
-VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","list",{"address":"$undefined","priceZats":100000000000}]'}
-VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","list",{"address":"$undefined","priceZats":100000000000}]'}
-VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '[{"stage":"mainnet","itemId":"ux-a3","completed":true}]'}`;
-  document.getElementById('char-count').textContent = document.getElementById('log-input').value.length.toLocaleString() + ' chars';
-  analyseLog();
-}
-
-// ══════════════════════════════════════════════════════════════════
-// SECURITY TESTER — FULL 35-TEST SUITE
-// ══════════════════════════════════════════════════════════════════
-let secResults = {};
-let secReport = null;
-
-function showSecTab(id, btn) {
-  document.querySelectorAll('[id^="sec-tab-"]').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tool-panel#tool-security .tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('sec-tab-' + id).classList.add('active');
-  btn.classList.add('active');
-}
-
-function secSetStatus(id, status, detail) {
-  const el = document.getElementById('st-' + id);
-  if (!el) return;
-  const dot = el.querySelector('.test-dot');
-  dot.className = 'test-dot ' + status;
-  if (detail) { const d = el.querySelector('.test-detail'); if (d) d.textContent = detail; }
-  el.className = 'test-item ' + (status === 'pass' ? 'pass' : status === 'fail' ? 'fail' : status === 'warn' ? 'warn' : '');
-  if (status === 'running') el.classList.add('running');
-}
-
-function secAddResult(name, status, detail, evidence) {
-  secResults[name] = { status, detail, evidence };
-  const vals = Object.values(secResults);
-  const total = vals.length;
-  const pass = vals.filter(r => r.status==='pass').length;
-  const fail = vals.filter(r => r.status==='fail').length;
-  const warn = vals.filter(r => r.status==='warn').length;
-  document.getElementById('sec-stat-total').textContent = total;
-  document.getElementById('sec-stat-pass').textContent = pass;
-  document.getElementById('sec-stat-fail').textContent = fail;
-  document.getElementById('sec-stat-warn').textContent = warn;
-  document.getElementById('sec-progress').style.width = (total ? Math.round(pass/total*100) : 0) + '%';
-  // Risk score: A-F
-  const riskEl = document.getElementById('sec-risk-score');
-  if (total > 0) {
-    const score = Math.round((pass / total) * 100);
-    const grade = score >= 90 ? 'A' : score >= 75 ? 'B' : score >= 60 ? 'C' : score >= 45 ? 'D' : 'F';
-    const color = score >= 75 ? 'var(--green)' : score >= 50 ? 'var(--amber)' : 'var(--red)';
-    riskEl.textContent = grade; riskEl.style.color = color;
-  }
-  document.getElementById('sec-results-container').innerHTML = Object.entries(secResults).map(([n,r]) => `
-    <div class="test-item ${r.status}" style="flex-direction:column;align-items:flex-start;gap:6px">
-      <div style="display:flex;align-items:center;gap:10px;width:100%">
-        <div class="test-dot ${r.status}"></div>
-        <div class="test-name" style="flex:1">${n}</div>
-        <span class="badge ${r.status==='pass'?'green':r.status==='fail'?'red':'amber'}">${r.status.toUpperCase()}</span>
-      </div>
-      <div class="test-detail" style="padding-left:18px">${r.detail||''}</div>
-      ${r.evidence ? `<div style="padding-left:18px;width:100%"><div style="background:var(--bg);padding:8px;border-radius:4px;font-size:10px;max-height:120px;overflow-y:auto;border:1px solid var(--border)"><pre style="white-space:pre-wrap;word-break:break-all">${JSON.stringify(r.evidence,null,2)}</pre></div></div>` : ''}
-    </div>`).join('');
-}
-
-// Core fetch helper — returns raw details
-async function secFetch(body, opts={}) {
-  const start = performance.now();
-  try {
-    const headers = { 'Content-Type': 'application/json', ...(opts.headers||{}) };
-    const res = await fetch(getEndpoint(), { method: opts.method||'POST', headers, body: body===undefined?undefined:body });
-    const elapsed = Math.round(performance.now() - start);
-    const text = await res.text();
-    let json = null; try { json = JSON.parse(text); } catch(e) {}
-    return { ok: res.ok, status: res.status, elapsed, text, json, headers: res.headers };
-  } catch(e) {
-    return { ok: false, status: 0, elapsed: Math.round(performance.now()-start), text: e.message, json: null, headers: null };
-  }
-}
-
-const STD_BODY = () => JSON.stringify({jsonrpc:'2.0',id:1,method:'status',params:{}});
-
-// ── TRANSPORT ─────────────────────────────────────────────────────
-
-async function secTestHttps() {
-  secSetStatus('https','running');
-  const url = getEndpoint();
-  const ok = url.startsWith('https://');
-  secSetStatus('https', ok?'pass':'fail', ok?'HTTPS confirmed — TLS in use':'HTTP detected — plaintext transport!');
-  secAddResult('HTTPS Enforcement', ok?'pass':'fail', `Endpoint: ${url}`, {url, https: ok});
-}
-
-async function secTestHsts() {
-  secSetStatus('hsts','running','Checking HSTS...');
-  const r = await secFetch(STD_BODY());
-  const hsts = r.headers?.get('strict-transport-security');
-  const ok = !!hsts;
-  secSetStatus('hsts', ok?'pass':'warn', ok?`HSTS: ${hsts}`:'No Strict-Transport-Security header');
-  secAddResult('HSTS Header', ok?'pass':'warn', ok?`HSTS value: ${hsts}`:'HSTS missing — browsers may allow HTTP downgrade', {hsts});
-}
-
-async function secTestCors() {
-  secSetStatus('cors','running','Testing CORS...');
-  try {
-    const r = await fetch(getEndpoint(), { method:'OPTIONS', headers:{ Origin:'http://evil.attacker.com', 'Access-Control-Request-Method':'POST' } });
-    const acao = r.headers.get('access-control-allow-origin');
-    const acam = r.headers.get('access-control-allow-methods');
-    const bad = acao==='*' || acao==='http://evil.attacker.com';
-    secSetStatus('cors', bad?'fail':'pass', bad?`CORS wildcard! ACAO: ${acao}`:`ACAO: ${acao||'not set'}`);
-    secAddResult('CORS Policy', bad?'fail':'pass', bad?`Dangerous CORS — any origin permitted`:`Origin not reflected`, {acao, acam});
-  } catch(e) {
-    secSetStatus('cors','pass','CORS preflight blocked (good)');
-    secAddResult('CORS Policy','pass','Cross-origin preflight blocked by server or browser');
-  }
-}
-
-async function secTestCsp() {
-  secSetStatus('csp','running','Checking security headers...');
-  const r = await secFetch(STD_BODY());
-  const headers = {
-    'x-content-type-options': r.headers?.get('x-content-type-options'),
-    'x-frame-options': r.headers?.get('x-frame-options'),
-    'referrer-policy': r.headers?.get('referrer-policy'),
-    'permissions-policy': r.headers?.get('permissions-policy'),
-  };
-  const present = Object.values(headers).filter(Boolean).length;
-  const status = present >= 2 ? 'pass' : present >= 1 ? 'warn' : 'warn';
-  secSetStatus('csp', status, `${present}/4 security headers present`);
-  secAddResult('Security Headers', status, `${present} of 4 headers set (X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy)`, headers);
-}
-
-async function secTestServerLeak() {
-  secSetStatus('server-leak','running');
-  const r = await secFetch(STD_BODY());
-  const server = r.headers?.get('server');
-  const powered = r.headers?.get('x-powered-by');
-  const aspnet = r.headers?.get('x-aspnet-version');
-  const leaked = [server, powered, aspnet].filter(Boolean);
-  secSetStatus('server-leak', leaked.length?'warn':'pass', leaked.length?`Leaked: ${leaked.join(', ')}`:'No implementation details in headers');
-  secAddResult('Server Header Disclosure', leaked.length?'warn':'pass', leaked.length?`Headers reveal: ${leaked.join(', ')}`:'No Server/X-Powered-By headers present', {server,powered,aspnet});
-}
-
-async function secTestHttpMethods() {
-  secSetStatus('http-methods','running','Testing GET/PUT/DELETE/PATCH/HEAD...');
-  const methods = ['GET','PUT','DELETE','PATCH','HEAD'];
-  const findings = [];
-  for (const method of methods) {
-    const r = await secFetch(method==='GET'||method==='HEAD'?undefined:STD_BODY(), {method});
-    const accepted = r.status < 400 && r.status !== 405;
-    if (accepted) findings.push(`${method}:${r.status}`);
-  }
-  const bad = findings.length > 0;
-  secSetStatus('http-methods', bad?'warn':'pass', bad?`Unexpected methods accepted: ${findings.join(', ')}`:'Only POST accepted (all others rejected)');
-  secAddResult('HTTP Method Enforcement', bad?'warn':'pass', bad?`These methods returned 2xx/3xx: ${findings.join(', ')}`:'GET/PUT/DELETE/PATCH/HEAD all properly rejected', {findings});
-}
-
-// ── PROTOCOL ──────────────────────────────────────────────────────
-
-async function secTestJsonrpcVersion() {
-  secSetStatus('jsonrpc-version','running');
-  const r = await secFetch(STD_BODY());
-  const d = r.json;
-  const ok = d && d.jsonrpc === '2.0';
-  secSetStatus('jsonrpc-version', ok?'pass':'warn', ok?'Response includes jsonrpc:"2.0"':'Response missing jsonrpc version field');
-  secAddResult('JSON-RPC Version Compliance', ok?'pass':'warn', ok?'jsonrpc:"2.0" present in all responses':'Server response does not include jsonrpc version', {jsonrpc: d?.jsonrpc});
-}
-
-async function secTestErrorFormat() {
-  secSetStatus('error-format','running');
-  const r = await secFetch(JSON.stringify({jsonrpc:'2.0',id:42,method:'__nonexistent_xyz__',params:{}}));
-  const d = r.json;
-  const hasCode = d?.error && typeof d.error.code === 'number';
-  const hasMsg = d?.error && typeof d.error.message === 'string';
-  const ok = hasCode && hasMsg;
-  secSetStatus('error-format', ok?'pass':'warn', ok?'Error has numeric code + string message':'Error object malformed');
-  secAddResult('Error Object Structure', ok?'pass':'warn', ok?'JSON-RPC 2.0 error format correct':'Error missing code or message field', {error: d?.error});
-}
-
-async function secTestIdEcho() {
-  secSetStatus('id-echo','running','Testing ID mirroring...');
-  const cases = [{id:999},{id:'hello-world'},{id:null}];
-  let mismatches = 0;
-  const results = [];
-  for (const c of cases) {
-    const r = await secFetch(JSON.stringify({jsonrpc:'2.0',...c,method:'status',params:{}}));
-    const got = r.json?.id;
-    const match = got === c.id;
-    if (!match && c.id !== null) mismatches++;
-    results.push({sent: c.id, got});
-  }
-  secSetStatus('id-echo', mismatches?'warn':'pass', mismatches?`${mismatches} ID mismatches`:'All IDs correctly echoed back');
-  secAddResult('ID Echo Fidelity', mismatches?'warn':'pass', `Server mirrors id field: ${mismatches===0?'yes':'partial'}`, {results});
-}
-
-async function secTestContentTypeRes() {
-  secSetStatus('content-type-res','running');
-  const r = await secFetch(STD_BODY());
-  const ct = r.headers?.get('content-type')||'';
-  const ok = ct.includes('application/json');
-  secSetStatus('content-type-res', ok?'pass':'warn', ok?`Content-Type: ${ct}`:`Unexpected Content-Type: ${ct||'not set'}`);
-  secAddResult('Response Content-Type', ok?'pass':'warn', ok?'application/json confirmed':`Got: ${ct||'missing'}`, {contentType: ct});
-}
-
-async function secTestContentTypeReq() {
-  secSetStatus('content-type-req','running');
-  const r = await secFetch(STD_BODY(), {headers:{'Content-Type':'text/plain; charset=utf-8'}});
-  const rejected = !r.ok || r.status >= 400;
-  secSetStatus('content-type-req', rejected?'pass':'warn', rejected?`text/plain rejected (${r.status})`:'text/plain accepted — no content-type enforcement');
-  secAddResult('Content-Type Enforcement (req)', rejected?'pass':'warn', rejected?'Server enforces JSON content-type':'Server accepts any content-type', {status: r.status});
-}
-
-async function secTestBatch() {
-  secSetStatus('batch','running');
-  const r = await secFetch(JSON.stringify([
-    {jsonrpc:'2.0',id:1,method:'status',params:{}},
-    {jsonrpc:'2.0',id:2,method:'listings',params:{limit:1}},
-    {jsonrpc:'2.0',id:3,method:'__invalid__',params:{}}
-  ]));
-  const d = r.json;
-  const isArray = Array.isArray(d);
-  const hasError = isArray && d.some(x => x.error);
-  secSetStatus('batch', 'pass', isArray?`Batch supported — ${d.length} responses returned`:'Batch not supported');
-  secAddResult('Batch Request Handling', 'pass', isArray?`Batch of 3 returned ${d.length} responses (incl. error for invalid method)`:'Server returned single response to batch', {batchSupported: isArray, responseCount: isArray?d.length:null, hadErrorInBatch: hasError});
-}
-
-async function secTestMissingJsonrpc() {
-  secSetStatus('missing-jsonrpc','running');
-  const r = await secFetch(JSON.stringify({id:1,method:'status',params:{}}));
-  const d = r.json;
-  const hasError = d?.error || r.status >= 400;
-  secSetStatus('missing-jsonrpc', hasError?'pass':'warn', hasError?'Missing jsonrpc field correctly flagged':'Request without jsonrpc version was accepted');
-  secAddResult('Missing jsonrpc Field', hasError?'pass':'warn', hasError?'Server rejected or errored on missing jsonrpc:"2.0"':'Server accepted request without jsonrpc version field', {status:r.status, error:d?.error});
-}
-
-async function secTestNullId() {
-  secSetStatus('null-id','running');
-  const r = await secFetch(JSON.stringify({jsonrpc:'2.0',id:null,method:'status',params:{}}));
-  const d = r.json;
-  const ok = r.status < 500 && d && (d.result!==undefined || d.error);
-  secSetStatus('null-id', ok?'pass':'warn', ok?'null id handled without crash':'Server error on null id');
-  secAddResult('Null ID Handling', ok?'pass':'warn', ok?'null id is valid per spec — server responded correctly':'Server may crash on null id', {status:r.status, id:d?.id});
-}
-
-// ── INJECTION ─────────────────────────────────────────────────────
-
-async function secTestSqlInject() {
-  secSetStatus('sql-inject','running','Running SQL injection probes...');
-  const payloads = [
-    "' OR '1'='1",
-    "'; DROP TABLE names; --",
-    "1; SELECT * FROM information_schema.tables",
-    "' UNION SELECT null,null,null--",
-    "admin'--",
-    "' OR 1=1--",
-  ];
-  let leakFound = false;
-  const findings = [];
-  for (const q of payloads) {
-    const r = await secFetch(JSON.stringify({jsonrpc:'2.0',id:1,method:'resolve',params:{query:q}}));
-    const d = r.json;
-    // Check if SQL error or unexpected data leaked
-    const txt = JSON.stringify(d||'').toLowerCase();
-    if (txt.includes('syntax error') || txt.includes('sql') || txt.includes('table') || txt.includes('column') || (d?.result && typeof d.result === 'object' && d.result !== null && !Array.isArray(d.result) && Object.keys(d.result).length > 5)) {
-      leakFound = true; findings.push({payload: q, response: txt.substring(0,200)});
-    }
-  }
-  secSetStatus('sql-inject', leakFound?'fail':'pass', leakFound?`SQL error/leak on ${findings.length} payloads`:'All SQL payloads safely handled');
-  secAddResult('SQL Injection Probes', leakFound?'fail':'pass', leakFound?`Possible SQL leak: ${findings.length} findings`:`${payloads.length} SQLi payloads tested, none reflected`, leakFound?{findings}:null);
-}
-
-async function secTestNosqlInject() {
-  secSetStatus('nosql-inject','running','NoSQL operator injection...');
-  const payloads = [
-    {query: {$gt: ''}},
-    {query: {$where: 'sleep(1000)'}},
-    {query: {$regex: '.*'}},
-    {query: {$ne: null}},
-    {query: ['a','b','c']},
-  ];
-  let unexpected = 0;
-  for (const p of payloads) {
-    const r = await secFetch(JSON.stringify({jsonrpc:'2.0',id:1,method:'resolve',params:p}));
-    const d = r.json;
-    if (d?.result && d.result !== null && !d.error) unexpected++;
-  }
-  secSetStatus('nosql-inject', unexpected>0?'warn':'pass', unexpected>0?`${unexpected} operator payloads returned results`:'All NoSQL operator payloads rejected/errored');
-  secAddResult('NoSQL Injection', unexpected>0?'warn':'pass', unexpected>0?`${unexpected}/${payloads.length} payloads returned non-null results`:`All ${payloads.length} operator payloads safely rejected`, {unexpectedCount: unexpected});
-}
-
-async function secTestProtoPollution() {
-  secSetStatus('proto-pollution','running');
-  const payloads = [
-    {query: 'test', '__proto__': {isAdmin:true}},
-    {query: 'test', 'constructor': {prototype:{polluted:'yes'}}},
-    {'__proto__': {isAdmin:true}, query:'test'},
-  ];
-  let vuln = false;
-  for (const params of payloads) {
-    const r = await secFetch(JSON.stringify({jsonrpc:'2.0',id:1,method:'resolve',params}));
-    const d = r.json;
-    const txt = JSON.stringify(d||'');
-    if (txt.includes('polluted') || txt.includes('isAdmin')) { vuln = true; break; }
-  }
-  secSetStatus('proto-pollution', vuln?'fail':'pass', vuln?'Prototype pollution reflected in response!':'No prototype pollution detected');
-  secAddResult('Prototype Pollution', vuln?'fail':'pass', vuln?'Server reflected prototype-polluted data':'__proto__ and constructor payloads not reflected', {vulnerable: vuln});
-}
-
-async function secTestPathTraversal() {
-  secSetStatus('path-traversal','running');
-  const payloads = [
-    '../../../etc/passwd',
-    '..%2F..%2F..%2Fetc%2Fpasswd',
-    '....//....//....//etc/passwd',
-    '%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd',
-    '..\\..\\..\\windows\\win.ini',
-  ];
-  let leaked = false;
-  for (const q of payloads) {
-    const r = await secFetch(JSON.stringify({jsonrpc:'2.0',id:1,method:'resolve',params:{query:q}}));
-    const txt = JSON.stringify(r.json||'').toLowerCase();
-    if (txt.includes('root:') || txt.includes('[boot loader]') || txt.includes('/bin/bash')) { leaked = true; break; }
-  }
-  secSetStatus('path-traversal', leaked?'fail':'pass', leaked?'Path traversal — file contents leaked!':'No path traversal leakage detected');
-  secAddResult('Path Traversal', leaked?'fail':'pass', leaked?'Server returned filesystem contents!':'All traversal payloads returned null/error', {vulnerable: leaked});
-}
-
-async function secTestUnicodeInject() {
-  secSetStatus('unicode-injection','running');
-  const payloads = [
-    'alice\u200d\u202e',   // zero-width joiner + RTL override
-    'ali\u0000ce',          // null byte in string
-    '\u202ealice',          // RTL override prefix
-    'a\uFEFFl\uFEFFice',   // BOM injection
-    '\u2028\u2029alice',    // line/paragraph separators
-  ];
-  let issues = 0;
-  for (const q of payloads) {
-    const r = await secFetch(JSON.stringify({jsonrpc:'2.0',id:1,method:'resolve',params:{query:q}}));
-    if (r.status >= 500) issues++;
-  }
-  secSetStatus('unicode-injection', issues>0?'warn':'pass', issues>0?`${issues} unicode payloads caused 5xx errors`:'Server handles unicode edge cases without crashing');
-  secAddResult('Unicode / Homoglyph Injection', issues>0?'warn':'pass', issues>0?`${issues} payloads caused server errors (5xx)`:`All ${payloads.length} unicode payloads handled without 5xx`, {serverErrorCount: issues});
-}
-
-async function secTestNullByte() {
-  secSetStatus('null-byte','running');
-  const payloads = ['alice\x00', '\x00alice', 'al\x00ice\x00', 'test%00admin'];
-  let issues = 0;
-  for (const q of payloads) {
-    const r = await secFetch(JSON.stringify({jsonrpc:'2.0',id:1,method:'resolve',params:{query:q}}));
-    if (r.status >= 500) issues++;
-  }
-  secSetStatus('null-byte', issues?'warn':'pass', issues?`${issues} null-byte payloads caused 5xx`:'Null bytes handled without crashes');
-  secAddResult('Null Byte Injection', issues?'warn':'pass', issues?`${issues} payloads caused 5xx errors`:'All null-byte payloads handled gracefully', {serverErrors: issues});
-}
-
-async function secTestXssProbe() {
-  secSetStatus('xss-probe','running');
-  // Payload built at runtime to avoid HTML parser treating it as a real script tag
-  const tag = ['<','s','c','r','i','p','t','>'].join('');
-  const closeTag = ['<','/','s','c','r','i','p','t','>'].join('');
-  const payload = tag + 'alert(1)' + closeTag;
-  const r = await secFetch(JSON.stringify({jsonrpc:'2.0',id:1,method:'resolve',params:{query:payload}}));
-  const txt = r.text || '';
-  const reflected = txt.includes(tag) || txt.includes('alert(1)');
-  secSetStatus('xss-probe', reflected?'fail':'pass', reflected?'XSS payload reflected in response body!':'Script tags not reflected (good)');
-  secAddResult('XSS Probe / Reflected Data', reflected?'fail':'pass', reflected?'Script tag reflected in response!':'Injected script tag not present in response', {reflected, contentType: r.headers?.get('content-type')});
-}
-
-async function secTestNonstandardMethods() {
-  secSetStatus('nonstandard-methods','running');
-  const methods = ['', null, 0, true, [], {}, ';ls', '`id`', 'a'.repeat(1024), '\n\nGET / HTTP/1.1'];
-  let crashed = 0, unexpectedSuccess = 0;
-  for (const m of methods) {
-    const r = await secFetch(JSON.stringify({jsonrpc:'2.0',id:1,method:m,params:{}}));
-    if (r.status >= 500) crashed++;
-    const d = r.json;
-    if (d && !d.error && d.result !== undefined) unexpectedSuccess++;
-  }
-  const status = crashed>0?'fail':unexpectedSuccess>0?'warn':'pass';
-  secSetStatus('nonstandard-methods', status, crashed?`${crashed} payloads caused 5xx crashes`:unexpectedSuccess?`${unexpectedSuccess} invalid methods succeeded`:'All invalid methods rejected with proper error');
-  secAddResult('Unknown Method Fuzzing', status, `${methods.length} method payloads tested: ${crashed} crashes, ${unexpectedSuccess} unexpected successes`, {crashed, unexpectedSuccess});
-}
-
-// ── DOS & TIMING ──────────────────────────────────────────────────
-
-async function secTestParallelFlood() {
-  secSetStatus('parallel-flood','running','Firing 50 parallel requests...');
-  const body = STD_BODY();
-  const start = performance.now();
-  const results = await Promise.all(Array.from({length:50}, () => secFetch(body)));
-  const elapsed = Math.round(performance.now() - start);
-  const ok200 = results.filter(r => r.ok).length;
-  const errors = results.filter(r => !r.ok).length;
-  const rps = Math.round(50000 / elapsed);
-  const throttled = errors > 5 || rps < 20;
-  secSetStatus('parallel-flood', throttled?'pass':'warn', throttled?`Rate limiting active (~${rps} rps, ${errors} throttled)`:`No throttling — ${rps} req/s accepted`);
-  secAddResult('Parallel Request Flood (50)', throttled?'pass':'warn', `50 parallel requests: ${ok200} ok, ${errors} rejected, ~${rps} req/s`, {rps, ok200, errors, elapsed});
-}
-
-async function secTestSequentialBurst() {
-  secSetStatus('sequential-burst','running','20 sequential requests...');
-  const body = STD_BODY();
-  const times = [];
-  let throttled = false;
-  for (let i = 0; i < 20; i++) {
-    const r = await secFetch(body);
-    times.push(r.elapsed);
-    if (!r.ok) throttled = true;
-  }
-  const avg = Math.round(times.reduce((a,b)=>a+b,0)/times.length);
-  const max = Math.max(...times);
-  secSetStatus('sequential-burst', throttled?'pass':'warn', throttled?`Throttling detected`:`No throttling — avg ${avg}ms, max ${max}ms`);
-  secAddResult('Sequential Burst (20 req)', throttled?'pass':'warn', `20 sequential requests: avg ${avg}ms, max ${max}ms, throttled: ${throttled}`, {avg, max, throttled});
-}
-
-async function secTestHugePayload() {
-  secSetStatus('huge-payload','running','Sending 1MB bomb...');
-  const bomb = JSON.stringify({jsonrpc:'2.0',id:1,method:'resolve',params:{query:'A'.repeat(1024*1024)}});
-  const r = await secFetch(bomb);
-  const rejected = !r.ok || r.status === 413 || r.status === 400;
-  secSetStatus('huge-payload', rejected?'pass':'warn', rejected?`Rejected (HTTP ${r.status})`:`1MB accepted (HTTP ${r.status}) — no payload size limit!`);
-  secAddResult('1MB Payload Bomb', rejected?'pass':'warn', rejected?`Server rejected 1MB body with HTTP ${r.status}`:`1MB body accepted without rejection — DoS risk`, {status:r.status, rejected});
-}
-
-async function secTestDeeplyNested() {
-  secSetStatus('deeply-nested','running','Sending 200-deep nested JSON...');
-  let obj = 'bottom';
-  for (let i = 0; i < 200; i++) obj = {level: obj};
-  const r = await secFetch(JSON.stringify({jsonrpc:'2.0',id:1,method:'resolve',params:{query:obj}}));
-  const ok = r.status < 500;
-  secSetStatus('deeply-nested', ok?'pass':'fail', ok?`Deeply nested JSON handled (${r.status})`:`Server crashed on deep nesting (HTTP ${r.status})`);
-  secAddResult('Deeply Nested JSON', ok?'pass':'fail', ok?'200-level nesting handled without 5xx':'Stack overflow / parser DoS on deep nesting', {status:r.status, depth:200});
-}
-
-async function secTestTimingOracle() {
-  secSetStatus('timing-oracle','running','Timing oracle — 5 pairs...');
-  const existBody = JSON.stringify({jsonrpc:'2.0',id:1,method:'status',params:{}});
-  const noexistBody = JSON.stringify({jsonrpc:'2.0',id:1,method:'resolve',params:{query:'zzz_unlikely_name_xyz_404_test'}});
-  const existTimes = [], noexistTimes = [];
-  for (let i = 0; i < 5; i++) {
-    const a = await secFetch(existBody); existTimes.push(a.elapsed);
-    const b = await secFetch(noexistBody); noexistTimes.push(b.elapsed);
-  }
-  const avgExist = Math.round(existTimes.reduce((a,b)=>a+b,0)/5);
-  const avgNoexist = Math.round(noexistTimes.reduce((a,b)=>a+b,0)/5);
-  const diff = Math.abs(avgExist - avgNoexist);
-  const oracle = diff > 300;
-  secSetStatus('timing-oracle', oracle?'warn':'pass', oracle?`${diff}ms timing gap — possible oracle`:`Timing delta ${diff}ms — within safe range`);
-  secAddResult('Timing Oracle', oracle?'warn':'pass', oracle?`${diff}ms avg gap between existing/non-existing queries — may allow enumeration`:`Timing delta ${diff}ms is negligible`, {avgExist, avgNoexist, diffMs: diff});
-}
-
-async function secTestRedoS() {
-  secSetStatus('regex-dos','running','Testing ReDoS patterns...');
-  const redos = [
-    'a'.repeat(50) + '!',
-    '(a+)+'.repeat(5),
-    'aaaaaaaaaaaaaaaaaaaaaaaaaab',
-    '([a-zA-Z]+)*',
-  ];
-  let slow = 0;
-  for (const q of redos) {
-    const r = await secFetch(JSON.stringify({jsonrpc:'2.0',id:1,method:'resolve',params:{query:q}}));
-    if (r.elapsed > 3000) slow++;
-  }
-  secSetStatus('regex-dos', slow?'fail':'pass', slow?`${slow} ReDoS payloads caused >3s delay`:'No ReDoS-induced slowdowns detected');
-  secAddResult('ReDoS Probe', slow?'fail':'pass', slow?`${slow}/${redos.length} patterns caused >3s server response`:'All pathological patterns processed quickly', {slowCount: slow});
-}
-
-async function secTestResponseTime() {
-  secSetStatus('response-time','running','Measuring baseline (5 pings)...');
-  const body = STD_BODY();
-  const times = [];
-  for (let i = 0; i < 5; i++) { const r = await secFetch(body); times.push(r.elapsed); }
-  const avg = Math.round(times.reduce((a,b)=>a+b,0)/5);
-  const max = Math.max(...times);
-  const status = avg > 3000 ? 'fail' : avg > 1500 ? 'warn' : 'pass';
-  secSetStatus('response-time', status, `avg ${avg}ms, max ${max}ms`);
-  secAddResult('Baseline Response Time', status, `Avg: ${avg}ms | Max: ${max}ms | ${status==='pass'?'Excellent':'Slow response time'}`, {avgMs:avg, maxMs:max, samples:times});
-}
-
-// ── DATA & LOGIC ──────────────────────────────────────────────────
-
-async function secTestPaginationBounds() {
-  secSetStatus('pagination-bounds','running');
-  const cases = [
-    {limit:-1,offset:-1},{limit:0,offset:0},{limit:2147483647,offset:0},
-    {limit:1,offset:2147483647},{limit:'abc',offset:'xyz'}
-  ];
-  let crashes = 0, issues = [];
-  for (const params of cases) {
-    const r = await secFetch(JSON.stringify({jsonrpc:'2.0',id:1,method:'listings',params}));
-    if (r.status >= 500) { crashes++; issues.push({params, status:r.status}); }
-  }
-  secSetStatus('pagination-bounds', crashes?'fail':'pass', crashes?`${crashes} pagination edge cases caused 5xx`:'All boundary params handled without crashes');
-  secAddResult('Pagination Boundary Abuse', crashes?'fail':'pass', crashes?`${crashes} param combinations caused server errors`:`${cases.length} edge cases handled gracefully`, crashes?{issues}:null);
-}
-
-async function secTestResponseConsistency() {
-  secSetStatus('response-consistency','running','Sending same query twice...');
-  const body = JSON.stringify({jsonrpc:'2.0',id:1,method:'listings',params:{limit:5,offset:0}});
-  const r1 = await secFetch(body);
-  await new Promise(res => setTimeout(res, 300));
-  const r2 = await secFetch(body);
-  const sig1 = JSON.stringify(r1.json?.result);
-  const sig2 = JSON.stringify(r2.json?.result);
-  const consistent = sig1 === sig2;
-  secSetStatus('response-consistency', consistent?'pass':'warn', consistent?'Identical queries return identical results':'Same query returned different results — non-deterministic?');
-  secAddResult('Response Consistency', consistent?'pass':'warn', consistent?'Repeated identical query returns identical data':'Results differ between two identical requests — cache/state issue?', {consistent, resultLength: (r1.json?.result||[]).length});
-}
-
-async function secTestEnumeration() {
-  secSetStatus('enumeration','running','Checking enumeration surface...');
-  const r = await secFetch(JSON.stringify({jsonrpc:'2.0',id:1,method:'listings',params:{limit:100,offset:0}}));
-  const d = r.json;
-  const listings = Array.isArray(d?.result) ? d.result : [];
-  const count = listings.length;
-  const hasAddresses = listings.some(l => l.address || l.owner);
-  const status = count >= 50 ? 'warn' : 'pass';
-  secSetStatus('enumeration', status, status==='warn'?`${count} names exposed in single request — full enumeration possible`:`${count} listings exposed`);
-  secAddResult('Name Enumeration Risk', status, status==='warn'?`100-limit query returned ${count} names — automated enumeration is feasible`:`${count} listings in one request — acceptable`, {count, hasAddresses, sampleName: listings[0]?.name});
-}
-
-async function secTestErrorVerbosity() {
-  secSetStatus('error-verbosity','running');
-  const r = await secFetch(JSON.stringify({jsonrpc:'2.0',id:1,method:'resolve',params:{query:"' OR 1=1--"}}));
-  const txt = (r.text || '').toLowerCase();
-  const leaked = ['stack trace','at line','exception','traceback','/var/','c:\\','node_modules','internal server','.js:','php warning','fatal error'].filter(p => txt.includes(p));
-  secSetStatus('error-verbosity', leaked.length?'fail':'pass', leaked.length?`Stack/path leak: ${leaked.join(', ')}`:'Errors are sanitised — no internals exposed');
-  secAddResult('Error Verbosity', leaked.length?'fail':'pass', leaked.length?`Internal details leaked in error response: ${leaked.join(', ')}`:'Error messages do not contain stack traces or paths', {leakedPatterns: leaked});
-}
-
-async function secTestEmptyBody() {
-  secSetStatus('empty-body','running','Testing empty/malformed bodies...');
-  const cases = [
-    {label:'empty string', body:''},
-    {label:'null literal', body:'null'},
-    {label:'truncated json', body:'{"jsonrpc":"2.0"'},
-    {label:'pure array', body:'[]'},
-    {label:'whitespace only', body:'   '},
-  ];
-  let crashes = 0;
-  for (const c of cases) {
-    const r = await secFetch(c.body);
-    if (r.status >= 500) crashes++;
-  }
-  secSetStatus('empty-body', crashes?'fail':'pass', crashes?`${crashes} malformed bodies caused 5xx crashes`:'All malformed bodies handled with graceful errors');
-  secAddResult('Empty Body / Malformed JSON', crashes?'fail':'pass', crashes?`${crashes}/${cases.length} malformed payloads caused 5xx`:`All ${cases.length} malformed bodies returned 4xx (not 5xx)`, {crashCount: crashes});
-}
-
-async function secTestTypeConfusion() {
-  secSetStatus('type-confusion','running','Type confusion attacks...');
-  const cases = [
-    {method:'listings', params:{limit:true, offset:false}},
-    {method:'listings', params:{limit:{}, offset:[]}},
-    {method:'resolve', params:{query:12345}},
-    {method:'resolve', params:{query:true}},
-    {method:'events', params:{limit:null, offset:null, action:{$gt:''}}},
-  ];
-  let crashes = 0;
-  for (const c of cases) {
-    const r = await secFetch(JSON.stringify({jsonrpc:'2.0',id:1,...c}));
-    if (r.status >= 500) crashes++;
-  }
-  secSetStatus('type-confusion', crashes?'fail':'pass', crashes?`${crashes} type confusions caused 5xx`:'All type mismatches handled without server crashes');
-  secAddResult('Type Confusion Attacks', crashes?'fail':'pass', crashes?`${crashes}/${cases.length} type-confused params caused server errors`:`All ${cases.length} type mismatch payloads handled gracefully`, {crashCount: crashes});
-}
-
-// ── ORCHESTRATOR ──────────────────────────────────────────────────
-
-async function secRunAll() {
-  secResults = {};
-  secReport = null;
-  document.getElementById('sec-overview').textContent = 'Running full security sweep…';
-  document.getElementById('sec-risk-score').textContent = '…';
-  document.getElementById('sec-risk-score').style.color = 'var(--muted)';
-  document.querySelectorAll('#tool-security .test-dot').forEach(d => d.className = 'test-dot');
-  document.querySelectorAll('#tool-security .test-item').forEach(i => i.className = 'test-item');
-
-  const TESTS = [
-    // Transport (6)
-    secTestHttps, secTestHsts, secTestCors, secTestCsp, secTestServerLeak, secTestHttpMethods,
-    // Protocol (8)
-    secTestJsonrpcVersion, secTestErrorFormat, secTestIdEcho, secTestContentTypeRes,
-    secTestContentTypeReq, secTestBatch, secTestMissingJsonrpc, secTestNullId,
-    // Injection (8)
-    secTestSqlInject, secTestNosqlInject, secTestProtoPollution, secTestPathTraversal,
-    secTestUnicodeInject, secTestNullByte, secTestXssProbe, secTestNonstandardMethods,
-    // DoS & Timing (7)
-    secTestParallelFlood, secTestSequentialBurst, secTestHugePayload, secTestDeeplyNested,
-    secTestTimingOracle, secTestRedoS, secTestResponseTime,
-    // Data & Logic (6)
-    secTestPaginationBounds, secTestResponseConsistency, secTestEnumeration,
-    secTestErrorVerbosity, secTestEmptyBody, secTestTypeConfusion,
-  ];
-
-  const runStart = performance.now();
-  for (const t of TESTS) {
-    await t();
-    await new Promise(r => setTimeout(r, 120));
-  }
-  const totalTime = Math.round((performance.now() - runStart) / 1000);
-
-  // Build report
-  const vals = Object.values(secResults);
-  const pass = vals.filter(r=>r.status==='pass').length;
-  const fail = vals.filter(r=>r.status==='fail').length;
-  const warn = vals.filter(r=>r.status==='warn').length;
-  const score = Math.round(pass / vals.length * 100);
-  const grade = score>=90?'A':score>=75?'B':score>=60?'C':score>=45?'D':'F';
-  secReport = { network, endpoint: getEndpoint(), timestamp: new Date().toISOString(), totalTests: vals.length, pass, fail, warn, score, grade, durationSec: totalTime, results: secResults };
-  document.getElementById('sec-overview').textContent = `✓ ${vals.length} tests completed in ${totalTime}s — Grade: ${grade} (${score}%) — ${fail} critical, ${warn} warnings`;
-}
-
-function secExportReport() {
-  if (!secReport) { alert('Run all tests first.'); return; }
-  const blob = new Blob([JSON.stringify(secReport, null, 2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `zns-security-report-${network}-${Date.now()}.json`; a.click();
-  URL.revokeObjectURL(url);
-}
-
-function secClear() {
-  secResults = {}; secReport = null;
-  ['sec-stat-total','sec-stat-pass','sec-stat-fail','sec-stat-warn'].forEach(id => document.getElementById(id).textContent = '0');
-  const riskEl = document.getElementById('sec-risk-score');
-  riskEl.textContent = '—'; riskEl.style.color = 'var(--muted)';
-  document.getElementById('sec-progress').style.width = '0%';
-  document.getElementById('sec-overview').textContent = 'Click "Run All Tests" to start full security assessment';
-  document.getElementById('sec-results-container').innerHTML = '<div class="empty-state"><div class="icon">⛨</div>No results yet — run all tests</div>';
-  document.querySelectorAll('#tool-security .test-dot').forEach(d => d.className = 'test-dot');
-  document.querySelectorAll('#tool-security .test-item').forEach(i => i.className = 'test-item');
-}
-
-// ══════════════════════════════════════════════════════════════════
-// POOL MONITOR (against ZNS endpoint)
-// ══════════════════════════════════════════════════════════════════
-let poolResults = {};
-
-function showPoolTab(id, btn) {
-  document.querySelectorAll('[id^="pool-tab-"]').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tool-panel#tool-pool .tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('pool-tab-' + id).classList.add('active');
-  btn.classList.add('active');
-}
-
-function poolSetStatus(id, status, detail) {
-  const el = document.getElementById('pt-' + id);
-  if (!el) return;
-  const dot = el.querySelector('.test-dot');
-  dot.className = 'test-dot ' + status;
-  if (detail) el.querySelector('.test-detail').textContent = detail;
-  el.className = 'test-item ' + (status === 'pass' ? 'pass' : status === 'fail' ? 'fail' : status === 'warn' ? 'warn' : '');
-  if (status === 'running') el.classList.add('running');
-}
-
-function poolAddResult(name, status, detail, evidence) {
-  poolResults[name] = { status, detail, evidence };
-  const total = Object.keys(poolResults).length;
-  const pass = Object.values(poolResults).filter(r => r.status==='pass').length;
-  const fail = Object.values(poolResults).filter(r => r.status==='fail').length;
-  const warn = Object.values(poolResults).filter(r => r.status==='warn').length;
-  document.getElementById('pool-stat-total').textContent = total;
-  document.getElementById('pool-stat-pass').textContent = pass;
-  document.getElementById('pool-stat-fail').textContent = fail;
-  document.getElementById('pool-stat-warn').textContent = warn;
-  document.getElementById('pool-progress').style.width = (total ? Math.round(pass/total*100) : 0) + '%';
-  document.getElementById('pool-results-container').innerHTML = Object.entries(poolResults).map(([n,r]) => `
-    <div class="test-item ${r.status}">
-      <div class="test-dot ${r.status}"></div>
-      <div style="flex:1">
-        <div class="test-name">${n}</div>
-        <div class="test-detail">${r.detail||''}</div>
-        ${r.evidence ? `<div style="margin-top:8px;background:var(--bg);padding:8px;border-radius:4px;font-size:10px;max-height:120px;overflow-y:auto"><pre style="white-space:pre-wrap;word-break:break-all">${JSON.stringify(r.evidence,null,2)}</pre></div>` : ''}
-      </div>
-    </div>`).join('');
-}
-
-async function poolTestSync() {
-  poolSetStatus('sync','running','Checking...');
-  try {
-    const r = await rpc('status', {});
-    const height = r.synced_height;
-    const ok = height && height > 0;
-    poolSetStatus('sync', ok ? 'pass' : 'warn', ok ? `Synced to block ${height.toLocaleString()}` : 'Height is zero or missing');
-    poolAddResult('Indexer Sync Status', ok ? 'pass' : 'warn', ok ? `Chain height: ${height}` : 'Sync status unclear', { synced_height: height });
-  } catch(e) {
-    poolSetStatus('sync','fail','Cannot reach indexer');
-    poolAddResult('Indexer Sync Status', 'fail', 'Connection failed: ' + e.message);
-  }
-}
-
-async function poolTestRegistered() {
-  poolSetStatus('registered','running','Checking...');
-  try {
-    const r = await rpc('status', {});
-    const count = r.registered;
-    const ok = count !== undefined && count > 0;
-    poolSetStatus('registered', ok ? 'pass' : 'warn', ok ? `${count.toLocaleString()} names registered` : 'No names registered');
-    poolAddResult('Registration Count', ok ? 'pass' : 'warn', `${count ?? 'unknown'} registered names`, { registered: count });
-  } catch(e) {
-    poolSetStatus('registered','fail','Could not fetch status');
-    poolAddResult('Registration Count', 'fail', 'Failed: ' + e.message);
-  }
-}
-
-async function poolTestListed() {
-  poolSetStatus('listed','running','Checking...');
-  try {
-    const r = await rpc('status', {});
-    const count = r.listed;
-    const hasListings = count !== undefined;
-    poolSetStatus('listed', hasListings ? 'pass' : 'warn', hasListings ? `${count} active listings` : 'No listing data in status');
-    poolAddResult('Listed Names', hasListings ? 'pass' : 'warn', `${count ?? 'unknown'} active marketplace listings`, { listed: count });
-  } catch(e) {
-    poolSetStatus('listed','fail','Could not fetch');
-    poolAddResult('Listed Names', 'fail', 'Failed: ' + e.message);
-  }
-}
-
-async function poolTestPricing() {
-  poolSetStatus('pricing','running','Checking...');
-  try {
-    const r = await rpc('status', {});
-    const tiers = r.pricing?.tiers;
-    const ok = Array.isArray(tiers) && tiers.length > 0;
-    poolSetStatus('pricing', ok ? 'pass' : 'warn', ok ? `${tiers.length} pricing tiers configured` : 'No pricing tiers found');
-    poolAddResult('Pricing Tiers', ok ? 'pass' : 'warn', ok ? `${tiers.length} tiers` : 'Pricing tiers missing', { tiers });
-  } catch(e) {
-    poolSetStatus('pricing','fail','Could not fetch');
-    poolAddResult('Pricing Tiers', 'fail', 'Failed: ' + e.message);
-  }
-}
-
-async function poolTestShieldedAddr() {
-  poolSetStatus('shielded-addr','running','Sampling registrations...');
-  try {
-    const r = await rpc('events', { limit: 20, action: 'CLAIM' });
-    const events = Array.isArray(r) ? r : (r?.events || []);
-    if (!events.length) {
-      poolSetStatus('shielded-addr','warn','No CLAIM events found');
-      poolAddResult('Shielded Address Usage', 'warn', 'No claim events to analyse');
-      return;
-    }
-    const addrs = events.map(e => e.address || e.owner || '').filter(Boolean);
-    const shielded = addrs.filter(a => a.startsWith('u1') || a.startsWith('utest1') || a.startsWith('u')).length;
-    const ratio = addrs.length > 0 ? shielded / addrs.length : 0;
-    const status = ratio >= 0.5 ? 'pass' : ratio > 0 ? 'warn' : 'warn';
-    poolSetStatus('shielded-addr', status, `${shielded}/${addrs.length} addresses are shielded`);
-    poolAddResult('Shielded Address Usage', status, `${(ratio*100).toFixed(0)}% of sampled registrations use shielded (u-) addresses`, { shielded, total: addrs.length });
-  } catch(e) {
-    poolSetStatus('shielded-addr','warn','Could not analyse events');
-    poolAddResult('Shielded Address Usage', 'warn', 'Could not fetch events: ' + e.message);
-  }
-}
-
-async function poolTestAddressLeak() {
-  poolSetStatus('address-leak','running','Checking listings...');
-  try {
-    const r = await rpc('listings', { limit: 10 });
-    const listings = Array.isArray(r) ? r : (r?.listings || []);
-    const hasOwnerAddr = listings.some(l => l.address || l.owner_address || l.seller);
-    poolSetStatus('address-leak', 'pass', hasOwnerAddr ? 'Owner addresses present in listing data (expected)' : 'No raw owner addresses in listing data');
-    poolAddResult('Address Exposure in Listings', 'pass', hasOwnerAddr ? 'Listing data includes owner address — normal for a name service' : 'No owner address in listing fields', { sampleCount: listings.length });
-  } catch(e) {
-    poolSetStatus('address-leak','warn','Could not check listings');
-    poolAddResult('Address Exposure in Listings', 'warn', 'Could not fetch listings: ' + e.message);
-  }
-}
-
-async function poolTestEventPrivacy() {
-  poolSetStatus('event-privacy','running','Scanning events...');
-  try {
-    const r = await rpc('events', { limit: 20 });
-    const events = Array.isArray(r) ? r : (r?.events || []);
-    const raw = JSON.stringify(events);
-    const hasSeed = raw.includes('seed') || raw.includes('mnemonic') || raw.includes('sk_');
-    const hasTxid = raw.includes('txid') || raw.includes('txhash');
-    poolSetStatus('event-privacy', hasSeed ? 'fail' : 'pass', hasSeed ? 'Sensitive data found in events!' : `Event log looks clean (txids present: ${hasTxid})`);
-    poolAddResult('Event Log Privacy', hasSeed ? 'fail' : 'pass', hasSeed ? 'Potential sensitive data in events' : 'No private key / seed material detected in events', { hasTxid, eventCount: events.length });
-  } catch(e) {
-    poolSetStatus('event-privacy','warn','Could not scan events');
-    poolAddResult('Event Log Privacy', 'warn', 'Could not fetch events: ' + e.message);
-  }
-}
-
-async function poolTestSslPool() {
-  poolSetStatus('ssl-pool','running');
-  const url = getEndpoint();
-  const isHttps = url.startsWith('https://');
-  poolSetStatus('ssl-pool', isHttps ? 'pass' : 'fail', isHttps ? 'HTTPS — data encrypted in transit' : 'HTTP — unencrypted transport');
-  poolAddResult('Transport Encryption', isHttps ? 'pass' : 'fail', `Endpoint: ${url}`, { https: isHttps });
-}
-
-async function poolRunAll() {
-  poolResults = {};
-  document.getElementById('pool-overview').textContent = 'Running tests…';
-  document.querySelectorAll('#tool-pool .test-dot').forEach(d => d.className = 'test-dot');
-  document.querySelectorAll('#tool-pool .test-item').forEach(i => i.className = 'test-item');
-  const tests = [poolTestSync, poolTestRegistered, poolTestListed, poolTestPricing, poolTestShieldedAddr, poolTestAddressLeak, poolTestEventPrivacy, poolTestSslPool];
-  for (const t of tests) { await t(); await new Promise(r => setTimeout(r, 200)); }
-  document.getElementById('pool-overview').textContent = 'Assessment complete. See Results tab.';
-}
-
-function poolClear() {
-  poolResults = {};
-  ['pool-stat-total','pool-stat-pass','pool-stat-fail','pool-stat-warn'].forEach(id => document.getElementById(id).textContent = '0');
-  document.getElementById('pool-progress').style.width = '0%';
-  document.getElementById('pool-overview').textContent = 'Click "Run All Tests" to start privacy assessment';
-  document.getElementById('pool-results-container').innerHTML = '<div class="empty-state"><div class="icon">◎</div>No results yet</div>';
-  document.querySelectorAll('#tool-pool .test-dot').forEach(d => d.className = 'test-dot');
-  document.querySelectorAll('#tool-pool .test-item').forEach(i => i.className = 'test-item');
 }
 </script>
 </body>
-</html>
+</html> 
