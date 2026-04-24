@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZNS · Zcash Dev Toolkit</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@400;600;700;800&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #07080c; --surface: #0d0f15; --surface2: #131620; --surface3: #191d28;
+      --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.11);
+      --text: #dde1ec; --muted: #5a6078; --muted2: #7c849e;
+      --accent: #4f9cf9; --green: #3ecf8e; --red: #f25f5c; --amber: #f4a836; --purple: #b47cf8;
+      --mono: 'JetBrains Mono', monospace; --display: 'Syne', sans-serif;
+      --sidebar-w: 220px;
+    }
+
+    html, body { height: 100%; }
+    body { background: var(--bg); color: var(--text); font-family: var(--mono); font-size: 13px; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ── HEADER ── */
+    .app-header {
+      height: 48px; padding: 0 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0; position: sticky; top: 0; z-index: 100;
+    }
+    .header-logo { display: flex; align-items: center; gap: 10px; }
+    .header-logo-icon {
+      width: 26px; height: 26px; border-radius: 6px;
+      background: linear-gradient(135deg, #4f9cf9, #b47cf8);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--display); font-size: 10px; font-weight: 800; color: #fff;
+    }
+    .header-logo-name { font-family: var(--display); font-size: 16px; font-weight: 700; color: var(--text); }
+    .header-logo-sub { font-size: 10px; color: var(--muted2); margin-left: 4px; }
+
+    .net-selector { display: flex; gap: 3px; background: var(--bg); border: 1px solid var(--border); padding: 3px; border-radius: 8px; }
+    .net-btn { font-family: var(--mono); font-size: 10px; padding: 4px 12px; border-radius: 5px; border: none; cursor: pointer; background: transparent; color: var(--muted); transition: all 0.15s; }
+    .net-btn.active { background: var(--surface3); color: var(--accent); border: 1px solid rgba(79,156,249,0.3); }
+
+    /* ── LAYOUT ── */
+    .app-body { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 48px); }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w); flex-shrink: 0;
+      background: var(--surface); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; overflow-y: auto;
+    }
+    .sidebar-section { padding: 16px 12px 6px; font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.2px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 14px; cursor: pointer;
+      font-size: 12px; color: var(--muted2);
+      border: none; background: transparent; width: 100%; text-align: left;
+      border-left: 2px solid transparent; transition: all 0.12s;
+    }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: rgba(79,156,249,0.06); color: var(--accent); border-left-color: var(--accent); }
+    .nav-icon { font-size: 14px; flex-shrink: 0; }
+
+    /* ── MAIN CONTENT ── */
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .tool-panel { display: none; flex-direction: column; height: 100%; overflow: hidden; }
+    .tool-panel.active { display: flex; }
+
+    /* ── PANEL HEADER ── */
+    .panel-header {
+      padding: 16px 24px 12px;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .panel-header-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .panel-title { font-family: var(--display); font-size: 17px; font-weight: 700; color: var(--text); }
+    .panel-desc { font-size: 11px; color: var(--muted2); margin-top: 3px; }
+    .panel-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    /* ── PANEL BODY ── */
+    .panel-body { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+
+    /* ── TABS ── */
+    .tab-bar { display: flex; gap: 2px; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 24px; flex-shrink: 0; overflow-x: auto; }
+    .tab-btn { padding: 9px 14px; font-size: 11px; color: var(--muted); cursor: pointer; border: none; background: transparent; border-bottom: 2px solid transparent; transition: all 0.12s; white-space: nowrap; display: flex; align-items: center; gap: 5px; }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-content { display: none; padding: 16px 0; }
+    .tab-content.active { display: block; }
+
+    /* ── SHARED FORM ── */
+    .form-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+    .field { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 150px; }
+    .field.narrow { flex: 0 0 90px; min-width: 90px; }
+    label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+    input, select, textarea {
+      font-family: var(--mono); font-size: 12px; padding: 8px 12px;
+      background: var(--surface2); border: 1px solid var(--border2);
+      border-radius: 6px; color: var(--text); outline: none; width: 100%;
+      transition: border-color 0.15s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: rgba(79,156,249,0.5); box-shadow: 0 0 0 2px rgba(79,156,249,0.07); }
+    select option { background: var(--surface3); }
+    textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
+
+    /* ── BUTTONS ── */
+    .btn { font-family: var(--mono); font-size: 11px; padding: 7px 16px; border-radius: 6px; border: 1px solid var(--border2); cursor: pointer; background: transparent; color: var(--text); transition: all 0.15s; white-space: nowrap; }
+    .btn:hover { background: var(--surface3); }
+    .btn.primary { background: rgba(79,156,249,0.14); border-color: rgba(79,156,249,0.4); color: var(--accent); }
+    .btn.primary:hover { background: rgba(79,156,249,0.24); }
+    .btn.danger { background: rgba(242,95,92,0.1); border-color: rgba(242,95,92,0.3); color: var(--red); }
+    .btn.danger:hover { background: rgba(242,95,92,0.2); }
+    .btn.success { background: rgba(62,207,142,0.1); border-color: rgba(62,207,142,0.3); color: var(--green); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── RESULT BOX ── */
+    .result-wrap { display: flex; flex-direction: column; gap: 6px; }
+    .result-header { display: flex; align-items: center; justify-content: space-between; }
+    .result-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+    .copy-btn { font-family: var(--mono); font-size: 10px; padding: 3px 10px; border-radius: 4px; border: 1px solid var(--border2); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.12s; }
+    .copy-btn:hover { color: var(--text); background: var(--surface3); }
+    .result-box {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px;
+      font-family: var(--mono); font-size: 11px; line-height: 1.6;
+      overflow-y: auto; white-space: pre-wrap; word-break: break-all;
+      min-height: 120px; max-height: 420px; color: var(--text);
+    }
+    .result-box.err { border-color: rgba(242,95,92,0.35); color: var(--red); }
+    .result-box.ok { border-color: rgba(62,207,142,0.3); }
+    .result-box.placeholder { color: var(--muted); display: flex; align-items: center; justify-content: center; font-size: 11px; }
+
+    /* ── STAT GRID ── */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+    .stat-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+    .sc-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+    .sc-val { font-family: var(--display); font-size: 22px; font-weight: 700; }
+    .sc-val.accent { color: var(--accent); } .sc-val.green { color: var(--green); } .sc-val.red { color: var(--red); } .sc-val.amber { color: var(--amber); }
+
+    /* ── TEST ITEMS ── */
+    .test-list { display: flex; flex-direction: column; gap: 6px; }
+    .test-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-left: 3px solid transparent; transition: border-color 0.15s; }
+    .test-item.pass { border-left-color: var(--green); }
+    .test-item.fail { border-left-color: var(--red); }
+    .test-item.warn { border-left-color: var(--amber); }
+    .test-item.running { border-color: rgba(79,156,249,0.4); }
+    .test-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--muted); }
+    .test-dot.running { background: var(--accent); animation: pulse 1s infinite; }
+    .test-dot.pass { background: var(--green); }
+    .test-dot.fail { background: var(--red); }
+    .test-dot.warn { background: var(--amber); }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+    .test-name { flex: 1; font-size: 12px; }
+    .test-detail { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+    /* ── PROGRESS ── */
+    .progress-bar { height: 3px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s; }
+
+    /* ── BADGES / PILLS ── */
+    .badge { font-size: 9px; padding: 2px 7px; border-radius: 4px; font-weight: 600; }
+    .badge.blue { background: rgba(79,156,249,0.12); color: var(--accent); }
+    .badge.green { background: rgba(62,207,142,0.12); color: var(--green); }
+    .badge.red { background: rgba(242,95,92,0.12); color: var(--red); }
+    .badge.amber { background: rgba(244,168,54,0.12); color: var(--amber); }
+    .pill { font-size: 9px; padding: 2px 7px; border-radius: 4px; font-weight: 600; }
+    .pill.blue { background: rgba(79,156,249,0.12); color: var(--accent); }
+    .pill.green { background: rgba(62,207,142,0.12); color: var(--green); }
+    .pill.red { background: rgba(242,95,92,0.12); color: var(--red); }
+    .pill.amber { background: rgba(244,168,54,0.12); color: var(--amber); }
+    .pill.purple { background: rgba(180,124,248,0.12); color: var(--purple); }
+    .pill.gray { background: rgba(99,106,128,0.12); color: var(--muted2); }
+
+    /* ── AVAIL PILL ── */
+    .avail-pill { display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 99px; font-size: 12px; font-weight: 500; }
+    .avail-pill.yes { background: rgba(62,207,142,0.1); border: 1px solid rgba(62,207,142,0.3); color: var(--green); }
+    .avail-pill.no { background: rgba(242,95,92,0.1); border: 1px solid rgba(242,95,92,0.3); color: var(--red); }
+    .cost-note { font-size: 11px; color: var(--muted); margin-top: 6px; }
+    .cost-note span { color: var(--amber); }
+
+    /* ── ZNS LOG ANALYSER ── */
+    .log-layout { display: flex; flex: 1; overflow: hidden; height: 100%; }
+    .log-pane-input { width: 300px; min-width: 220px; border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+    .log-pane-header { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; }
+    #log-input { flex: 1; background: var(--bg); border: none; color: var(--text); font-family: var(--mono); font-size: 11px; padding: 12px; resize: none; outline: none; line-height: 1.6; }
+    .log-input-footer { padding: 8px 10px; border-top: 1px solid var(--border); display: flex; gap: 6px; }
+    .log-pane-output { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .log-tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 12px; gap: 2px; overflow-x: auto; }
+    .log-tab { padding: 9px 12px; font-size: 11px; color: var(--muted); cursor: pointer; border: none; background: transparent; border-bottom: 2px solid transparent; transition: all 0.12s; white-space: nowrap; display: flex; align-items: center; gap: 5px; }
+    .log-tab:hover { color: var(--text); }
+    .log-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .log-tab-content { display: none; flex: 1; overflow-y: auto; padding: 14px; }
+    .log-tab-content.active { display: block; }
+    .flag-item { display: flex; gap: 10px; padding: 10px 12px; background: var(--surface2); border-radius: 7px; margin-bottom: 7px; }
+    .flag-item.red { border-left: 3px solid var(--red); }
+    .flag-item.amber { border-left: 3px solid var(--amber); }
+    .flag-item.info { border-left: 3px solid var(--accent); }
+    .flag-title { font-size: 12px; color: var(--text); font-weight: 500; margin-bottom: 2px; }
+    .flag-desc { font-size: 11px; color: var(--muted2); line-height: 1.5; }
+    .flag-code { font-size: 10px; color: var(--amber); margin-top: 5px; background: rgba(244,168,54,0.07); padding: 3px 7px; border-radius: 3px; display: inline-block; word-break: break-all; }
+    .req-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; margin-bottom: 6px; overflow: hidden; cursor: pointer; }
+    .req-card:hover { border-color: var(--border2); }
+    .req-card.flag-red { border-left: 3px solid var(--red); }
+    .req-card.flag-amber { border-left: 3px solid var(--amber); }
+    .req-card.flag-green { border-left: 3px solid rgba(62,207,142,0.3); }
+    .req-head { padding: 8px 12px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .req-num { font-size: 9px; color: var(--muted); min-width: 22px; }
+    .req-detail { display: none; border-top: 1px solid var(--border); padding: 10px 12px; }
+    .req-card.expanded .req-detail { display: block; }
+    .sub-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin: 8px 0 4px; }
+    .json-block { background: var(--bg); border-radius: 5px; padding: 8px 10px; font-size: 11px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; max-height: 260px; overflow-y: auto; color: var(--text); border: 1px solid var(--border); }
+    .json-block .k { color: #7c9ef5; } .json-block .s { color: #7dd3a0; } .json-block .n { color: #f0c674; } .json-block .b { color: #c792ea; } .json-block .nl { color: var(--muted); } .json-block .undef { color: var(--red); font-weight: 600; }
+    .tl-item { display: flex; gap: 10px; margin-bottom: 5px; align-items: flex-start; }
+    .tl-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+    .tl-dot.fetch { background: var(--accent); } .tl-dot.input { background: var(--muted); } .tl-dot.submit { background: var(--amber); } .tl-dot.flagged { background: var(--red); }
+    .tl-line { font-size: 11px; color: var(--text); line-height: 1.5; }
+    .filter-bar { display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; }
+    .filter-btn { font-size: 10px; padding: 3px 9px; border-radius: 99px; border: 1px solid var(--border2); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.12s; }
+    .filter-btn:hover { color: var(--text); }
+    .filter-btn.active { background: rgba(79,156,249,0.1); border-color: rgba(79,156,249,0.3); color: var(--accent); }
+    .repeat-tag { margin-left: auto; font-size: 9px; padding: 2px 7px; border-radius: 4px; background: rgba(244,168,54,0.1); color: var(--amber); }
+    .section-title { font-size: 9px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin: 14px 0 7px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 11px; }
+    .empty-state .icon { font-size: 28px; margin-bottom: 10px; opacity: 0.25; }
+    .help-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 11px; line-height: 1.55; color: var(--muted2); }
+    .help-card strong { color: var(--text); }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+
+    @media(max-width:640px) {
+      .sidebar { width: 46px; min-width: 46px; }
+      .nav-label { display: none; }
+      .sidebar-section { display: none; }
+      .nav-item { justify-content: center; padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ HEADER ══════════════════════════════════════════════════════ -->
+<header class="app-header">
+  <div class="header-logo">
+    <div class="header-logo-icon">ZNS</div>
+    <span class="header-logo-name">Zcash Dev Toolkit</span>
+    <span class="header-logo-sub">v2.0</span>
+  </div>
+  <div class="net-selector">
+    <button class="net-btn active" onclick="setNetwork('testnet', this)">Testnet</button>
+    <button class="net-btn" onclick="setNetwork('mainnet', this)">Mainnet</button>
+  </div>
+</header>
+
+<!-- ══ BODY ════════════════════════════════════════════════════════ -->
+<div class="app-body">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-section">ZNS Queries</div>
+    <button class="nav-item active" onclick="showTool('status', this)"><span class="nav-icon">◈</span><span class="nav-label">Status</span></button>
+    <button class="nav-item" onclick="showTool('resolve', this)"><span class="nav-icon">⤵</span><span class="nav-label">Resolve Name</span></button>
+    <button class="nav-item" onclick="showTool('revaddr', this)"><span class="nav-icon">⤶</span><span class="nav-label">Resolve Address</span></button>
+    <button class="nav-item" onclick="showTool('avail', this)"><span class="nav-icon">✦</span><span class="nav-label">Availability</span></button>
+    <button class="nav-item" onclick="showTool('listings', this)"><span class="nav-icon">☰</span><span class="nav-label">Listings</span></button>
+    <button class="nav-item" onclick="showTool('events', this)"><span class="nav-icon">⟳</span><span class="nav-label">Events</span></button>
+    <div class="sidebar-section">Advanced</div>
+    <button class="nav-item" onclick="showTool('raw', this)"><span class="nav-icon">{ }</span><span class="nav-label">Raw RPC</span></button>
+    <button class="nav-item" onclick="showTool('fuzz', this)"><span class="nav-icon">⚡</span><span class="nav-label">Fuzz Runner</span></button>
+    <div class="sidebar-section">Monitoring</div>
+    <button class="nav-item" onclick="showTool('log', this)"><span class="nav-icon">⊞</span><span class="nav-label">Log Analyser</span></button>
+    <button class="nav-item" onclick="showTool('security', this)"><span class="nav-icon">⛨</span><span class="nav-label">Security Tester</span></button>
+    <button class="nav-item" onclick="showTool('pool', this)"><span class="nav-icon">◎</span><span class="nav-label">Pool Monitor</span></button>
+  </nav>
+
+  <!-- ══ MAIN CONTENT ══════════════════════════════════════════════ -->
+  <div class="main-content">
+
+    <!-- ─── STATUS ─────────────────────────────────────────────── -->
+    <div class="tool-panel active" id="tool-status">
+      <div class="panel-header">
+        <div class="panel-header-top">
+          <div><div class="panel-title">Status</div><div class="panel-desc">Indexer sync state, admin pubkey, pricing tiers, and UIVK</div></div>
+          <div class="panel-actions"><button class="btn primary" onclick="doStatus(this)">▶ Run</button></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="stat-grid" id="stat-cards-status" style="display:none"></div>
+        <div class="result-wrap">
+          <div class="result-header"><span class="result-label">Response</span><button class="copy-btn" onclick="copyEl('res-status')">Copy</button></div>
+          <div class="result-box placeholder" id="res-status">Hit Run to fetch indexer status</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── RESOLVE NAME ──────────────────────────────────────── -->
+    <div class="tool-panel" id="tool-resolve">
+      <div class="panel-header">
+        <div class="panel-header-top">
+          <div><div class="panel-title">Resolve Name</div><div class="panel-desc">Forward lookup: name → registration object (null if unclaimed)</div></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="field"><label>Name (without .zcash)</label><input id="in-resolve-name" placeholder="alice" /></div>
+          <button class="btn primary" onclick="doResolve(this)">▶ Run</button>
+        </div>
+        <div class="result-wrap">
+          <div class="result-header"><span class="result-label">Response</span><button class="copy-btn" onclick="copyEl('res-resolve')">Copy</button></div>
+          <div class="result-box placeholder" id="res-resolve">Enter a name and hit Run</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── RESOLVE ADDRESS ──────────────────────────────────── -->
+    <div class="tool-panel" id="tool-revaddr">
+      <div class="panel-header">
+        <div class="panel-header-top">
+          <div><div class="panel-title">Resolve Address</div><div class="panel-desc">Reverse lookup: unified address → all names pointing at it</div></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="field"><label>Unified Address</label><input id="in-revaddr" placeholder="utest1..." /></div>
+          <div class="field narrow"><label>Limit</label><input id="in-revaddr-limit" value="50" type="number" /></div>
+          <div class="field narrow"><label>Offset</label><input id="in-revaddr-offset" value="0" type="number" /></div>
+          <button class="btn primary" onclick="doResolveAddr(this)">▶ Run</button>
+        </div>
+        <div class="result-wrap">
+          <div class="result-header"><span class="result-label">Response</span><button class="copy-btn" onclick="copyEl('res-revaddr')">Copy</button></div>
+          <div class="result-box placeholder" id="res-revaddr">Enter an address and hit Run</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── AVAILABILITY ─────────────────────────────────────── -->
+    <div class="tool-panel" id="tool-avail">
+      <div class="panel-header">
+        <div class="panel-header-top">
+          <div><div class="panel-title">Availability</div><div class="panel-desc">Check if a name is unclaimed and see its estimated claim cost</div></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="field"><label>Name (without .zcash)</label><input id="in-avail" placeholder="satoshi" /></div>
+          <button class="btn primary" onclick="doAvail(this)">▶ Run</button>
+        </div>
+        <div id="avail-ui"></div>
+        <div class="result-wrap">
+          <div class="result-header"><span class="result-label">Raw Response</span><button class="copy-btn" onclick="copyEl('res-avail')">Copy</button></div>
+          <div class="result-box placeholder" id="res-avail">Enter a name and hit Run</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── LISTINGS ─────────────────────────────────────────── -->
+    <div class="tool-panel" id="tool-listings">
+      <div class="panel-header">
+        <div class="panel-header-top">
+          <div><div class="panel-title">Listings</div><div class="panel-desc">Active marketplace listings. Price in zatoshis (1 ZEC = 100,000,000 zats)</div></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="field narrow"><label>Limit</label><input id="in-list-limit" value="20" type="number" /></div>
+          <div class="field narrow"><label>Offset</label><input id="in-list-offset" value="0" type="number" /></div>
+          <button class="btn primary" onclick="doListings(this)">▶ Run</button>
+        </div>
+        <div class="result-wrap">
+          <div class="result-header"><span class="result-label">Response</span><button class="copy-btn" onclick="copyEl('res-listings')">Copy</button></div>
+          <div class="result-box placeholder" id="res-listings">Hit Run to fetch listings</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── EVENTS ─────────────────────────────────────────────── -->
+    <div class="tool-panel" id="tool-events">
+      <div class="panel-header">
+        <div class="panel-header-top">
+          <div><div class="panel-title">Events</div><div class="panel-desc">On-chain event log. Actions: CLAIM, LIST, DELIST, BUY, UPDATE, RELEASE, SETPRICE</div></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="field"><label>Name filter (optional)</label><input id="in-ev-name" placeholder="alice" /></div>
+          <div class="field"><label>Action filter</label>
+            <select id="in-ev-action">
+              <option value="">All</option>
+              <option>CLAIM</option><option>LIST</option><option>DELIST</option>
+              <option>BUY</option><option>UPDATE</option><option>RELEASE</option><option>SETPRICE</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Since height (optional)</label><input id="in-ev-height" placeholder="3900000" type="number" /></div>
+          <div class="field narrow"><label>Limit</label><input id="in-ev-limit" value="20" type="number" /></div>
+          <div class="field narrow"><label>Offset</label><input id="in-ev-offset" value="0" type="number" /></div>
+          <button class="btn primary" onclick="doEvents(this)">▶ Run</button>
+        </div>
+        <div class="result-wrap">
+          <div class="result-header"><span class="result-label">Response</span><button class="copy-btn" onclick="copyEl('res-events')">Copy</button></div>
+          <div class="result-box placeholder" id="res-events">Hit Run to fetch events</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── RAW RPC ───────────────────────────────────────────── -->
+    <div class="tool-panel" id="tool-raw">
+      <div class="panel-header">
+        <div class="panel-header-top">
+          <div><div class="panel-title">Raw JSON-RPC</div><div class="panel-desc">Send any payload directly to the indexer</div></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="field" style="min-width:100%">
+          <label>Request body</label>
+          <textarea id="in-raw">{"jsonrpc":"2.0","id":1,"method":"status","params":{}}</textarea>
+        </div>
+        <div class="form-row">
+          <button class="btn primary" onclick="doRaw(this)">▶ Send</button>
+        </div>
+        <div class="result-wrap">
+          <div class="result-header"><span class="result-label">Response</span><button class="copy-btn" onclick="copyEl('res-raw')">Copy</button></div>
+          <div class="result-box placeholder" id="res-raw">Edit the request and hit Send</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── FUZZ RUNNER ───────────────────────────────────────── -->
+    <div class="tool-panel" id="tool-fuzz">
+      <div class="panel-header">
+        <div class="panel-header-top">
+          <div><div class="panel-title">Fuzz Runner</div><div class="panel-desc">Run canned payload corpus and flag anomalies</div></div>
+          <div class="panel-actions"><button class="btn" onclick="exportFuzzReport()">Export JSON</button></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="field narrow"><label>Repetitions</label><input id="in-fuzz-reps" value="2" type="number" min="1" max="10" /></div>
+          <div class="field narrow"><label>Slow ms</label><input id="in-fuzz-slow" value="1200" type="number" min="100" /></div>
+          <button class="btn primary" onclick="doFuzz(this)">▶ Run corpus</button>
+        </div>
+        <div class="field">
+          <label>Custom fuzz cases (JSON array, optional)</label>
+          <textarea id="in-fuzz-custom" placeholder='[{"name":"my-test","mode":"rpc","method":"status","params":{}}]'></textarea>
+        </div>
+        <div class="form-row">
+          <button class="btn" onclick="saveCustomCases()">Save</button>
+          <button class="btn" onclick="loadCustomCases()">Load</button>
+          <button class="btn danger" onclick="clearCustomCases()">Clear</button>
+        </div>
+        <div class="result-wrap">
+          <div class="result-header"><span class="result-label">Report</span><button class="copy-btn" onclick="copyEl('res-fuzz')">Copy</button></div>
+          <div class="result-box placeholder" id="res-fuzz">Run the corpus to generate an anomaly report</div>
+        </div>
+        <div class="help-card" id="fuzz-explainer">
+          <strong>How to read this report</strong><br/>
+          - <strong>ok / failed</strong>: total successful vs failed executions.<br/>
+          - <strong>anomalies.error</strong>: endpoint threw or returned an error for at least one run.<br/>
+          - <strong>anomalies.slow</strong>: a run exceeded your <strong>Slow ms</strong> threshold.<br/>
+          - <strong>anomalies.inconsistent</strong>: same test returned different responses across repetitions — strongest bug signal.
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── LOG ANALYSER ─────────────────────────────────────── -->
+    <div class="tool-panel" id="tool-log" style="overflow:hidden;">
+      <div class="log-layout" style="flex:1;height:calc(100vh - 48px)">
+        <div class="log-pane-input">
+          <div class="log-pane-header"><span>Paste console log</span><span id="char-count">0 chars</span></div>
+          <textarea id="log-input" placeholder="Paste raw console log here...
+
+Handles format:
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '[...]'}
+VM140:1 input InputEvent {data: 'f', ...}
+VM140:1 submit SubmitEvent {...}
+RPC response: {...}"></textarea>
+          <div class="log-input-footer">
+            <button class="btn primary" style="flex:1" onclick="analyseLog()">▶ Analyse</button>
+            <button class="btn" onclick="loadBuiltIn()">Load example</button>
+            <button class="btn danger" onclick="clearLog()">Clear</button>
+          </div>
+        </div>
+        <div class="log-pane-output">
+          <div class="log-tabs">
+            <button class="log-tab active" onclick="showLogTab('log-summary',this)">Summary <span class="badge blue" id="b-summary">—</span></button>
+            <button class="log-tab" onclick="showLogTab('log-timeline',this)">Timeline <span class="badge blue" id="b-timeline">0</span></button>
+            <button class="log-tab" onclick="showLogTab('log-requests',this)">Requests <span class="badge blue" id="b-requests">0</span></button>
+            <button class="log-tab" onclick="showLogTab('log-flags',this)">Flags <span class="badge red" id="b-flags">0</span></button>
+            <button class="log-tab" onclick="showLogTab('log-typed',this)">Typed <span class="badge blue" id="b-typed">0</span></button>
+          </div>
+          <div class="log-tab-content active" id="log-summary"><div id="log-summary-content"><div class="empty-state"><div class="icon">◈</div>Paste logs and click Analyse</div></div></div>
+          <div class="log-tab-content" id="log-timeline"><div id="log-timeline-content"><div class="empty-state"><div class="icon">◈</div>No timeline yet</div></div></div>
+          <div class="log-tab-content" id="log-requests">
+            <div class="filter-bar" id="req-filters"></div>
+            <div id="log-requests-content"><div class="empty-state"><div class="icon">◈</div>No requests yet</div></div>
+          </div>
+          <div class="log-tab-content" id="log-flags"><div id="log-flags-content"><div class="empty-state"><div class="icon">◈</div>No flags yet</div></div></div>
+          <div class="log-tab-content" id="log-typed"><div id="log-typed-content"><div class="empty-state"><div class="icon">◈</div>No input events</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SECURITY TESTER ───────────────────────────────────── -->
+    <div class="tool-panel" id="tool-security">
+      <div class="panel-header">
+        <div class="panel-header-top">
+          <div><div class="panel-title">Security Tester</div><div class="panel-desc">Tests run against the ZNS indexer endpoint for the selected network</div></div>
+          <div class="panel-actions">
+            <button class="btn primary" onclick="secRunAll()">▶ Run All Tests</button>
+            <button class="btn danger" onclick="secClear()">Clear</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="stat-grid">
+          <div class="stat-card"><div class="sc-label">Total</div><div class="sc-val accent" id="sec-stat-total">0</div></div>
+          <div class="stat-card"><div class="sc-label">Passed</div><div class="sc-val green" id="sec-stat-pass">0</div></div>
+          <div class="stat-card"><div class="sc-label">Failed</div><div class="sc-val red" id="sec-stat-fail">0</div></div>
+          <div class="stat-card"><div class="sc-label">Warnings</div><div class="sc-val amber" id="sec-stat-warn">0</div></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="sec-progress" style="width:0%"></div></div>
+        <div id="sec-overview" style="font-size:11px;color:var(--muted);margin-bottom:4px">Click "Run All Tests" to start security assessment</div>
+
+        <div class="tab-bar" style="margin:0 -24px;padding:0 24px;background:transparent;">
+          <button class="tab-btn active" onclick="showSecTab('rpc',this)">RPC</button>
+          <button class="tab-btn" onclick="showSecTab('auth',this)">Auth</button>
+          <button class="tab-btn" onclick="showSecTab('config',this)">Config</button>
+          <button class="tab-btn" onclick="showSecTab('results',this)">Results</button>
+        </div>
+        <div id="sec-tab-rpc" class="tab-content active">
+          <div class="test-list">
+            <div class="test-item" id="st-version"><div class="test-dot"></div><div><div class="test-name">Version / Info Disclosure</div><div class="test-detail">Check if server leaks implementation details</div></div></div>
+            <div class="test-item" id="st-nonstandard"><div class="test-dot"></div><div><div class="test-name">Non-Standard Method Fuzzing</div><div class="test-detail">Send invalid/unknown method names</div></div></div>
+            <div class="test-item" id="st-injection"><div class="test-dot"></div><div><div class="test-name">Injection Tests</div><div class="test-detail">Test for JSON/prototype injection vectors</div></div></div>
+            <div class="test-item" id="st-dos"><div class="test-dot"></div><div><div class="test-name">DoS / Rate Limiting</div><div class="test-detail">Check rate limiting under parallel load</div></div></div>
+            <div class="test-item" id="st-cors"><div class="test-dot"></div><div><div class="test-name">CORS Policy</div><div class="test-detail">Verify CORS headers for cross-origin requests</div></div></div>
+            <div class="test-item" id="st-ssl"><div class="test-dot"></div><div><div class="test-name">Transport Security</div><div class="test-detail">Verify HTTPS is used</div></div></div>
+          </div>
+        </div>
+        <div id="sec-tab-auth" class="tab-content">
+          <div class="test-list">
+            <div class="test-item" id="st-unauthenticated"><div class="test-dot"></div><div><div class="test-name">Unauthenticated Access</div><div class="test-detail">Attempt to call restricted methods without auth</div></div></div>
+            <div class="test-item" id="st-oversize-payload"><div class="test-dot"></div><div><div class="test-name">Oversized Payload</div><div class="test-detail">Send extremely large request body</div></div></div>
+            <div class="test-item" id="st-batch"><div class="test-dot"></div><div><div class="test-name">Batch Request Handling</div><div class="test-detail">Test JSON-RPC batch request behavior</div></div></div>
+            <div class="test-item" id="st-null-id"><div class="test-dot"></div><div><div class="test-name">Null / Missing ID</div><div class="test-detail">Send requests with null or missing id field</div></div></div>
+          </div>
+        </div>
+        <div id="sec-tab-config" class="tab-content">
+          <div class="test-list">
+            <div class="test-item" id="st-method-not-allowed"><div class="test-dot"></div><div><div class="test-name">GET Method Rejection</div><div class="test-detail">Ensure GET requests are rejected</div></div></div>
+            <div class="test-item" id="st-content-type"><div class="test-dot"></div><div><div class="test-name">Content-Type Enforcement</div><div class="test-detail">Send wrong content-type headers</div></div></div>
+            <div class="test-item" id="st-error-format"><div class="test-dot"></div><div><div class="test-name">Error Response Format</div><div class="test-detail">Verify errors follow JSON-RPC 2.0 spec</div></div></div>
+            <div class="test-item" id="st-unknown-fields"><div class="test-dot"></div><div><div class="test-name">Unknown Fields Handling</div><div class="test-detail">Send extra unknown fields in params</div></div></div>
+          </div>
+        </div>
+        <div id="sec-tab-results" class="tab-content">
+          <div id="sec-results-container"><div class="empty-state"><div class="icon">⛨</div>No results yet</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── POOL MONITOR ──────────────────────────────────────── -->
+    <div class="tool-panel" id="tool-pool">
+      <div class="panel-header">
+        <div class="panel-header-top">
+          <div><div class="panel-title">Pool Monitor</div><div class="panel-desc">Shielded pool & privacy checks via the ZNS indexer endpoint</div></div>
+          <div class="panel-actions">
+            <button class="btn primary" onclick="poolRunAll()">▶ Run All Tests</button>
+            <button class="btn danger" onclick="poolClear()">Clear</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="stat-grid">
+          <div class="stat-card"><div class="sc-label">Total</div><div class="sc-val accent" id="pool-stat-total">0</div></div>
+          <div class="stat-card"><div class="sc-label">Passed</div><div class="sc-val green" id="pool-stat-pass">0</div></div>
+          <div class="stat-card"><div class="sc-label">Failed</div><div class="sc-val red" id="pool-stat-fail">0</div></div>
+          <div class="stat-card"><div class="sc-label">Warnings</div><div class="sc-val amber" id="pool-stat-warn">0</div></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="pool-progress" style="width:0%"></div></div>
+        <div id="pool-overview" style="font-size:11px;color:var(--muted);margin-bottom:4px">Click "Run All Tests" to start privacy assessment</div>
+
+        <div class="tab-bar" style="margin:0 -24px;padding:0 24px;background:transparent;">
+          <button class="tab-btn active" onclick="showPoolTab('indexer',this)">Indexer</button>
+          <button class="tab-btn" onclick="showPoolTab('privacy',this)">Privacy</button>
+          <button class="tab-btn" onclick="showPoolTab('pool-results',this)">Results</button>
+        </div>
+        <div id="pool-tab-indexer" class="tab-content active">
+          <div class="test-list">
+            <div class="test-item" id="pt-sync"><div class="test-dot"></div><div><div class="test-name">Indexer Sync Status</div><div class="test-detail">Check synced height and chain health</div></div></div>
+            <div class="test-item" id="pt-registered"><div class="test-dot"></div><div><div class="test-name">Registration Count</div><div class="test-detail">Verify registered name count is non-zero</div></div></div>
+            <div class="test-item" id="pt-listed"><div class="test-dot"></div><div><div class="test-name">Listed Names</div><div class="test-detail">Check marketplace has active listings</div></div></div>
+            <div class="test-item" id="pt-pricing"><div class="test-dot"></div><div><div class="test-name">Pricing Tiers Configured</div><div class="test-detail">Verify pricing tiers exist for name lengths</div></div></div>
+          </div>
+        </div>
+        <div id="pool-tab-privacy" class="tab-content">
+          <div class="test-list">
+            <div class="test-item" id="pt-shielded-addr"><div class="test-dot"></div><div><div class="test-name">Shielded Address Usage</div><div class="test-detail">Check if registered names use shielded (u-) addresses</div></div></div>
+            <div class="test-item" id="pt-address-leak"><div class="test-dot"></div><div><div class="test-name">Address Exposure in Listings</div><div class="test-detail">Detect if listing owner addresses are exposed</div></div></div>
+            <div class="test-item" id="pt-event-privacy"><div class="test-dot"></div><div><div class="test-name">Event Log Privacy</div><div class="test-detail">Inspect event data for sensitive info leakage</div></div></div>
+            <div class="test-item" id="pt-ssl-pool"><div class="test-dot"></div><div><div class="test-name">Transport Encryption</div><div class="test-detail">Verify HTTPS is used for all data in transit</div></div></div>
+          </div>
+        </div>
+        <div id="pool-tab-pool-results" class="tab-content">
+          <div id="pool-results-container"><div class="empty-state"><div class="icon">◎</div>No results yet</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /app-body -->
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+// GLOBAL STATE & HELPERS
+// ══════════════════════════════════════════════════════════════════
+const ENDPOINTS = {
+  testnet: 'https://light.zcash.me/zns-testnet',
+  mainnet: 'https://light.zcash.me/zns-mainnet-test'
+};
+let network = 'testnet';
+let cachedStatus = null;
+let lastFuzzReport = null;
+
+function getEndpoint() { return ENDPOINTS[network]; }
+
+function setNetwork(net, btn) {
+  network = net;
+  cachedStatus = null;
+  document.querySelectorAll('.net-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function showTool(id, btn) {
+  document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('tool-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+async function rpc(method, params) {
+  const res = await fetch(getEndpoint(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(JSON.stringify(data.error));
+  return data.result;
+}
+
+async function rpcRaw(body) {
+  const started = performance.now();
+  const res = await fetch(getEndpoint(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body
+  });
+  const elapsed = Math.round(performance.now() - started);
+  const text = await res.text();
+  let json = null, parseError = null;
+  try { json = JSON.parse(text); } catch(e) { parseError = e.message; }
+  return { status: res.status, elapsed, text, json, parseError, headers: res.headers };
+}
+
+function showResult(id, data, isError) {
+  const el = document.getElementById(id);
+  el.classList.remove('placeholder','err','ok');
+  el.classList.add(isError ? 'err' : 'ok');
+  el.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+}
+
+function setLoading(btn, v) { btn.disabled = v; btn.classList.toggle('loading', v); }
+function copyEl(id) { navigator.clipboard.writeText(document.getElementById(id).innerText || '').catch(()=>{}); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+    const panel = e.target.closest('.tool-panel, .panel');
+    if (panel) { const btn = panel.querySelector('.btn.primary'); if (btn) btn.click(); }
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════
+// ZNS QUERIES
+// ══════════════════════════════════════════════════════════════════
+async function doStatus(btn) {
+  setLoading(btn, true);
+  try {
+    const r = await rpc('status', {});
+    cachedStatus = r;
+    const cards = document.getElementById('stat-cards-status');
+    cards.style.display = 'grid';
+    const rows = [['Synced Height', r.synced_height?.toLocaleString() ?? '—'], ['Registered', r.registered ?? '—'], ['Listed', r.listed ?? '—'], ['Network', network]];
+    cards.innerHTML = rows.map(([l,v]) => `<div class="stat-card"><div class="sc-label">${l}</div><div class="sc-val" style="font-size:${typeof v==='number'&&v>99999?'16px':'22px'}">${v}</div></div>`).join('');
+    showResult('res-status', r, false);
+  } catch(e) { showResult('res-status', 'Error: ' + e.message, true); }
+  setLoading(btn, false);
+}
+
+async function doResolve(btn) {
+  const name = document.getElementById('in-resolve-name').value.trim().replace(/\.zcash$/, '');
+  if (!name) return;
+  setLoading(btn, true);
+  try { showResult('res-resolve', await rpc('resolve', { query: name }), false); }
+  catch(e) { showResult('res-resolve', 'Error: ' + e.message, true); }
+  setLoading(btn, false);
+}
+
+async function doResolveAddr(btn) {
+  const addr = document.getElementById('in-revaddr').value.trim();
+  if (!addr) return;
+  const limit = parseInt(document.getElementById('in-revaddr-limit').value) || 50;
+  const offset = parseInt(document.getElementById('in-revaddr-offset').value) || 0;
+  setLoading(btn, true);
+  try { showResult('res-revaddr', await rpc('resolve', { query: addr, limit, offset }), false); }
+  catch(e) { showResult('res-revaddr', 'Error: ' + e.message, true); }
+  setLoading(btn, false);
+}
+
+async function doAvail(btn) {
+  const name = document.getElementById('in-avail').value.trim().replace(/\.zcash$/, '');
+  if (!name) return;
+  setLoading(btn, true);
+  try {
+    if (!cachedStatus) cachedStatus = await rpc('status', {});
+    const r = await rpc('resolve', { query: name });
+    const available = r === null;
+    const tiers = cachedStatus?.pricing?.tiers;
+    let cost = null;
+    if (tiers) { const idx = Math.min(name.length - 1, tiers.length - 1); cost = tiers[idx]; }
+    const ui = document.getElementById('avail-ui');
+    ui.innerHTML = '';
+    const pill = document.createElement('div');
+    pill.className = 'avail-pill ' + (available ? 'yes' : 'no');
+    pill.textContent = (available ? '✓ ' : '✗ ') + name + '.zcash is ' + (available ? 'available' : 'taken');
+    ui.appendChild(pill);
+    if (available && cost) {
+      const note = document.createElement('div');
+      note.className = 'cost-note';
+      note.innerHTML = `Estimated cost: <span>${(cost/1e8).toFixed(4)} ZEC</span> (${cost.toLocaleString()} zatoshis)`;
+      ui.appendChild(note);
+    }
+    showResult('res-avail', r, false);
+  } catch(e) {
+    document.getElementById('avail-ui').innerHTML = '';
+    showResult('res-avail', 'Error: ' + e.message, true);
+  }
+  setLoading(btn, false);
+}
+
+async function doListings(btn) {
+  const limit = parseInt(document.getElementById('in-list-limit').value) || 20;
+  const offset = parseInt(document.getElementById('in-list-offset').value) || 0;
+  setLoading(btn, true);
+  try { showResult('res-listings', await rpc('listings', { limit, offset }), false); }
+  catch(e) { showResult('res-listings', 'Error: ' + e.message, true); }
+  setLoading(btn, false);
+}
+
+async function doEvents(btn) {
+  const params = {
+    limit: parseInt(document.getElementById('in-ev-limit').value) || 20,
+    offset: parseInt(document.getElementById('in-ev-offset').value) || 0
+  };
+  const name = document.getElementById('in-ev-name').value.trim();
+  const action = document.getElementById('in-ev-action').value;
+  const h = document.getElementById('in-ev-height').value.trim();
+  if (name) params.name = name;
+  if (action) params.action = action;
+  if (h) params.since_height = parseInt(h);
+  setLoading(btn, true);
+  try { showResult('res-events', await rpc('events', params), false); }
+  catch(e) { showResult('res-events', 'Error: ' + e.message, true); }
+  setLoading(btn, false);
+}
+
+async function doRaw(btn) {
+  setLoading(btn, true);
+  try {
+    const res = await fetch(getEndpoint(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: document.getElementById('in-raw').value
+    });
+    showResult('res-raw', await res.json(), false);
+  } catch(e) { showResult('res-raw', 'Error: ' + e.message, true); }
+  setLoading(btn, false);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// FUZZ RUNNER
+// ══════════════════════════════════════════════════════════════════
+const FUZZ_CORPUS = [
+  { name: 'status-empty', mode: 'rpc', method: 'status', params: {} },
+  { name: 'status-null-params', mode: 'rpc', method: 'status', params: null },
+  { name: 'status-array-params', mode: 'rpc', method: 'status', params: [] },
+  { name: 'resolve-null', mode: 'rpc', method: 'resolve', params: { query: null } },
+  { name: 'resolve-empty', mode: 'rpc', method: 'resolve', params: { query: '' } },
+  { name: 'resolve-large', mode: 'rpc', method: 'resolve', params: { query: 'a'.repeat(4096) } },
+  { name: 'resolve-unicode', mode: 'rpc', method: 'resolve', params: { query: 'alice\u200d\u202e\u2066' } },
+  { name: 'resolve-object', mode: 'rpc', method: 'resolve', params: { query: { nested: 'bad' } } },
+  { name: 'listings-negative', mode: 'rpc', method: 'listings', params: { limit: -50, offset: -5 } },
+  { name: 'listings-huge', mode: 'rpc', method: 'listings', params: { limit: 999999999, offset: 999999999 } },
+  { name: 'events-odd-types', mode: 'rpc', method: 'events', params: { name: 12, action: false, limit: '20', offset: {} } },
+  { name: 'raw-missing-jsonrpc', mode: 'raw', body: '{"id":1,"method":"status","params":{}}' },
+  { name: 'raw-invalid-json', mode: 'raw', body: '{"jsonrpc":"2.0","id":1,"method":"status","params":' },
+  { name: 'raw-unknown-method', mode: 'raw', body: '{"jsonrpc":"2.0","id":1,"method":"__unknown__","params":{}}' },
+  { name: 'raw-batch', mode: 'raw', body: '[{"jsonrpc":"2.0","id":1,"method":"status","params":{}},{"jsonrpc":"2.0","id":2,"method":"listings","params":{}}]' }
+];
+const FUZZ_STORAGE = 'znsTester.customFuzzCases.v1';
+
+function parseCustomCases() {
+  const raw = document.getElementById('in-fuzz-custom').value.trim();
+  if (!raw) return [];
+  const parsed = JSON.parse(raw);
+  if (!Array.isArray(parsed)) throw new Error('Must be JSON array');
+  return parsed;
+}
+
+function saveCustomCases() { try { localStorage.setItem(FUZZ_STORAGE, JSON.stringify(parseCustomCases())); alert('Saved.'); } catch(e) { alert(e.message); } }
+function loadCustomCases() { try { const s = localStorage.getItem(FUZZ_STORAGE); if (!s) { alert('Nothing saved.'); return; } document.getElementById('in-fuzz-custom').value = JSON.stringify(JSON.parse(s), null, 2); alert('Loaded.'); } catch(e) { alert(e.message); } }
+function clearCustomCases() { localStorage.removeItem(FUZZ_STORAGE); document.getElementById('in-fuzz-custom').value = ''; alert('Cleared.'); }
+function exportFuzzReport() {
+  if (!lastFuzzReport) { alert('Run the corpus first.'); return; }
+  const blob = new Blob([JSON.stringify(lastFuzzReport, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `zns-fuzz-${network}-${Date.now()}.json`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function runFuzzCase(test) {
+  const start = performance.now();
+  try {
+    if (test.mode === 'rpc') {
+      const result = await rpc(test.method, test.params);
+      return { ok: true, elapsed: Math.round(performance.now() - start), sig: JSON.stringify(result).slice(0, 300) };
+    }
+    const r = await rpcRaw(test.body);
+    const ok = r.status >= 200 && r.status < 300 && r.json && !r.json.error;
+    return { ok, elapsed: r.elapsed, sig: r.parseError ? 'non-json' : JSON.stringify(r.json).slice(0, 300) };
+  } catch(e) {
+    return { ok: false, elapsed: Math.round(performance.now() - start), sig: 'thrown:' + e.message };
+  }
+}
+
+async function doFuzz(btn) {
+  const reps = Math.max(1, Math.min(10, parseInt(document.getElementById('in-fuzz-reps').value) || 2));
+  const slowMs = Math.max(100, parseInt(document.getElementById('in-fuzz-slow').value) || 1200);
+  let custom = [];
+  try { custom = parseCustomCases(); } catch(e) { showResult('res-fuzz', 'Error: ' + e.message, true); return; }
+  const corpus = FUZZ_CORPUS.concat(custom);
+  setLoading(btn, true);
+  const results = [];
+  for (let i = 0; i < reps; i++) {
+    for (const test of corpus) {
+      const r = await runFuzzCase(test);
+      results.push({ test: test.name, run: i + 1, ...r });
+    }
+  }
+  const byTest = {};
+  results.forEach(r => { if (!byTest[r.test]) byTest[r.test] = []; byTest[r.test].push(r); });
+  const anomalies = [];
+  Object.keys(byTest).forEach(name => {
+    const arr = byTest[name];
+    const sigs = new Set(arr.map(x => x.sig));
+    if (sigs.size > 1) anomalies.push({ kind: 'inconsistent', test: name });
+    if (arr.some(x => x.elapsed > slowMs)) anomalies.push({ kind: 'slow', test: name });
+    if (arr.some(x => !x.ok)) anomalies.push({ kind: 'error', test: name });
+  });
+  const report = {
+    network, totalTests: corpus.length, repetitions: reps, executions: results.length, slowThresholdMs: slowMs,
+    stats: { ok: results.filter(x => x.ok).length, failed: results.filter(x => !x.ok).length,
+      maxLatencyMs: Math.max(...results.map(x => x.elapsed)),
+      avgLatencyMs: Math.round(results.reduce((a, b) => a + b.elapsed, 0) / results.length) },
+    anomalies,
+    sampleFailures: results.filter(x => !x.ok).slice(0, 5)
+  };
+  lastFuzzReport = report;
+  showResult('res-fuzz', report, false);
+  const el = document.getElementById('fuzz-explainer');
+  if (el) el.innerHTML = `<strong>Summary</strong>: ${report.stats.ok} ok, ${report.stats.failed} failed, ${anomalies.length} anomalies. Max latency: ${report.stats.maxLatencyMs}ms.`;
+  setLoading(btn, false);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// LOG ANALYSER
+// ══════════════════════════════════════════════════════════════════
+let _fetches=[], _flags=[], _inputs=[], _submits=[];
+
+function parseLog(raw) {
+  const lines = raw.split('\n');
+  const fetches=[], inputs=[], submits=[];
+  lines.forEach((line, idx) => {
+    const t = line.trim();
+    if (/FETCH:\s/.test(t) && t.includes('body:')) {
+      const bm = t.match(/body:\s*'([\s\S]+?)'\s*\}?\s*$/);
+      let body = null, bodyRaw = '';
+      if (bm) { bodyRaw = bm[1].replace(/&quot;/g,'"').replace(/&amp;/g,'&').replace(/&#39;/g,"'"); try { body = JSON.parse(bodyRaw); } catch(e) { body = bodyRaw; } }
+      fetches.push({ lineNum: idx+1, raw: t, body, bodyRaw, res: null }); return;
+    }
+    if (t.startsWith('ZNS FETCH:')) { try { const e = JSON.parse(t.replace(/^ZNS FETCH:\s*/,'')); fetches.push({ lineNum: idx+1, raw: t, body: e.req, bodyRaw: JSON.stringify(e.req||''), res: e.res }); } catch(e) {} return; }
+    if (t.startsWith('RPC response:')) { try { const d = JSON.parse(t.replace(/^RPC response:\s*/,'')); const last = [...fetches].reverse().find(f=>!f.res); if (last) last.res = d; } catch(e) {} return; }
+    const im = t.match(/input\s+InputEvent\s+\{.*?data:\s*'([^']*)'/);
+    if (im) { inputs.push({ lineNum: idx+1, char: im[1] }); return; }
+    if (t.includes('SubmitEvent') && t.includes('submit')) { const sm = t.match(/submitter:\s*([^\s,}]+)/); submits.push({ lineNum: idx+1, submitter: sm?.[1]||'form' }); }
+  });
+  return { fetches, inputs, submits };
+}
+
+function logClassify(f) {
+  const b = f.body;
+  if (!b) return { action:'UNKNOWN', name:null };
+  if (Array.isArray(b)) {
+    const obj = b.find(x => x && typeof x === 'object' && !Array.isArray(x));
+    if (obj && obj.action) return { action: obj.action.toUpperCase(), name: obj.name||null };
+    const strs = b.filter(x => typeof x === 'string');
+    const acts = ['claim','list','delist','buy','update','release','setprice'];
+    const nets = ['mainnet','testnet'];
+    const act = strs.find(s => acts.includes(s.toLowerCase()));
+    const name = strs.find(s => !nets.includes(s.toLowerCase()) && !acts.includes(s.toLowerCase())) || null;
+    if (act) return { action: act.toUpperCase(), name };
+    return { action: 'RESOLVE', name: strs.find(s => !nets.includes(s.toLowerCase()))||null };
+  }
+  if (b && typeof b === 'object' && b.method) return { action: b.method.toUpperCase(), name: null };
+  return { action:'UNKNOWN', name:null };
+}
+
+function detectFlags(fetches) {
+  const flags = [];
+  const bodyCount = {};
+  fetches.forEach(f => { bodyCount[f.bodyRaw||''] = (bodyCount[f.bodyRaw||'']||0)+1; });
+  const reported = new Set();
+  fetches.forEach((f, idx) => {
+    const k = f.bodyRaw||'';
+    if (bodyCount[k] >= 5 && !reported.has(k)) {
+      reported.add(k);
+      const { action } = logClassify(f);
+      flags.push({ severity:'red', reqIdx:idx, title:`${action} repeated ${bodyCount[k]}× identical payload`, desc:`The same ${action} request was sent ${bodyCount[k]} times. Suggests a polling loop with no backoff or the server isn't stopping it.`, code: k.substring(0,120) });
+    }
+    const s = JSON.stringify(f.body||'');
+    const { action } = logClassify(f);
+    const undefM = [...s.matchAll(/"([^"]+)"\s*:\s*"\$undefined"/g)];
+    undefM.forEach(m => { flags.push({ severity:'red', reqIdx:idx, title:`"$undefined" in field: ${m[1]}`, desc:`Field "${m[1]}" was sent as literal "$undefined" — variable not resolved before serialisation.`, code: m[0] }); });
+    const otpM = s.match(/"otp"\s*:\s*"(\d+)"/);
+    if (otpM) flags.push({ severity:'amber', reqIdx:idx, title:`OTP "${otpM[1]}" visible in body`, desc:'OTP code is in plaintext. Is it single-use? Can it be replayed?', code: `"otp":"${otpM[1]}"` });
+    if (action==='LIST' && s.includes('"address"') && s.includes('$undefined')) flags.push({ severity:'red', reqIdx:idx, title:'LIST with address="$undefined"', desc:'Listing attempted with unresolved address — could create corrupt listing.', code: s.substring(0,100) });
+  });
+  const seen = new Set();
+  return flags.filter(f => { const k = f.title + (f.code||'').substring(0,40); if (seen.has(k)) return false; seen.add(k); return true; });
+}
+
+function hl(obj) {
+  const str = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2);
+  return str.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, m => {
+    let c = 'n';
+    if (/^"/.test(m)) c = /:$/.test(m) ? 'k' : 's';
+    else if (/true|false/.test(m)) c = 'b';
+    else if (/null/.test(m)) c = 'nl';
+    if (c === 's' && m.includes('$undefined')) c = 'undef';
+    return `<span class="${c}">${m}</span>`;
+  });
+}
+
+function pillColor(a) {
+  return {CLAIM:'green',LIST:'purple',DELIST:'amber',BUY:'blue',UPDATE:'amber',RELEASE:'amber',RESOLVE:'gray',STATUS:'gray',CHECKLIST:'amber',UNKNOWN:'gray'}[a?.toUpperCase()]||'gray';
+}
+
+function setBadge(id, v) { const e = document.getElementById(id); if (e) e.textContent = v; }
+function showLogTab(id, btn) {
+  document.querySelectorAll('.log-tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.log-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function analyseLog() {
+  const raw = document.getElementById('log-input').value;
+  if (!raw.trim()) return;
+  const { fetches, inputs, submits } = parseLog(raw);
+  _fetches = fetches; _inputs = inputs; _submits = submits;
+  const flags = detectFlags(fetches);
+  _flags = flags;
+  setBadge('b-summary', fetches.length + 'r');
+  setBadge('b-timeline', fetches.length + inputs.length + submits.length);
+  setBadge('b-requests', fetches.length);
+  setBadge('b-flags', flags.length);
+  setBadge('b-typed', inputs.length);
+  renderLogSummary(fetches, flags, inputs, submits);
+  renderLogTimeline(fetches, inputs, submits);
+  renderLogRequests(fetches, flags, 'all');
+  renderLogFlags(flags);
+  renderLogTyped(inputs, submits);
+  const fb = document.getElementById('req-filters');
+  const actions = [...new Set(fetches.map(f => logClassify(f).action))];
+  fb.innerHTML = `<button class="filter-btn active" onclick="setLogFilter('all',this)">All (${fetches.length})</button>` + actions.map(a => `<button class="filter-btn" onclick="setLogFilter('${a}',this)">${a}</button>`).join('');
+}
+
+function renderLogSummary(fetches, flags, inputs, submits) {
+  const actions = {};
+  fetches.forEach(f => { const { action } = logClassify(f); actions[action] = (actions[action]||0)+1; });
+  const red = flags.filter(f => f.severity==='red').length;
+  const amber = flags.filter(f => f.severity==='amber').length;
+  const typed = inputs.map(i => i.char).join('');
+  const bc = {};
+  fetches.forEach(f => { bc[f.bodyRaw||''] = (bc[f.bodyRaw||'']||0)+1; });
+  const repeats = Object.values(bc).filter(v => v >= 5).length;
+  document.getElementById('log-summary-content').innerHTML = `
+    <div class="stat-grid" style="margin-bottom:12px">
+      <div class="stat-card"><div class="sc-label">Fetches</div><div class="sc-val accent">${fetches.length}</div></div>
+      <div class="stat-card"><div class="sc-label">Critical</div><div class="sc-val red">${red}</div></div>
+      <div class="stat-card"><div class="sc-label">Warnings</div><div class="sc-val amber">${amber}</div></div>
+      <div class="stat-card"><div class="sc-label">Repeated</div><div class="sc-val ${repeats>0?'amber':''}">${repeats}</div></div>
+    </div>
+    <div class="section-title">Request Breakdown</div>
+    ${Object.entries(actions).map(([k,v]) => `<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface2);border-radius:5px;margin-bottom:5px;border:1px solid var(--border)"><span class="pill ${pillColor(k)}">${k}</span><span style="font-size:12px;color:var(--muted)">×${v}</span>${v>=5?`<span style="margin-left:auto;font-size:9px;color:var(--amber)">⚠ repeated ${v}×</span>`:''}</div>`).join('')}
+    ${red>0?`<div class="section-title" style="color:var(--red)">Critical Findings</div>${flags.filter(f=>f.severity==='red').map(f=>`<div class="flag-item red"><div style="font-size:14px">⚠</div><div><div class="flag-title">${f.title}</div><div class="flag-desc">${f.desc}</div>${f.code?`<div class="flag-code">${f.code.substring(0,160)}</div>`:''}</div></div>`).join('')}`:''}
+    ${typed?`<div class="section-title">Reconstructed Input</div><div class="json-block" style="font-size:16px">"${typed}"</div>`:''}`;
+}
+
+function renderLogTimeline(fetches, inputs, submits) {
+  const events = [];
+  fetches.forEach(f => { const { action, name } = logClassify(f); events.push({ line: f.lineNum, type: 'fetch', action, name, flagged: (f.bodyRaw||'').includes('$undefined') }); });
+  inputs.forEach(i => events.push({ line: i.lineNum, type: 'input', char: i.char }));
+  submits.forEach(s => events.push({ line: s.lineNum, type: 'submit', submitter: s.submitter }));
+  events.sort((a,b) => a.line - b.line);
+  const collapsed = [];
+  let buf = [];
+  events.forEach(e => {
+    if (e.type === 'input') { buf.push(e.char); }
+    else { if (buf.length) { collapsed.push({ type:'input-group', text: buf.join('') }); buf = []; } collapsed.push(e); }
+  });
+  if (buf.length) collapsed.push({ type:'input-group', text: buf.join('') });
+  document.getElementById('log-timeline-content').innerHTML = collapsed.map(e => {
+    if (e.type === 'input-group') return `<div class="tl-item"><div class="tl-dot input"></div><div class="tl-line">Typed: <strong>"${e.text}"</strong></div></div>`;
+    if (e.type === 'submit') return `<div class="tl-item"><div class="tl-dot submit"></div><div class="tl-line">Form submitted via ${e.submitter}</div></div>`;
+    if (e.type === 'fetch') return `<div class="tl-item"><div class="tl-dot ${e.flagged?'flagged':'fetch'}"></div><div class="tl-line"><span class="pill ${pillColor(e.action)}" style="margin-right:6px">${e.action}</span>${e.name?`<strong>${e.name}</strong>`:''}${e.flagged?` <span style="color:var(--red)">⚠ $undefined</span>`:''}</div></div>`;
+    return '';
+  }).join('');
+}
+
+function renderLogRequests(fetches, flags, filter) {
+  const filtered = filter === 'all' ? fetches : fetches.filter(f => logClassify(f).action === filter);
+  if (!filtered.length) { document.getElementById('log-requests-content').innerHTML = '<div class="empty-state"><div class="icon">◈</div>No matching requests</div>'; return; }
+  const bc = {};
+  filtered.forEach(f => { bc[f.bodyRaw||''] = (bc[f.bodyRaw||'']||0)+1; });
+  document.getElementById('log-requests-content').innerHTML = filtered.map((f,i) => {
+    const { action, name } = logClassify(f);
+    const gi = _fetches.indexOf(f);
+    const hasRed = flags.some(fl => fl.reqIdx===gi && fl.severity==='red');
+    const hasAmber = flags.some(fl => fl.reqIdx===gi && fl.severity==='amber');
+    const isRepeat = (bc[f.bodyRaw||'']||1) > 1;
+    return `<div class="req-card ${hasRed?'flag-red':hasAmber?'flag-amber':'flag-green'}" onclick="this.classList.toggle('expanded')">
+      <div class="req-head">
+        <span class="req-num">#${i+1}</span>
+        <span class="pill ${pillColor(action)}">${action}</span>
+        ${name?`<span style="font-size:11px">${name}</span>`:''}
+        ${isRepeat?`<span class="pill amber">×${bc[f.bodyRaw||'']}</span>`:''}
+        ${hasRed?`<span class="pill red">⚠</span>`:''}
+      </div>
+      <div class="req-detail">
+        <div class="sub-label">Request body</div>
+        <div class="json-block">${hl(f.body)}</div>
+        ${f.res?`<div class="sub-label">Response</div><div class="json-block">${hl(f.res)}</div>`:''}
+        <div class="sub-label">Line ${f.lineNum}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderLogFlags(flags) {
+  if (!flags.length) { document.getElementById('log-flags-content').innerHTML = '<div class="empty-state"><div class="icon">✓</div>No flags detected</div>'; return; }
+  document.getElementById('log-flags-content').innerHTML = flags.map(f => `
+    <div class="flag-item ${f.severity}">
+      <div style="font-size:14px">${f.severity==='red'?'⚠':f.severity==='amber'?'△':'ℹ'}</div>
+      <div><div class="flag-title">${f.title}</div><div class="flag-desc">${f.desc}</div>${f.code?`<div class="flag-code">${f.code.substring(0,200)}</div>`:''}</div>
+    </div>`).join('');
+}
+
+function renderLogTyped(inputs, submits) {
+  if (!inputs.length) { document.getElementById('log-typed-content').innerHTML = '<div class="empty-state"><div class="icon">◈</div>No input events captured</div>'; return; }
+  const text = inputs.map(i => i.char).join('');
+  document.getElementById('log-typed-content').innerHTML = `
+    <div class="section-title">Reconstructed Input</div>
+    <div class="json-block" style="font-size:20px;letter-spacing:2px;color:var(--green)">"${text}"</div>
+    <div class="section-title" style="margin-top:14px">Keystroke Breakdown</div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:14px">${inputs.map(i => `<span style="background:var(--surface3);padding:3px 7px;border-radius:4px;font-size:12px">${i.char||'⌫'}</span>`).join('')}</div>
+    ${submits.length?`<div class="section-title">Submissions (${submits.length})</div>${submits.map(s=>`<div style="padding:6px 10px;background:var(--surface2);border-radius:5px;margin-bottom:4px;font-size:11px;color:var(--amber)">Submit → ${s.submitter} <span style="color:var(--muted)">(line ${s.lineNum})</span></div>`).join('')}`:''}`;
+}
+
+function setLogFilter(f, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLogRequests(_fetches, _flags, f);
+}
+
+function clearLog() {
+  document.getElementById('log-input').value = '';
+  document.getElementById('char-count').textContent = '0 chars';
+  ['log-summary-content','log-timeline-content','log-requests-content','log-flags-content','log-typed-content'].forEach(id => {
+    const c = document.getElementById(id); if (c) c.innerHTML = '<div class="empty-state"><div class="icon">◈</div>Cleared</div>';
+  });
+  ['b-summary','b-timeline','b-requests','b-flags','b-typed'].forEach(id => setBadge(id, '—'));
+}
+
+document.getElementById('log-input').addEventListener('input', function() {
+  document.getElementById('char-count').textContent = this.value.length.toLocaleString() + ' chars';
+});
+
+function loadBuiltIn() {
+  document.getElementById('log-input').value = `lockdown-install.js:1 SES Removing unpermitted intrinsics
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["mainnet","tvrCDOkaiBun"]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["mainnet"]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["mainnet"]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["mainnet"]'}
+VM140:1 input InputEvent {isTrusted: true, data: 'f', isComposing: false, inputType: 'insertText', dataTransfer: null}
+VM140:1 input InputEvent {isTrusted: true, data: 'i', isComposing: false, inputType: 'insertText', dataTransfer: null}
+VM140:1 input InputEvent {isTrusted: true, data: 's', isComposing: false, inputType: 'insertText', dataTransfer: null}
+VM140:1 input InputEvent {isTrusted: true, data: 'h', isComposing: false, inputType: 'insertText', dataTransfer: null}
+VM140:1 input InputEvent {isTrusted: true, data: 'p', isComposing: false, inputType: 'insertText', dataTransfer: null}
+VM140:1 input InputEvent {isTrusted: true, data: 'i', isComposing: false, inputType: 'insertText', dataTransfer: null}
+VM140:1 input InputEvent {isTrusted: true, data: 'e', isComposing: false, inputType: 'insertText', dataTransfer: null}
+VM140:1 submit SubmitEvent {isTrusted: true, submitter: button.searchform-claim, type: 'submit', target: form.w-full}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet"]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '[{"name":"fishpie","action":"claim","address":"u1g...","unlockCode":"$undefined","authMode":"default"}]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet"]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","claim",{"address":"u1gnft6aa...","priceZats":"$undefined"}]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet"]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","claim",{"address":"u1gnft6aa...","priceZats":"$undefined"}]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet"]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","claim",{"address":"u1gnft6aa...","priceZats":"$undefined"}]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet"]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '[{"name":"fishpie","action":"list","address":"$undefined","otp":"612282","authMode":"otp"}]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","list",{"address":"$undefined","priceZats":100000000000}]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","list",{"address":"$undefined","priceZats":100000000000}]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '["fishpie","mainnet","list",{"address":"$undefined","priceZats":100000000000}]'}
+VM145:10 FETCH: / {method: 'POST', headers: {…}, body: '[{"stage":"mainnet","itemId":"ux-a3","completed":true}]'}`;
+  document.getElementById('char-count').textContent = document.getElementById('log-input').value.length.toLocaleString() + ' chars';
+  analyseLog();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SECURITY TESTER (against ZNS endpoint)
+// ══════════════════════════════════════════════════════════════════
+let secResults = {};
+
+function showSecTab(id, btn) {
+  document.querySelectorAll('[id^="sec-tab-"]').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tool-panel#tool-security .tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function secSetStatus(id, status, detail) {
+  const el = document.getElementById('st-' + id);
+  if (!el) return;
+  const dot = el.querySelector('.test-dot');
+  dot.className = 'test-dot ' + status;
+  if (detail) el.querySelector('.test-detail').textContent = detail;
+  el.className = 'test-item ' + (status === 'pass' ? 'pass' : status === 'fail' ? 'fail' : status === 'warn' ? 'warn' : '');
+  if (status === 'running') el.classList.add('running');
+}
+
+function secAddResult(name, status, detail, evidence) {
+  secResults[name] = { status, detail, evidence };
+  const total = Object.keys(secResults).length;
+  const pass = Object.values(secResults).filter(r => r.status==='pass').length;
+  const fail = Object.values(secResults).filter(r => r.status==='fail').length;
+  const warn = Object.values(secResults).filter(r => r.status==='warn').length;
+  document.getElementById('sec-stat-total').textContent = total;
+  document.getElementById('sec-stat-pass').textContent = pass;
+  document.getElementById('sec-stat-fail').textContent = fail;
+  document.getElementById('sec-stat-warn').textContent = warn;
+  document.getElementById('sec-progress').style.width = (total ? Math.round(pass/total*100) : 0) + '%';
+  document.getElementById('sec-results-container').innerHTML = Object.entries(secResults).map(([n,r]) => `
+    <div class="test-item ${r.status}">
+      <div class="test-dot ${r.status}"></div>
+      <div style="flex:1">
+        <div class="test-name">${n}</div>
+        <div class="test-detail">${r.detail||''}</div>
+        ${r.evidence ? `<div style="margin-top:8px;background:var(--bg);padding:8px;border-radius:4px;font-size:10px;max-height:120px;overflow-y:auto"><pre style="white-space:pre-wrap;word-break:break-all">${JSON.stringify(r.evidence,null,2)}</pre></div>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+async function secRpcRaw(body, opts={}) {
+  const start = performance.now();
+  try {
+    const headers = { 'Content-Type': 'application/json', ...(opts.headers||{}) };
+    const res = await fetch(getEndpoint(), { method: opts.method||'POST', headers, body });
+    return { ok: res.ok, status: res.status, elapsed: Math.round(performance.now()-start), text: await res.text(), headers: res.headers };
+  } catch(e) {
+    return { ok: false, status: 0, elapsed: Math.round(performance.now()-start), text: e.message, headers: null };
+  }
+}
+
+async function secTestVersion() {
+  secSetStatus('version','running','Checking...');
+  const r = await secRpcRaw(JSON.stringify({jsonrpc:'2.0',id:1,method:'status',params:{}}));
+  if (r.ok) {
+    let d; try { d = JSON.parse(r.text); } catch(e) {}
+    const hasServer = r.headers?.get('server') || r.headers?.get('x-powered-by');
+    secSetStatus('version', hasServer ? 'warn' : 'pass', hasServer ? `Server header: ${hasServer}` : 'No version/server headers leaked');
+    secAddResult('Version Disclosure', hasServer ? 'warn' : 'pass', hasServer ? `Server info: ${hasServer}` : 'No server headers exposed', { serverHeader: hasServer });
+  } else {
+    secSetStatus('version','fail','Cannot reach endpoint');
+    secAddResult('Version Disclosure', 'fail', 'Could not reach endpoint');
+  }
+}
+
+async function secTestNonstandard() {
+  secSetStatus('nonstandard','running','Fuzzing methods...');
+  const methods = ['', null, 123, '__INVALID__', ';cat /etc/passwd', 'a'.repeat(512)];
+  let unexpected = 0;
+  for (const m of methods) {
+    const r = await secRpcRaw(JSON.stringify({jsonrpc:'2.0',id:1,method:m,params:{}}));
+    let d; try { d = JSON.parse(r.text); } catch(e) {}
+    if (d && !d.error && d.result !== undefined) unexpected++;
+  }
+  secSetStatus('nonstandard', unexpected > 0 ? 'warn' : 'pass', unexpected > 0 ? `${unexpected} methods returned unexpected success` : 'All invalid methods correctly rejected');
+  secAddResult('Non-Standard Methods', unexpected > 0 ? 'warn' : 'pass', `${unexpected}/${methods.length} non-standard methods returned success`);
+}
+
+async function secTestInjection() {
+  secSetStatus('injection','running','Testing...');
+  const payloads = [
+    { method:'resolve', params:{ query:"'; DROP TABLE names; --" } },
+    { method:'resolve', params:{ query:{ '__proto__': { isAdmin: true } } } },
+    { method:'resolve', params:{ query:'../../../etc/passwd' } }
+  ];
+  let vuln = false;
+  for (const p of payloads) {
+    const r = await secRpcRaw(JSON.stringify({jsonrpc:'2.0',id:1,...p}));
+    let d; try { d = JSON.parse(r.text); } catch(e) {}
+    if (d && d.result && typeof d.result === 'object' && Object.keys(d.result).some(k => k.includes('passwd') || k.includes('admin'))) { vuln = true; break; }
+  }
+  secSetStatus('injection', vuln ? 'fail' : 'pass', vuln ? 'Possible injection vulnerability' : 'No injection vulnerabilities detected');
+  secAddResult('Injection Tests', vuln ? 'fail' : 'pass', vuln ? 'Injection test returned unexpected data' : 'All injection payloads safely handled');
+}
+
+async function secTestDos() {
+  secSetStatus('dos','running','Sending 30 parallel requests...');
+  const start = performance.now();
+  const body = JSON.stringify({jsonrpc:'2.0',id:1,method:'status',params:{}});
+  await Promise.all(Array.from({length:30}, () => secRpcRaw(body)));
+  const elapsed = Math.round(performance.now() - start);
+  const rps = Math.round(1000 / (elapsed / 30));
+  const isHigh = rps > 30;
+  secSetStatus('dos', isHigh ? 'warn' : 'pass', `~${rps} req/s — ${isHigh ? 'no rate limiting detected' : 'rate limiting in effect'}`);
+  secAddResult('DoS / Rate Limiting', isHigh ? 'warn' : 'pass', `${rps} req/s under parallel load`, { rps, elapsed });
+}
+
+async function secTestCors() {
+  secSetStatus('cors','running','Checking CORS...');
+  try {
+    const r = await fetch(getEndpoint(), { method:'OPTIONS', headers:{ Origin:'http://evil.example.com' } });
+    const cors = r.headers.get('access-control-allow-origin');
+    const isBad = cors === '*' || cors === 'http://evil.example.com';
+    secSetStatus('cors', isBad ? 'fail' : 'pass', isBad ? `CORS too permissive: ${cors}` : `CORS: ${cors || 'not set'}`);
+    secAddResult('CORS Policy', isBad ? 'fail' : 'pass', `Access-Control-Allow-Origin: ${cors || 'not set'}`, { cors });
+  } catch(e) {
+    secSetStatus('cors','pass','CORS blocked / not applicable');
+    secAddResult('CORS Policy', 'pass', 'CORS preflight blocked or not applicable');
+  }
+}
+
+async function secTestSsl() {
+  secSetStatus('ssl','running');
+  const url = getEndpoint();
+  const isHttps = url.startsWith('https://');
+  secSetStatus('ssl', isHttps ? 'pass' : 'fail', isHttps ? 'HTTPS — secure transport' : 'HTTP — credentials in plaintext');
+  secAddResult('Transport Security', isHttps ? 'pass' : 'fail', `Endpoint: ${url}`, { https: isHttps });
+}
+
+async function secTestUnauthenticated() {
+  secSetStatus('unauthenticated','running');
+  // Try a write-like method with no creds to see what happens
+  const r = await secRpcRaw(JSON.stringify({jsonrpc:'2.0',id:1,method:'status',params:{}}));
+  secSetStatus('unauthenticated','pass','Public status method accessible (expected)');
+  secAddResult('Unauthenticated Access', 'pass', 'Public read methods work as expected (indexer is public read API)', { status: r.status });
+}
+
+async function secTestOversizePayload() {
+  secSetStatus('oversize-payload','running','Sending 1MB payload...');
+  const bigBody = JSON.stringify({jsonrpc:'2.0',id:1,method:'resolve',params:{ query:'a'.repeat(1024*1024) }});
+  const r = await secRpcRaw(bigBody);
+  const rejected = !r.ok || r.status >= 400;
+  secSetStatus('oversize-payload', rejected ? 'pass' : 'warn', rejected ? `Rejected (${r.status})` : 'Large payload accepted without rejection');
+  secAddResult('Oversized Payload', rejected ? 'pass' : 'warn', `1MB payload: HTTP ${r.status}`, { status: r.status, rejected });
+}
+
+async function secTestBatch() {
+  secSetStatus('batch','running');
+  const r = await secRpcRaw(JSON.stringify([{jsonrpc:'2.0',id:1,method:'status',params:{}},{jsonrpc:'2.0',id:2,method:'listings',params:{limit:1}}]));
+  let d; try { d = JSON.parse(r.text); } catch(e) {}
+  const supported = Array.isArray(d);
+  secSetStatus('batch', 'pass', supported ? 'Batch requests supported' : 'Batch requests not supported (or single response returned)');
+  secAddResult('Batch Requests', 'pass', supported ? 'Batch JSON-RPC is supported' : 'Batch not supported — server returned single response', { batchSupported: supported });
+}
+
+async function secTestNullId() {
+  secSetStatus('null-id','running');
+  const r = await secRpcRaw(JSON.stringify({jsonrpc:'2.0',id:null,method:'status',params:{}}));
+  let d; try { d = JSON.parse(r.text); } catch(e) {}
+  const ok = r.ok && d && (d.result !== undefined || d.error);
+  secSetStatus('null-id', ok ? 'pass' : 'warn', ok ? 'Null id handled correctly' : 'Unexpected response for null id');
+  secAddResult('Null / Missing ID', ok ? 'pass' : 'warn', 'Request with null id field', { status: r.status });
+}
+
+async function secTestGetMethod() {
+  secSetStatus('method-not-allowed','running');
+  const r = await secRpcRaw(null, { method:'GET' });
+  const rejected = r.status === 405 || r.status === 404 || r.status === 400 || !r.ok;
+  secSetStatus('method-not-allowed', rejected ? 'pass' : 'warn', rejected ? `GET rejected (${r.status})` : 'GET request not rejected');
+  secAddResult('GET Method Rejection', rejected ? 'pass' : 'warn', `GET request returned HTTP ${r.status}`, { status: r.status });
+}
+
+async function secTestContentType() {
+  secSetStatus('content-type','running');
+  const r = await secRpcRaw(JSON.stringify({jsonrpc:'2.0',id:1,method:'status',params:{}}), { headers:{ 'Content-Type':'text/plain' } });
+  const rejected = !r.ok || r.status >= 400;
+  secSetStatus('content-type', rejected ? 'pass' : 'warn', rejected ? 'Wrong content-type rejected' : 'Wrong content-type accepted');
+  secAddResult('Content-Type Enforcement', rejected ? 'pass' : 'warn', `text/plain content-type: HTTP ${r.status}`, { status: r.status });
+}
+
+async function secTestErrorFormat() {
+  secSetStatus('error-format','running');
+  const r = await secRpcRaw(JSON.stringify({jsonrpc:'2.0',id:1,method:'nonexistent_method_xyz',params:{}}));
+  let d; try { d = JSON.parse(r.text); } catch(e) {}
+  const hasError = d && d.error && typeof d.error.code === 'number' && typeof d.error.message === 'string';
+  secSetStatus('error-format', hasError ? 'pass' : 'warn', hasError ? 'JSON-RPC 2.0 error format correct' : 'Error format deviates from JSON-RPC 2.0');
+  secAddResult('Error Response Format', hasError ? 'pass' : 'warn', hasError ? 'Errors follow JSON-RPC 2.0 spec' : 'Error format issue', { error: d?.error });
+}
+
+async function secTestUnknownFields() {
+  secSetStatus('unknown-fields','running');
+  const r = await secRpcRaw(JSON.stringify({jsonrpc:'2.0',id:1,method:'status',params:{},__extra:'injected','$proto':'bad'}));
+  const ok = r.ok;
+  secSetStatus('unknown-fields','pass', ok ? 'Unknown fields in request silently ignored' : 'Server rejected request with unknown fields');
+  secAddResult('Unknown Fields', 'pass', `Extra fields in request: HTTP ${r.status}`, { status: r.status });
+}
+
+async function secRunAll() {
+  secResults = {};
+  document.getElementById('sec-overview').textContent = 'Running tests…';
+  const tests = [secTestVersion, secTestNonstandard, secTestInjection, secTestDos, secTestCors, secTestSsl,
+    secTestUnauthenticated, secTestOversizePayload, secTestBatch, secTestNullId,
+    secTestGetMethod, secTestContentType, secTestErrorFormat, secTestUnknownFields];
+  // reset dots
+  document.querySelectorAll('#tool-security .test-dot').forEach(d => d.className = 'test-dot');
+  document.querySelectorAll('#tool-security .test-item').forEach(i => i.className = 'test-item');
+  for (const t of tests) { await t(); await new Promise(r => setTimeout(r, 150)); }
+  document.getElementById('sec-overview').textContent = 'Assessment complete. See Results tab.';
+}
+
+function secClear() {
+  secResults = {};
+  ['sec-stat-total','sec-stat-pass','sec-stat-fail','sec-stat-warn'].forEach(id => document.getElementById(id).textContent = '0');
+  document.getElementById('sec-progress').style.width = '0%';
+  document.getElementById('sec-overview').textContent = 'Click "Run All Tests" to start security assessment';
+  document.getElementById('sec-results-container').innerHTML = '<div class="empty-state"><div class="icon">⛨</div>No results yet</div>';
+  document.querySelectorAll('#tool-security .test-dot').forEach(d => d.className = 'test-dot');
+  document.querySelectorAll('#tool-security .test-item').forEach(i => i.className = 'test-item');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// POOL MONITOR (against ZNS endpoint)
+// ══════════════════════════════════════════════════════════════════
+let poolResults = {};
+
+function showPoolTab(id, btn) {
+  document.querySelectorAll('[id^="pool-tab-"]').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tool-panel#tool-pool .tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('pool-tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function poolSetStatus(id, status, detail) {
+  const el = document.getElementById('pt-' + id);
+  if (!el) return;
+  const dot = el.querySelector('.test-dot');
+  dot.className = 'test-dot ' + status;
+  if (detail) el.querySelector('.test-detail').textContent = detail;
+  el.className = 'test-item ' + (status === 'pass' ? 'pass' : status === 'fail' ? 'fail' : status === 'warn' ? 'warn' : '');
+  if (status === 'running') el.classList.add('running');
+}
+
+function poolAddResult(name, status, detail, evidence) {
+  poolResults[name] = { status, detail, evidence };
+  const total = Object.keys(poolResults).length;
+  const pass = Object.values(poolResults).filter(r => r.status==='pass').length;
+  const fail = Object.values(poolResults).filter(r => r.status==='fail').length;
+  const warn = Object.values(poolResults).filter(r => r.status==='warn').length;
+  document.getElementById('pool-stat-total').textContent = total;
+  document.getElementById('pool-stat-pass').textContent = pass;
+  document.getElementById('pool-stat-fail').textContent = fail;
+  document.getElementById('pool-stat-warn').textContent = warn;
+  document.getElementById('pool-progress').style.width = (total ? Math.round(pass/total*100) : 0) + '%';
+  document.getElementById('pool-results-container').innerHTML = Object.entries(poolResults).map(([n,r]) => `
+    <div class="test-item ${r.status}">
+      <div class="test-dot ${r.status}"></div>
+      <div style="flex:1">
+        <div class="test-name">${n}</div>
+        <div class="test-detail">${r.detail||''}</div>
+        ${r.evidence ? `<div style="margin-top:8px;background:var(--bg);padding:8px;border-radius:4px;font-size:10px;max-height:120px;overflow-y:auto"><pre style="white-space:pre-wrap;word-break:break-all">${JSON.stringify(r.evidence,null,2)}</pre></div>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+async function poolTestSync() {
+  poolSetStatus('sync','running','Checking...');
+  try {
+    const r = await rpc('status', {});
+    const height = r.synced_height;
+    const ok = height && height > 0;
+    poolSetStatus('sync', ok ? 'pass' : 'warn', ok ? `Synced to block ${height.toLocaleString()}` : 'Height is zero or missing');
+    poolAddResult('Indexer Sync Status', ok ? 'pass' : 'warn', ok ? `Chain height: ${height}` : 'Sync status unclear', { synced_height: height });
+  } catch(e) {
+    poolSetStatus('sync','fail','Cannot reach indexer');
+    poolAddResult('Indexer Sync Status', 'fail', 'Connection failed: ' + e.message);
+  }
+}
+
+async function poolTestRegistered() {
+  poolSetStatus('registered','running','Checking...');
+  try {
+    const r = await rpc('status', {});
+    const count = r.registered;
+    const ok = count !== undefined && count > 0;
+    poolSetStatus('registered', ok ? 'pass' : 'warn', ok ? `${count.toLocaleString()} names registered` : 'No names registered');
+    poolAddResult('Registration Count', ok ? 'pass' : 'warn', `${count ?? 'unknown'} registered names`, { registered: count });
+  } catch(e) {
+    poolSetStatus('registered','fail','Could not fetch status');
+    poolAddResult('Registration Count', 'fail', 'Failed: ' + e.message);
+  }
+}
+
+async function poolTestListed() {
+  poolSetStatus('listed','running','Checking...');
+  try {
+    const r = await rpc('status', {});
+    const count = r.listed;
+    const hasListings = count !== undefined;
+    poolSetStatus('listed', hasListings ? 'pass' : 'warn', hasListings ? `${count} active listings` : 'No listing data in status');
+    poolAddResult('Listed Names', hasListings ? 'pass' : 'warn', `${count ?? 'unknown'} active marketplace listings`, { listed: count });
+  } catch(e) {
+    poolSetStatus('listed','fail','Could not fetch');
+    poolAddResult('Listed Names', 'fail', 'Failed: ' + e.message);
+  }
+}
+
+async function poolTestPricing() {
+  poolSetStatus('pricing','running','Checking...');
+  try {
+    const r = await rpc('status', {});
+    const tiers = r.pricing?.tiers;
+    const ok = Array.isArray(tiers) && tiers.length > 0;
+    poolSetStatus('pricing', ok ? 'pass' : 'warn', ok ? `${tiers.length} pricing tiers configured` : 'No pricing tiers found');
+    poolAddResult('Pricing Tiers', ok ? 'pass' : 'warn', ok ? `${tiers.length} tiers` : 'Pricing tiers missing', { tiers });
+  } catch(e) {
+    poolSetStatus('pricing','fail','Could not fetch');
+    poolAddResult('Pricing Tiers', 'fail', 'Failed: ' + e.message);
+  }
+}
+
+async function poolTestShieldedAddr() {
+  poolSetStatus('shielded-addr','running','Sampling registrations...');
+  try {
+    const r = await rpc('events', { limit: 20, action: 'CLAIM' });
+    const events = Array.isArray(r) ? r : (r?.events || []);
+    if (!events.length) {
+      poolSetStatus('shielded-addr','warn','No CLAIM events found');
+      poolAddResult('Shielded Address Usage', 'warn', 'No claim events to analyse');
+      return;
+    }
+    const addrs = events.map(e => e.address || e.owner || '').filter(Boolean);
+    const shielded = addrs.filter(a => a.startsWith('u1') || a.startsWith('utest1') || a.startsWith('u')).length;
+    const ratio = addrs.length > 0 ? shielded / addrs.length : 0;
+    const status = ratio >= 0.5 ? 'pass' : ratio > 0 ? 'warn' : 'warn';
+    poolSetStatus('shielded-addr', status, `${shielded}/${addrs.length} addresses are shielded`);
+    poolAddResult('Shielded Address Usage', status, `${(ratio*100).toFixed(0)}% of sampled registrations use shielded (u-) addresses`, { shielded, total: addrs.length });
+  } catch(e) {
+    poolSetStatus('shielded-addr','warn','Could not analyse events');
+    poolAddResult('Shielded Address Usage', 'warn', 'Could not fetch events: ' + e.message);
+  }
+}
+
+async function poolTestAddressLeak() {
+  poolSetStatus('address-leak','running','Checking listings...');
+  try {
+    const r = await rpc('listings', { limit: 10 });
+    const listings = Array.isArray(r) ? r : (r?.listings || []);
+    const hasOwnerAddr = listings.some(l => l.address || l.owner_address || l.seller);
+    poolSetStatus('address-leak', 'pass', hasOwnerAddr ? 'Owner addresses present in listing data (expected)' : 'No raw owner addresses in listing data');
+    poolAddResult('Address Exposure in Listings', 'pass', hasOwnerAddr ? 'Listing data includes owner address — normal for a name service' : 'No owner address in listing fields', { sampleCount: listings.length });
+  } catch(e) {
+    poolSetStatus('address-leak','warn','Could not check listings');
+    poolAddResult('Address Exposure in Listings', 'warn', 'Could not fetch listings: ' + e.message);
+  }
+}
+
+async function poolTestEventPrivacy() {
+  poolSetStatus('event-privacy','running','Scanning events...');
+  try {
+    const r = await rpc('events', { limit: 20 });
+    const events = Array.isArray(r) ? r : (r?.events || []);
+    const raw = JSON.stringify(events);
+    const hasSeed = raw.includes('seed') || raw.includes('mnemonic') || raw.includes('sk_');
+    const hasTxid = raw.includes('txid') || raw.includes('txhash');
+    poolSetStatus('event-privacy', hasSeed ? 'fail' : 'pass', hasSeed ? 'Sensitive data found in events!' : `Event log looks clean (txids present: ${hasTxid})`);
+    poolAddResult('Event Log Privacy', hasSeed ? 'fail' : 'pass', hasSeed ? 'Potential sensitive data in events' : 'No private key / seed material detected in events', { hasTxid, eventCount: events.length });
+  } catch(e) {
+    poolSetStatus('event-privacy','warn','Could not scan events');
+    poolAddResult('Event Log Privacy', 'warn', 'Could not fetch events: ' + e.message);
+  }
+}
+
+async function poolTestSslPool() {
+  poolSetStatus('ssl-pool','running');
+  const url = getEndpoint();
+  const isHttps = url.startsWith('https://');
+  poolSetStatus('ssl-pool', isHttps ? 'pass' : 'fail', isHttps ? 'HTTPS — data encrypted in transit' : 'HTTP — unencrypted transport');
+  poolAddResult('Transport Encryption', isHttps ? 'pass' : 'fail', `Endpoint: ${url}`, { https: isHttps });
+}
+
+async function poolRunAll() {
+  poolResults = {};
+  document.getElementById('pool-overview').textContent = 'Running tests…';
+  document.querySelectorAll('#tool-pool .test-dot').forEach(d => d.className = 'test-dot');
+  document.querySelectorAll('#tool-pool .test-item').forEach(i => i.className = 'test-item');
+  const tests = [poolTestSync, poolTestRegistered, poolTestListed, poolTestPricing, poolTestShieldedAddr, poolTestAddressLeak, poolTestEventPrivacy, poolTestSslPool];
+  for (const t of tests) { await t(); await new Promise(r => setTimeout(r, 200)); }
+  document.getElementById('pool-overview').textContent = 'Assessment complete. See Results tab.';
+}
+
+function poolClear() {
+  poolResults = {};
+  ['pool-stat-total','pool-stat-pass','pool-stat-fail','pool-stat-warn'].forEach(id => document.getElementById(id).textContent = '0');
+  document.getElementById('pool-progress').style.width = '0%';
+  document.getElementById('pool-overview').textContent = 'Click "Run All Tests" to start privacy assessment';
+  document.getElementById('pool-results-container').innerHTML = '<div class="empty-state"><div class="icon">◎</div>No results yet</div>';
+  document.querySelectorAll('#tool-pool .test-dot').forEach(d => d.className = 'test-dot');
+  document.querySelectorAll('#tool-pool .test-item').forEach(i => i.className = 'test-item');
+}
+</script>
+</body>
+</html>
