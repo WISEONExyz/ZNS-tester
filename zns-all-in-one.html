@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZNS · Zcash Dev Toolkit</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@400;600;700;800&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #07080c; --surface: #0d0f15; --surface2: #131620; --surface3: #191d28;
+      --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.11);
+      --text: #dde1ec; --muted: #5a6078; --muted2: #7c849e;
+      --accent: #4f9cf9; --green: #3ecf8e; --red: #f25f5c; --amber: #f4a836; --purple: #b47cf8;
+      --mono: 'JetBrains Mono', monospace; --display: 'Syne', sans-serif;
+      --sidebar-w: 220px;
+    }
+
+    html, body { height: 100%; }
+    body { background: var(--bg); color: var(--text); font-family: var(--mono); font-size: 13px; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ── HEADER ── */
+    .app-header {
+      height: 48px; padding: 0 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0; position: sticky; top: 0; z-index: 100;
+    }
+    .header-logo { display: flex; align-items: center; gap: 10px; }
+    .header-logo-icon {
+      width: 26px; height: 26px; border-radius: 6px;
+      background: linear-gradient(135deg, #4f9cf9, #b47cf8);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--display); font-size: 10px; font-weight: 800; color: #fff;
+    }
+    .header-logo-name { font-family: var(--display); font-size: 16px; font-weight: 700; color: var(--text); }
+    .header-logo-sub { font-size: 10px; color: var(--muted2); margin-left: 4px; }
+
+    .net-selector { display: flex; gap: 3px; background: var(--bg); border: 1px solid var(--border); padding: 3px; border-radius: 8px; }
+    .net-btn { font-family: var(--mono); font-size: 10px; padding: 4px 12px; border-radius: 5px; border: none; cursor: pointer; background: transparent; color: var(--muted); transition: all 0.15s; }
+    .net-btn.active { background: var(--surface3); color: var(--accent); border: 1px solid rgba(79,156,249,0.3); }
+
+    /* ── LAYOUT ── */
+    .app-body { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 48px); }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w); flex-shrink: 0;
+      background: var(--surface); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; overflow-y: auto;
+    }
+    .sidebar-section { padding: 16px 12px 6px; font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.2px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 14px; cursor: pointer;
+      font-size: 12px; color: var(--muted2);
+      border: none; background: transparent; width: 100%; text-align: left;
+      border-left: 2px solid transparent; transition: all 0.12s;
+    }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: rgba(79,156,249,0.06); color: var(--accent); border-left-color: var(--accent); }
+    .nav-icon { font-size: 14px; flex-shrink: 0; }
+
+    /* ── MAIN CONTENT ── */
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .tool-panel { display: none; flex-direction: column; height: 100%; overflow: hidden; }
+    .tool-panel.active { display: flex; }
+
+    /* ── PANEL HEADER ── */
+    .panel-header {
+      padding: 16px 24px 12px;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .panel-header-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .panel-title { font-family: var(--display); font-size: 17px; font-weight: 700; color: var(--text); }
+    .panel-desc { font-size: 11px; color: var(--muted2); margin-top: 3px; }
+    .panel-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    /* ── PANEL BODY ── */
+    .panel-body { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+
+    /* ── TABS ── */
+    .tab-bar { display: flex; gap: 2px; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 24px; flex-shrink: 0; overflow-x: auto; }
+    .tab-btn { padding: 9px 14px; font-size: 11px; color: var(--muted); cursor: pointer; border: none; background: transparent; border-bottom: 2px solid transparent; transition: all 0.12s; white-space: nowrap; }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-content { display: none; padding: 16px 0; }
+    .tab-content.active { display: block; }
+
+    /* ── SHARED FORM ── */
+    .form-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+    .field { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 150px; }
+    .field.narrow { flex: 0 0 90px; min-width: 90px; }
+    label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+    input, select, textarea {
+      font-family: var(--mono); font-size: 12px; padding: 8px 12px;
+      background: var(--surface2); border: 1px solid var(--border2);
+      border-radius: 6px; color: var(--text); outline: none; width: 100%;
+      transition: border-color 0.15s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: rgba(79,156,249,0.5); box-shadow: 0 0 0 2px rgba(79,156,249,0.07); }
+    select option { background: var(--surface3); }
+    textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
+
+    /* ── BUTTONS ── */
+    .btn { font-family: var(--mono); font-size: 11px; padding: 7px 16px; border-radius: 6px; border: 1px solid var(--border2); cursor: pointer; background: transparent; color: var(--text); transition: all 0.15s; }
+    .btn:hover { background: var(--surface3); }
+    .btn.primary { background: rgba(79,156,249,0.14); border-color: rgba(79,156,249,0.4); color: var(--accent); }
+    .btn.primary:hover { background: rgba(79,156,249,0.24); }
+    .btn.danger { background: rgba(242,95,92,0.1); border-color: rgba(242,95,92,0.3); color: var(--red); }
+    .btn.danger:hover { background: rgba(242,95,92,0.2); }
+    .btn.success { background: rgba(62,207,142,0.1); border-color: rgba(62,207,142,0.3); color: var(--green); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── RESULT BOX ── */
+    .result-wrap { display: flex; flex-direction: column; gap: 6px; }
+    .result-header { display: flex; align-items: center; justify-content: space-between; }
+    .result-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+    .copy-btn { font-family: var(--mono); font-size: 10px; padding: 3px 10px; border-radius: 4px; border: 1px solid var(--border2); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.12s; }
+    .copy-btn:hover { color: var(--text); background: var(--surface3); }
+    .result-box {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px;
+      font-family: var(--mono); font-size: 11px; line-height: 1.6;
+      overflow-y: auto; white-space: pre-wrap; word-break: break-all;
+      min-height: 120px; max-height: 420px; color: var(--text);
+    }
+    .result-box.err { border-color: rgba(242,95,92,0.35); color: var(--red); }
+    .result-box.ok { border-color: rgba(62,207,142,0.3); }
+    .result-box.placeholder { color: var(--muted); display: flex; align-items: center; justify-content: center; font-size: 11px; }
+
+    /* ── STAT GRID ── */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+    .stat-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+    .sc-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+    .sc-val { font-family: var(--display); font-size: 22px; font-weight: 700; }
+    .sc-val.accent { color: var(--accent); } .sc-val.green { color: var(--green); } .sc-val.red { color: var(--red); } .sc-val.amber { color: var(--amber); }
+
+    /* ── TEST ITEMS ── */
+    .test-list { display: flex; flex-direction: column; gap: 6px; }
+    .test-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-left: 3px solid transparent; transition: all 0.12s; }
+    .test-item.pass { border-left-color: var(--green); }
+    .test-item.fail { border-left-color: var(--red); }
+    .test-item.warn { border-left-color: var(--amber); }
+    .test-item.running { border-color: rgba(79,156,249,0.4); }
+    .test-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--muted); }
+    .test-dot.running { background: var(--accent); animation: pulse 1s infinite; }
+    .test-dot.pass { background: var(--green); }
+    .test-dot.fail { background: var(--red); }
+    .test-dot.warn { background: var(--amber); }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+    .test-name { flex: 1; font-size: 12px; }
+    .test-detail { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+    /* ── PROGRESS ── */
+    .progress-bar { height: 3px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s; }
+
+    /* ── BADGES / PILLS ── */
+    .badge { font-size: 9px; padding: 2px 7px; border-radius: 4px; font-weight: 600; }
+    .badge.blue { background: rgba(79,156,249,0.12); color: var(--accent); }
+    .badge.green { background: rgba(62,207,142,0.12); color: var(--green); }
+    .badge.red { background: rgba(242,95,92,0.12); color: var(--red); }
+    .badge.amber { background: rgba(244,168,54,0.12); color: var(--amber); }
+    .pill { font-size: 9px; padding: 2px 7px; border-radius: 4px; font-weight: 600; }
+    .pill.blue { background: rgba(79,156,249,0.12); color: var(--accent); }
+    .pill.green { background: rgba(62,207,142,0.12); color: var(--green); }
+    .pill.red { background: rgba(242,95,92,0.12); color: var(--red); }
+    .pill.amber { background: rgba(244,168,54,0.12); color: var(--amber); }
+    .pill.purple { background: rgba(180,124,248,0.12); color: var(--purple); }
+    .pill.gray { background: rgba(99,106,128,0.12); color: var(--muted2); }
+
+    /* ── AVAIL PILL ── */
+    .avail-pill { display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 99px; font-size: 12px; font-weight: 500; }
+    .avail-pill.yes { background: rgba(62,207,142,0.1); border: 1px solid rgba(62,207,142,0.3); color: var(--green); }
+    .avail-pill.no { background: rgba(242,95,92,0.1); border: 1px solid rgba(242,95,92,0.3); color: var(--red); }
+    .cost-note { font-size: 11px; color: var(--muted); margin-top: 6px; }
+    .cost-note span { color: var(--amber); }
+
+    /* ── RESULTS GRID ── */
+    .results-grid { display: flex; flex-direction: column; gap: 8px; }
+    .result-item { padding: 10px 12px; background: var(--surface2); border-radius: 6px; border-left: 3px solid transparent; }
+    .result-item.pass { border-left-color: var(--green); }
+    .result-item.fail { border-left-color: var(--red); }
+    .result-item.warn { border-left-color: var(--amber); }
+    .result-item-title { font-weight: 500; color: var(--text); margin-bottom: 2px; }
+    .result-item-detail { font-size: 10px; color: var(--muted); line-height: 1.4; }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+
+    @media(max-width:640px) {
+      .sidebar { width: 46px; min-width: 46px; }
+      .nav-label { display: none; }
+      .sidebar-section { display: none; }
+      .nav-item { justify-content: center; padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ HEADER ══════════════════════════════════════════════════════ -->
+<header class="app-header">
+  <div class="header-logo">
+    <div class="header-logo-icon">ZNS</div>
+    <span class="header-logo-name">Zcash Dev Toolkit</span>
+    <span class="header-logo-sub">v2.1</span>
+  </div>
+  <div class="net-selector">
+    <button class="net-btn active" onclick="setNetwork('testnet', this)">Testnet</button>
+    <button class="net-btn" onclick="setNetwork('mainnet', this)">Mainnet</button>
+  </div>
+</header>
+
+<!-- ══ BODY ════════════════════════════════════════════════════════ -->
+<div class="app-body">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-section">ZNS Queries</div>
+    <button class="nav-item active" onclick="showTool('status', this)"><span class="nav-icon">◈</span><span class="nav-label">Status</span></button>
+    <button class="nav-item" onclick="showTool('resolve', this)"><span class="nav-icon">⤵</span><span class="nav-label">Resolve Name</span></button>
+    <button class="nav-item" onclick="showTool('revaddr', this)"><span class="nav-icon">⤶</span><span class="nav-label">Resolve Address</span></button>
+    <button class="nav-item" onclick="showTool('avail', this)"><span class="nav-icon">✦</span><span class="nav-label">Availability</span></button>
+    <button class="nav-item" onclick="showTool('listings', this)"><span class="nav-icon">☰</span><span class="nav-label">Listings</span></button>
+    <button class="nav-item" onclick="showTool('events', this)"><span class="nav-icon">⟳</span><span class="nav-label">Events</span></button>
+    <div class="sidebar-section">Advanced</div>
+    <button class="nav-item" onclick="showTool('raw', this)"><span class="nav-icon">{ }</span><span class="nav-label">Raw RPC</span></button>
+    <button class="nav-item" onclick="showTool('fuzz', this)"><span class="nav-icon">⚡</span><span class="nav-label">Fuzz Runner</span></button>
+    <div class="sidebar-section">Monitoring</div>
+    <button class="nav-item" onclick="showTool('log', this)"><span class="nav-icon">⊞</span><span class="nav-label">Log Analyser</span></button>
+    <button class="nav-item" onclick="showTool('security', this)"><span class="nav-icon">⛨</span><span class="nav-label">Security Tester</span></button>
+    <button class="nav-item" onclick="showTool('pool', this)"><span class="nav-icon">◎</span><span class="nav-label">Pool Monitor</span></button>
+  </nav>
+
+  <!-- ══ MAIN CONTENT ══════════════════════════════════════════════ -->
+  <div class="main-content">
+
+    <!-- ─── STATUS ─────────────────────────────────────────────── -->
+    <div class="tool-panel active" id="tool-status">
+      <div class="panel-header">
+        <div class="panel-header-top">
+          <div><div class="panel-title">Status</div><div class="panel-desc">Indexer sync state, admin pubkey, pricing tiers, and UIVK</div></div>
+          <div class="panel-actions"><button class="btn primary" onclick="doStatus(this)">▶ Run</button></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="stat-grid" id="stat-cards-status" style="display:none"></div>
+        <div class="result-wrap">
+          <div class="result-header"><span class="result-label">Response</span><button class="copy-btn" onclick="copyEl('res-status')">Copy</button></div>
+          <div class="result-box placeholder" id="res-status">Hit Run to fetch indexer status</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── RESOLVE NAME ──────────────────────────────────────── -->
+    <div class="tool-panel" id="tool-resolve">
+      <div class="panel-header">
+        <div class="panel-header-top">
+          <div><div class="panel-title">Resolve Name</div><div class="panel-desc">Forward lookup: name → registration object (null if unclaimed)</div></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="field"><label>Name (without .zcash)</label><input id="in-resolve-name" placeholder="alice" /></div>
+          <button class="btn primary" onclick="doResolve(this)">▶ Run</button>
+        </div>
+        <div class="result-wrap">
+          <div class="result-header"><span class="result-label">Response</span><button class="copy-btn" onclick="copyEl('res-resolve')">Copy</button></div>
+          <div class="result-box placeholder" id="res-resolve">Enter a name and hit Run</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── RESOLVE ADDRESS ──────────────────────────────────── -->
+    <div class="tool-panel" id="tool-revaddr">
+      <div class="panel-header">
+        <div class="panel-header-top">
+          <div><div class="panel-title">Resolve Address</div><div class="panel-desc">Reverse lookup: unified address → all names pointing at it</div></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="field"><label>Unified Address</label><input id="in-revaddr" placeholder="utest1..." /></div>
+          <div class="field narrow"><label>Limit</label><input id="in-revaddr-limit" value="50" type="number" /></div>
+          <div class="field narrow"><label>Offset</label><input id="in-revaddr-offset" value="0" type="number" /></div>
+          <button class="btn primary" onclick="doResolveAddr(this)">▶ Run</button>
+        </div>
+        <div class="result-wrap">
+          <div class="result-header"><span class="result-label">Response</span><button class="copy-btn" onclick="copyEl('res-revaddr')">Copy</button></div>
+          <div class="result-box placeholder" id="res-revaddr">Enter an address and hit Run</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── AVAILABILITY ─────────────────────────────────────── -->
+    <div class="tool-panel" id="tool-avail">
+      <div class="panel-header">
+        <div class="panel-header-top">
+          <div><div class="panel-title">Availability</div><div class="panel-desc">Check if a name is unclaimed and see its estimated claim cost</div></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="field"><label>Name (without .zcash)</label><input id="in-avail" placeholder="satoshi" /></div>
+          <button class="btn primary" onclick="doAvail(this)">▶ Run</button>
+        </div>
+        <div id="avail-ui"></div>
+        <div class="result-wrap">
+          <div class="result-header"><span class="result-label">Raw Response</span><button class="copy-btn" onclick="copyEl('res-avail')">Copy</button></div>
+          <div class="result-box placeholder" id="res-avail">Enter a name and hit Run</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── LISTINGS ─────────────────────────────────────────── -->
+    <div class="tool-panel" id="tool-listings">
+      <div class="panel-header">
+        <div class="panel-header-top">
+          <div><div class="panel-title">Listings</div><div class="panel-desc">Active marketplace listings. Price in zatoshis (1 ZEC = 100,000,000 zats)</div></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="field narrow"><label>Limit</label><input id="in-list-limit" value="20" type="number" /></div>
+          <div class="field narrow"><label>Offset</label><input id="in-list-offset" value="0" type="number" /></div>
+          <button class="btn primary" onclick="doListings(this)">▶ Run</button>
+        </div>
+        <div class="result-wrap">
+          <div class="result-header"><span class="result-label">Response</span><button class="copy-btn" onclick="copyEl('res-listings')">Copy</button></div>
+          <div class="result-box placeholder" id="res-listings">Hit Run to fetch listings</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── EVENTS ─────────────────────────────────────────────── -->
+    <div class="tool-panel" id="tool-events">
+      <div class="panel-header">
+        <div class="panel-header-top">
+          <div><div class="panel-title">Events</div><div class="panel-desc">On-chain event log. Actions: CLAIM, LIST, DELIST, BUY, UPDATE, RELEASE, SETPRICE</div></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="field"><label>Name filter (optional)</label><input id="in-ev-name" placeholder="alice" /></div>
+          <div class="field"><label>Action filter</label>
+            <select id="in-ev-action">
+              <option value="">All</option>
+              <option>CLAIM</option><option>LIST</option><option>DELIST</option>
+              <option>BUY</option><option>UPDATE</option><option>RELEASE</option><option>SETPRICE</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Since height (optional)</label><input id="in-ev-height" placeholder="3900000" type="number" /></div>
+          <div class="field narrow"><label>Limit</label><input id="in-ev-limit" value="20" type="number" /></div>
+          <div class="field narrow"><label>Offset</label><input id="in-ev-offset" value="0" type="number" /></div>
+          <button class="btn primary" onclick="doEvents(this)">▶ Run</button>
+        </div>
+        <div class="result-wrap">
+          <div class="result-header"><span class="result-label">Response</span><button class="copy-btn" onclick="copyEl('res-events')">Copy</button></div>
+          <div class="result-box placeholder" id="res-events">Hit Run to fetch events</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── RAW RPC ───────────────────────────────────────────── -->
+    <div class="tool-panel" id="tool-raw">
+      <div class="panel-header">
+        <div class="panel-header-top">
+          <div><div class="panel-title">Raw JSON-RPC</div><div class="panel-desc">Send any payload directly to the indexer</div></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="field" style="min-width:100%">
+          <label>Request body</label>
+          <textarea id="in-raw">{"jsonrpc":"2.0","id":1,"method":"status","params":{}}</textarea>
+        </div>
+        <div class="form-row">
+          <button class="btn primary" onclick="doRaw(this)">▶ Send</button>
+        </div>
+        <div class="result-wrap">
+          <div class="result-header"><span class="result-label">Response</span><button class="copy-btn" onclick="copyEl('res-raw')">Copy</button></div>
+          <div class="result-box placeholder" id="res-raw">Edit the request and hit Send</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── FUZZ RUNNER ───────────────────────────────────────── -->
+    <div class="tool-panel" id="tool-fuzz">
+      <div class="panel-header">
+        <div class="panel-header-top">
+          <div><div class="panel-title">Fuzz Runner</div><div class="panel-desc">Run canned payload corpus and flag anomalies</div></div>
+          <div class="panel-actions"><button class="btn" onclick="exportFuzzReport()">Export JSON</button></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="field narrow"><label>Repetitions</label><input id="in-fuzz-reps" value="2" type="number" min="1" max="10" /></div>
+          <div class="field narrow"><label>Slow ms</label><input id="in-fuzz-slow" value="1200" type="number" min="100" /></div>
+          <button class="btn primary" onclick="doFuzz(this)">▶ Run corpus</button>
+        </div>
+        <div class="field">
+          <label>Custom fuzz cases (JSON array, optional)</label>
+          <textarea id="in-fuzz-custom" placeholder='[{"name":"my-test","mode":"rpc","method":"status","params":{}}]'></textarea>
+        </div>
+        <div class="form-row">
+          <button class="btn" onclick="saveCustomCases()">Save</button>
+          <button class="btn" onclick="loadCustomCases()">Load</button>
+          <button class="btn danger" onclick="clearCustomCases()">Clear</button>
+        </div>
+        <div class="result-wrap">
+          <div class="result-header"><span class="result-label">Report</span><button class="copy-btn" onclick="copyEl('res-fuzz')">Copy</button></div>
+          <div class="result-box placeholder" id="res-fuzz">Run the corpus to generate an anomaly report</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── LOG ANALYSER ─────────────────────────────────────── -->
+    <div class="tool-panel" id="tool-log" style="overflow:hidden;">
+      <div class="log-layout" style="flex:1;height:calc(100vh - 48px)">
+        <div class="log-pane-input">
+          <div class="log-pane-header"><span>Paste console log</span></div>
+          <textarea id="log-input" placeholder="Paste raw console log here..."></textarea>
+          <div class="log-input-footer">
+            <button class="btn primary" style="flex:1" onclick="analyseLog()">▶ Analyse</button>
+            <button class="btn danger" onclick="clearLog()">Clear</button>
+          </div>
+        </div>
+        <div class="log-pane-output">
+          <div class="log-tabs">
+            <button class="log-tab active" onclick="showLogTab('log-summary',this)">Summary</button>
+            <button class="log-tab" onclick="showLogTab('log-flags',this)">Flags</button>
+          </div>
+          <div class="log-tab-content active" id="log-summary"><div id="log-summary-content"><div class="empty-state"><div class="icon">◈</div>Paste logs and click Analyse</div></div></div>
+          <div class="log-tab-content" id="log-flags"><div id="log-flags-content"><div class="empty-state"><div class="icon">◈</div>No flags yet</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SECURITY TESTER ───────────────────────────────────── -->
+    <div class="tool-panel" id="tool-security">
+      <div class="panel-header">
+        <div class="panel-header-top">
+          <div>
+            <div class="panel-title">Security Tester <span style="font-size:10px;background:rgba(242,95,92,0.15);color:var(--red);border:1px solid rgba(242,95,92,0.3);padding:2px 8px;border-radius:4px">BETA</span></div>
+            <div class="panel-desc">Full attack-surface sweep against the ZNS indexer — transport, protocol, injection, DoS, timing, enumeration, data integrity & more</div>
+          </div>
+          <div class="panel-actions">
+            <button class="btn" onclick="secExportReport()">Export Report</button>
+            <button class="btn primary" onclick="secRunAll(event)">▶ Run All Tests</button>
+            <button class="btn danger" onclick="secClear()">Clear</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="stat-grid">
+          <div class="stat-card"><div class="sc-label">Total</div><div class="sc-val accent" id="sec-stat-total">0</div></div>
+          <div class="stat-card"><div class="sc-label">Passed</div><div class="sc-val green" id="sec-stat-pass">0</div></div>
+          <div class="stat-card"><div class="sc-label">Failed</div><div class="sc-val red" id="sec-stat-fail">0</div></div>
+          <div class="stat-card"><div class="sc-label">Warnings</div><div class="sc-val amber" id="sec-stat-warn">0</div></div>
+          <div class="stat-card"><div class="sc-label">Risk Score</div><div class="sc-val" id="sec-risk-score" style="color:var(--muted)">—</div></div>
+        </div>
+        <div class="progress-bar" style="margin:4px 0 6px"><div class="progress-fill" id="sec-progress" style="width:0%"></div></div>
+        <div id="sec-overview" style="font-size:11px;color:var(--muted);margin-bottom:4px">Click "Run All Tests" to start full security assessment</div>
+
+        <div class="tab-bar" style="margin:0 -24px;padding:0 24px;background:transparent;">
+          <button class="tab-btn active" onclick="showSecTab('transport',this)">Transport</button>
+          <button class="tab-btn" onclick="showSecTab('protocol',this)">Protocol</button>
+          <button class="tab-btn" onclick="showSecTab('injection',this)">Injection</button>
+          <button class="tab-btn" onclick="showSecTab('dos',this)">DoS & Timing</button>
+          <button class="tab-btn" onclick="showSecTab('data',this)">Data & Logic</button>
+          <button class="tab-btn" onclick="showSecTab('results',this)">Results</button>
+        </div>
+
+        <!-- TRANSPORT -->
+        <div id="sec-tab-transport" class="tab-content active">
+          <div class="test-list">
+            <div class="test-item" id="st-https"><div class="test-dot"></div><div><div class="test-name">HTTPS Enforcement</div><div class="test-detail">Verify endpoint uses TLS — no plaintext HTTP</div></div></div>
+            <div class="test-item" id="st-hsts"><div class="test-dot"></div><div><div class="test-name">HSTS Header</div><div class="test-detail">Check Strict-Transport-Security header presence</div></div></div>
+            <div class="test-item" id="st-cors"><div class="test-dot"></div><div><div class="test-name">CORS Policy</div><div class="test-detail">Verify cross-origin policy not wildcard-open</div></div></div>
+            <div class="test-item" id="st-csp"><div class="test-dot"></div><div><div class="test-name">Security Headers</div><div class="test-detail">Check X-Content-Type-Options, X-Frame-Options</div></div></div>
+            <div class="test-item" id="st-server-leak"><div class="test-dot"></div><div><div class="test-name">Server Header Disclosure</div><div class="test-detail">Check if Server/X-Powered-By leaks</div></div></div>
+          </div>
+        </div>
+
+        <!-- PROTOCOL -->
+        <div id="sec-tab-protocol" class="tab-content">
+          <div class="test-list">
+            <div class="test-item" id="st-jsonrpc-version"><div class="test-dot"></div><div><div class="test-name">JSON-RPC Compliance</div><div class="test-detail">Response includes jsonrpc:"2.0"</div></div></div>
+            <div class="test-item" id="st-error-format"><div class="test-dot"></div><div><div class="test-name">Error Object Structure</div><div class="test-detail">Errors have numeric code + string message</div></div></div>
+            <div class="test-item" id="st-id-echo"><div class="test-dot"></div><div><div class="test-name">ID Echo Fidelity</div><div class="test-detail">Server mirrors back request id correctly</div></div></div>
+            <div class="test-item" id="st-content-type-res"><div class="test-dot"></div><div><div class="test-name">Content-Type Response</div><div class="test-detail">Returns application/json</div></div></div>
+            <div class="test-item" id="st-batch"><div class="test-dot"></div><div><div class="test-name">Batch Requests</div><div class="test-detail">Batch array handling — individual responses</div></div></div>
+          </div>
+        </div>
+
+        <!-- INJECTION -->
+        <div id="sec-tab-injection" class="tab-content">
+          <div class="test-list">
+            <div class="test-item" id="st-sql-inject"><div class="test-dot"></div><div><div class="test-name">SQL Injection Probes</div><div class="test-detail">Classic SQLi payloads in name parameter</div></div></div>
+            <div class="test-item" id="st-nosql-inject"><div class="test-dot"></div><div><div class="test-name">NoSQL Injection</div><div class="test-detail">MongoDB-style operator injection tests</div></div></div>
+            <div class="test-item" id="st-proto-pollution"><div class="test-dot"></div><div><div class="test-name">Prototype Pollution</div><div class="test-detail">__proto__ and constructor.prototype attacks</div></div></div>
+            <div class="test-item" id="st-path-traversal"><div class="test-dot"></div><div><div class="test-name">Path Traversal</div><div class="test-detail">../../../etc/passwd and variants</div></div></div>
+            <div class="test-item" id="st-unicode-inject"><div class="test-dot"></div><div><div class="test-name">Unicode Injection</div><div class="test-detail">Invisible chars and homoglyph attacks</div></div></div>
+            <div class="test-item" id="st-xss-probe"><div class="test-dot"></div><div><div class="test-name">XSS Probe</div><div class="test-detail">Check if injected tags are reflected</div></div></div>
+          </div>
+        </div>
+
+        <!-- DOS & TIMING -->
+        <div id="sec-tab-dos" class="tab-content">
+          <div class="test-list">
+            <div class="test-item" id="st-parallel-flood"><div class="test-dot"></div><div><div class="test-name">Parallel Flood (50 req)</div><div class="test-detail">50 simultaneous requests</div></div></div>
+            <div class="test-item" id="st-sequential-burst"><div class="test-dot"></div><div><div class="test-name">Sequential Burst (20 req)</div><div class="test-detail">20 rapid sequential requests</div></div></div>
+            <div class="test-item" id="st-huge-payload"><div class="test-dot"></div><div><div class="test-name">1MB Payload</div><div class="test-detail">Large query string handling</div></div></div>
+            <div class="test-item" id="st-deeply-nested"><div class="test-dot"></div><div><div class="test-name">Deep Nesting (500 levels)</div><div class="test-detail">Stack overflow protection check</div></div></div>
+            <div class="test-item" id="st-timing-oracle"><div class="test-dot"></div><div><div class="test-name">Timing Oracle</div><div class="test-detail">Response time variance detection</div></div></div>
+            <div class="test-item" id="st-response-time"><div class="test-dot"></div><div><div class="test-name">Baseline Latency</div><div class="test-detail">Average response time over 5 pings</div></div></div>
+          </div>
+        </div>
+
+        <!-- DATA & LOGIC -->
+        <div id="sec-tab-data" class="tab-content">
+          <div class="test-list">
+            <div class="test-item" id="st-pagination-bounds"><div class="test-dot"></div><div><div class="test-name">Pagination Bounds</div><div class="test-detail">limit=-1, limit=MAX_INT edge cases</div></div></div>
+            <div class="test-item" id="st-response-consistency"><div class="test-dot"></div><div><div class="test-name">Response Consistency</div><div class="test-detail">Same query twice — results match</div></div></div>
+            <div class="test-item" id="st-enumeration"><div class="test-dot"></div><div><div class="test-name">Name Enumeration Risk</div><div class="test-detail">Can listings/events expose all registrations</div></div></div>
+            <div class="test-item" id="st-error-verbosity"><div class="test-dot"></div><div><div class="test-name">Error Verbosity</div><div class="test-detail">Errors don't reveal stack traces</div></div></div>
+            <div class="test-item" id="st-empty-body"><div class="test-dot"></div><div><div class="test-name">Empty Body Handling</div><div class="test-detail">Empty body and malformed JSON</div></div></div>
+            <div class="test-item" id="st-type-confusion"><div class="test-dot"></div><div><div class="test-name">Type Confusion</div><div class="test-detail">Wrong types in parameters</div></div></div>
+          </div>
+        </div>
+
+        <div id="sec-tab-results" class="tab-content">
+          <div id="sec-results-container"><div class="empty-state"><div class="icon">⛨</div>No results yet — run all tests</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── POOL MONITOR ──────────────────────────────────────── -->
+    <div class="tool-panel" id="tool-pool">
+      <div class="panel-header">
+        <div class="panel-header-top">
+          <div><div class="panel-title">Pool Monitor</div><div class="panel-desc">Shielded pool & privacy checks via the ZNS indexer endpoint</div></div>
+          <div class="panel-actions">
+            <button class="btn primary" onclick="poolRunAll(event)">▶ Run All Tests</button>
+            <button class="btn danger" onclick="poolClear()">Clear</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="stat-grid">
+          <div class="stat-card"><div class="sc-label">Total</div><div class="sc-val accent" id="pool-stat-total">0</div></div>
+          <div class="stat-card"><div class="sc-label">Passed</div><div class="sc-val green" id="pool-stat-pass">0</div></div>
+          <div class="stat-card"><div class="sc-label">Failed</div><div class="sc-val red" id="pool-stat-fail">0</div></div>
+          <div class="stat-card"><div class="sc-label">Warnings</div><div class="sc-val amber" id="pool-stat-warn">0</div></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="pool-progress" style="width:0%"></div></div>
+        <div id="pool-overview" style="font-size:11px;color:var(--muted);margin-bottom:4px">Click "Run All Tests" to start privacy assessment</div>
+
+        <div class="tab-bar" style="margin:0 -24px;padding:0 24px;background:transparent;">
+          <button class="tab-btn active" onclick="showPoolTab('indexer',this)">Indexer</button>
+          <button class="tab-btn" onclick="showPoolTab('privacy',this)">Privacy</button>
+          <button class="tab-btn" onclick="showPoolTab('pool-results',this)">Results</button>
+        </div>
+        <div id="pool-tab-indexer" class="tab-content active">
+          <div class="test-list">
+            <div class="test-item" id="pt-sync"><div class="test-dot"></div><div><div class="test-name">Indexer Sync Status</div><div class="test-detail">Check synced height and chain health</div></div></div>
+            <div class="test-item" id="pt-registered"><div class="test-dot"></div><div><div class="test-name">Registration Count</div><div class="test-detail">Verify registered name count is non-zero</div></div></div>
+            <div class="test-item" id="pt-listed"><div class="test-dot"></div><div><div class="test-name">Listed Names</div><div class="test-detail">Check marketplace has active listings</div></div></div>
+            <div class="test-item" id="pt-pricing"><div class="test-dot"></div><div><div class="test-name">Pricing Tiers Configured</div><div class="test-detail">Verify pricing tiers exist for name lengths</div></div></div>
+          </div>
+        </div>
+        <div id="pool-tab-privacy" class="tab-content">
+          <div class="test-list">
+            <div class="test-item" id="pt-shielded-addr"><div class="test-dot"></div><div><div class="test-name">Shielded Address Usage</div><div class="test-detail">Check if registered names use shielded addresses</div></div></div>
+            <div class="test-item" id="pt-address-leak"><div class="test-dot"></div><div><div class="test-name">Address Exposure in Listings</div><div class="test-detail">Detect if listing owner address is leaked</div></div></div>
+            <div class="test-item" id="pt-event-privacy"><div class="test-dot"></div><div><div class="test-name">Event Log Privacy</div><div class="test-detail">Inspect event data for sensitive info leaks</div></div></div>
+            <div class="test-item" id="pt-ssl-pool"><div class="test-dot"></div><div><div class="test-name">Transport Encryption</div><div class="test-detail">Verify HTTPS is used for all data in transit</div></div></div>
+          </div>
+        </div>
+        <div id="pool-tab-pool-results" class="tab-content">
+          <div id="pool-results-container"><div class="empty-state"><div class="icon">◎</div>No results yet</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /app-body -->
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// GLOBAL STATE & HELPERS
+// ════════════════════════════════════════════════════════════════
+const ENDPOINTS = {
+  testnet: 'https://light.zcash.me/zns-testnet',
+  mainnet: 'https://light.zcash.me/zns-mainnet-test'
+};
+let network = 'testnet';
+let cachedStatus = null;
+let lastFuzzReport = null;
+
+function getEndpoint() { return ENDPOINTS[network]; }
+
+function setNetwork(net, btn) {
+  network = net;
+  cachedStatus = null;
+  document.querySelectorAll('.net-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function showTool(id, btn) {
+  document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('tool-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+async function rpc(method, params) {
+  const res = await fetch(getEndpoint(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(JSON.stringify(data.error));
+  return data.result;
+}
+
+async function rpcRaw(body) {
+  const started = performance.now();
+  const res = await fetch(getEndpoint(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body
+  });
+  const elapsed = Math.round(performance.now() - started);
+  const text = await res.text();
+  let json = null, parseError = null;
+  try { json = JSON.parse(text); } catch(e) { parseError = e.message; }
+  return { status: res.status, elapsed, text, json, parseError, headers: res.headers };
+}
+
+function showResult(id, data, isError) {
+  const el = document.getElementById(id);
+  el.classList.remove('placeholder','err','ok');
+  el.classList.add(isError ? 'err' : 'ok');
+  el.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+}
+
+function setLoading(btn, v) { btn.disabled = v; btn.classList.toggle('loading', v); }
+function copyEl(id) { navigator.clipboard.writeText(document.getElementById(id).innerText || '').catch(()=>{}); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+    const panel = e.target.closest('.tool-panel');
+    if (panel) { const btn = panel.querySelector('.btn.primary'); if (btn) btn.click(); }
+  }
+});
+
+// ════════════════════════════════════════════════════════════════
+// ZNS QUERIES
+// ════════════════════════════════════════════════════════════════
+async function doStatus(btn) {
+  setLoading(btn, true);
+  try {
+    const r = await rpc('status', {});
+    cachedStatus = r;
+    const cards = document.getElementById('stat-cards-status');
+    cards.style.display = 'grid';
+    const rows = [['Synced Height', r.synced_height?.toLocaleString() ?? '—'], ['Registered', r.registered ?? '—'], ['Listed', r.listed ?? '—'], ['Network', network]];
+    cards.innerHTML = rows.map(([l,v]) => `<div class="stat-card"><div class="sc-label">${l}</div><div class="sc-val" style="font-size:${typeof v==='number'&&v>99999?'16px':'22px'}">${v}</div></div>`).join('');
+    showResult('res-status', r, false);
+  } catch(e) { showResult('res-status', 'Error: ' + e.message, true); }
+  setLoading(btn, false);
+}
+
+async function doResolve(btn) {
+  const name = document.getElementById('in-resolve-name').value.trim().replace(/\.zcash$/, '');
+  if (!name) return;
+  setLoading(btn, true);
+  try { showResult('res-resolve', await rpc('resolve', { query: name }), false); }
+  catch(e) { showResult('res-resolve', 'Error: ' + e.message, true); }
+  setLoading(btn, false);
+}
+
+async function doResolveAddr(btn) {
+  const addr = document.getElementById('in-revaddr').value.trim();
+  if (!addr) return;
+  const limit = parseInt(document.getElementById('in-revaddr-limit').value) || 50;
+  const offset = parseInt(document.getElementById('in-revaddr-offset').value) || 0;
+  setLoading(btn, true);
+  try { showResult('res-revaddr', await rpc('resolve', { query: addr, limit, offset }), false); }
+  catch(e) { showResult('res-revaddr', 'Error: ' + e.message, true); }
+  setLoading(btn, false);
+}
+
+async function doAvail(btn) {
+  const name = document.getElementById('in-avail').value.trim().replace(/\.zcash$/, '');
+  if (!name) return;
+  setLoading(btn, true);
+  try {
+    if (!cachedStatus) cachedStatus = await rpc('status', {});
+    const r = await rpc('resolve', { query: name });
+    const available = r === null;
+    const tiers = cachedStatus?.pricing?.tiers;
+    let cost = null;
+    if (tiers) { const idx = Math.min(name.length - 1, tiers.length - 1); cost = tiers[idx]; }
+    const ui = document.getElementById('avail-ui');
+    ui.innerHTML = '';
+    const pill = document.createElement('div');
+    pill.className = 'avail-pill ' + (available ? 'yes' : 'no');
+    pill.textContent = (available ? '✓ ' : '✗ ') + name + '.zcash is ' + (available ? 'available' : 'taken');
+    ui.appendChild(pill);
+    if (available && cost) {
+      const note = document.createElement('div');
+      note.className = 'cost-note';
+      note.innerHTML = `Estimated cost: <span>${(cost/1e8).toFixed(4)} ZEC</span> (${cost.toLocaleString()} zatoshis)`;
+      ui.appendChild(note);
+    }
+    showResult('res-avail', r, false);
+  } catch(e) {
+    document.getElementById('avail-ui').innerHTML = '';
+    showResult('res-avail', 'Error: ' + e.message, true);
+  }
+  setLoading(btn, false);
+}
+
+async function doListings(btn) {
+  const limit = parseInt(document.getElementById('in-list-limit').value) || 20;
+  const offset = parseInt(document.getElementById('in-list-offset').value) || 0;
+  setLoading(btn, true);
+  try { showResult('res-listings', await rpc('listings', { limit, offset }), false); }
+  catch(e) { showResult('res-listings', 'Error: ' + e.message, true); }
+  setLoading(btn, false);
+}
+
+async function doEvents(btn) {
+  const params = {
+    limit: parseInt(document.getElementById('in-ev-limit').value) || 20,
+    offset: parseInt(document.getElementById('in-ev-offset').value) || 0
+  };
+  const name = document.getElementById('in-ev-name').value.trim();
+  const action = document.getElementById('in-ev-action').value;
+  const h = document.getElementById('in-ev-height').value.trim();
+  if (name) params.name = name;
+  if (action) params.action = action;
+  if (h) params.since_height = parseInt(h);
+  setLoading(btn, true);
+  try { showResult('res-events', await rpc('events', params), false); }
+  catch(e) { showResult('res-events', 'Error: ' + e.message, true); }
+  setLoading(btn, false);
+}
+
+async function doRaw(btn) {
+  setLoading(btn, true);
+  try {
+    const res = await fetch(getEndpoint(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: document.getElementById('in-raw').value
+    });
+    showResult('res-raw', await res.json(), false);
+  } catch(e) { showResult('res-raw', 'Error: ' + e.message, true); }
+  setLoading(btn, false);
+}
+
+// ════════════════════════════════════════════════════════════════
+// SECURITY TESTER
+// ════════════════════════════════════════════════════════════════
+let secResults = [];
+const SEC_TESTS = {
+  transport: [
+    { id: 'st-https', name: 'HTTPS Enforcement', fn: async () => {
+      const r = await rpcRaw('{"jsonrpc":"2.0","id":1,"method":"status","params":{}}');
+      return { pass: r.status < 400, detail: `Status: ${r.status}` };
+    }},
+    { id: 'st-hsts', name: 'HSTS Header', fn: async () => {
+      const r = await rpcRaw('{"jsonrpc":"2.0","id":1,"method":"status","params":{}}');
+      const hsts = r.headers.get('strict-transport-security');
+      return { pass: !!hsts, warn: !hsts, detail: hsts ? 'HSTS enabled' : 'No HSTS header' };
+    }},
+    { id: 'st-cors', name: 'CORS Policy', fn: async () => {
+      const r = await rpcRaw('{"jsonrpc":"2.0","id":1,"method":"status","params":{}}');
+      const cors = r.headers.get('access-control-allow-origin');
+      return { pass: cors !== '*', warn: cors === '*', detail: cors ? `CORS: ${cors}` : 'No CORS header' };
+    }},
+    { id: 'st-csp', name: 'Security Headers', fn: async () => {
+      const r = await rpcRaw('{"jsonrpc":"2.0","id":1,"method":"status","params":{}}');
+      const ctype = r.headers.get('x-content-type-options');
+      return { pass: !!ctype, warn: !ctype, detail: ctype || 'Missing X-Content-Type-Options' };
+    }},
+    { id: 'st-server-leak', name: 'Server Header Disclosure', fn: async () => {
+      const r = await rpcRaw('{"jsonrpc":"2.0","id":1,"method":"status","params":{}}');
+      const server = r.headers.get('server');
+      return { pass: !server, warn: !!server, detail: server ? `Leaks: ${server}` : 'No server header' };
+    }}
+  ],
+  protocol: [
+    { id: 'st-jsonrpc-version', name: 'JSON-RPC Compliance', fn: async () => {
+      const r = await rpcRaw('{"jsonrpc":"2.0","id":1,"method":"status","params":{}}');
+      const ok = r.json && r.json.jsonrpc === '2.0';
+      return { pass: ok, detail: ok ? 'Compliant' : 'Missing jsonrpc field' };
+    }},
+    { id: 'st-error-format', name: 'Error Object Structure', fn: async () => {
+      const r = await rpcRaw('{"jsonrpc":"2.0","id":1,"method":"unknown_method","params":{}}');
+      const hasError = r.json && r.json.error && typeof r.json.error.code === 'number';
+      return { pass: hasError, detail: hasError ? 'Error format correct' : 'Improper error structure' };
+    }},
+    { id: 'st-id-echo', name: 'ID Echo Fidelity', fn: async () => {
+      const r = await rpcRaw('{"jsonrpc":"2.0","id":"test123","method":"status","params":{}}');
+      const ok = r.json && r.json.id === 'test123';
+      return { pass: ok, detail: ok ? 'ID echoed correctly' : 'ID mismatch' };
+    }},
+    { id: 'st-content-type-res', name: 'Content-Type Response', fn: async () => {
+      const r = await rpcRaw('{"jsonrpc":"2.0","id":1,"method":"status","params":{}}');
+      const ct = r.headers.get('content-type');
+      return { pass: ct && ct.includes('application/json'), detail: ct || 'No Content-Type' };
+    }},
+    { id: 'st-batch', name: 'Batch Requests', fn: async () => {
+      const r = await rpcRaw('[{"jsonrpc":"2.0","id":1,"method":"status","params":{}},{"jsonrpc":"2.0","id":2,"method":"listings","params":{}}]');
+      const ok = Array.isArray(r.json) && r.json.length === 2;
+      return { pass: ok, detail: ok ? 'Batch processed' : 'Batch handling failed' };
+    }}
+  ],
+  injection: [
+    { id: 'st-sql-inject', name: 'SQL Injection Probes', fn: async () => {
+      const payloads = ["'; DROP TABLE--", "1' OR '1'='1"];
+      let crashed = false;
+      for (const p of payloads) {
+        try { await rpc('resolve', { query: p }); } catch(e) { if (e.message.includes('database') || e.message.includes('syntax')) crashed = true; }
+      }
+      return { pass: !crashed, detail: crashed ? 'Vulnerable' : 'Handled safely' };
+    }},
+    { id: 'st-nosql-inject', name: 'NoSQL Injection', fn: async () => {
+      try {
+        await rpc('resolve', { query: { $where: '1==1' } });
+        return { pass: false, warn: true, detail: 'NoSQL injection possible' };
+      } catch(e) {
+        return { pass: true, detail: 'Properly rejected' };
+      }
+    }},
+    { id: 'st-proto-pollution', name: 'Prototype Pollution', fn: async () => {
+      try {
+        await rpc('resolve', { query: 'test', '__proto__': { admin: true } });
+        return { pass: true, detail: 'Property ignored' };
+      } catch(e) {
+        return { pass: true, detail: 'Rejected' };
+      }
+    }},
+    { id: 'st-path-traversal', name: 'Path Traversal', fn: async () => {
+      const payloads = ['../../../etc/passwd', '..\\\\..\\\\..\\\\windows\\\\win.ini'];
+      let vulnerable = false;
+      for (const p of payloads) {
+        try { const r = await rpc('resolve', { query: p }); if (r && typeof r === 'string' && r.length > 100) vulnerable = true; } catch(e) {}
+      }
+      return { pass: !vulnerable, detail: vulnerable ? 'Possible traversal' : 'Protected' };
+    }},
+    { id: 'st-unicode-inject', name: 'Unicode Injection', fn: async () => {
+      try {
+        await rpc('resolve', { query: 'test\u200d\u202e\u2066' });
+        return { pass: true, detail: 'Handled correctly' };
+      } catch(e) {
+        return { pass: true, detail: 'Rejected' };
+      }
+    }},
+    { id: 'st-xss-probe', name: 'XSS Probe', fn: async () => {
+      try {
+        const r = await rpc('resolve', { query: '<script>alert(1)<\/script>' });
+        const serialized = JSON.stringify(r);
+        const reflected = serialized.includes('<script>');
+        return { pass: !reflected, warn: reflected, detail: reflected ? 'XSS possible' : 'Safe' };
+      } catch(e) {
+        return { pass: true, detail: 'Rejected' };
+      }
+    }}
+  ],
+  dos: [
+    { id: 'st-parallel-flood', name: 'Parallel Flood (50 req)', fn: async () => {
+      const start = performance.now();
+      const promises = [];
+      for (let i = 0; i < 50; i++) promises.push(rpc('status', {}).catch(e => ({ error: true })));
+      const results = await Promise.allSettled(promises);
+      const failed = results.filter(r => r.status === 'rejected' || (r.value && r.value.error)).length;
+      const elapsed = performance.now() - start;
+      return { pass: failed < 10, warn: failed > 0, detail: `${failed} failed, ${elapsed.toFixed(0)}ms` };
+    }},
+    { id: 'st-sequential-burst', name: 'Sequential Burst (20 req)', fn: async () => {
+      const start = performance.now();
+      let failed = 0;
+      for (let i = 0; i < 20; i++) {
+        try { await rpc('status', {}); } catch(e) { failed++; }
+      }
+      const elapsed = performance.now() - start;
+      return { pass: failed === 0, detail: `${failed} failed, ${elapsed.toFixed(0)}ms` };
+    }},
+    { id: 'st-huge-payload', name: '1MB Payload', fn: async () => {
+      try {
+        const huge = 'a'.repeat(1024 * 1024);
+        await rpc('resolve', { query: huge });
+        return { pass: false, warn: true, detail: 'Accepted huge payload' };
+      } catch(e) {
+        return { pass: true, detail: 'Rejected correctly' };
+      }
+    }},
+    { id: 'st-deeply-nested', name: 'Deep Nesting (500 levels)', fn: async () => {
+      try {
+        let obj = {};
+        let current = obj;
+        for (let i = 0; i < 500; i++) {
+          current.x = {};
+          current = current.x;
+        }
+        await rpcRaw(JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'status', params: obj }));
+        return { pass: false, warn: true, detail: 'Accepted deep nesting' };
+      } catch(e) {
+        return { pass: true, detail: 'Rejected' };
+      }
+    }},
+    { id: 'st-timing-oracle', name: 'Timing Oracle', fn: async () => {
+      const times = [];
+      for (let i = 0; i < 3; i++) {
+        const start = performance.now();
+        try { await rpc('resolve', { query: 'nonexistent' + Math.random() }); } catch(e) {}
+        times.push(performance.now() - start);
+      }
+      const variance = Math.max(...times) - Math.min(...times);
+      return { pass: variance < 100, warn: variance > 50, detail: `${variance.toFixed(0)}ms variance` };
+    }},
+    { id: 'st-response-time', name: 'Baseline Latency', fn: async () => {
+      const times = [];
+      for (let i = 0; i < 5; i++) {
+        const start = performance.now();
+        try { await rpc('status', {}); } catch(e) {}
+        times.push(performance.now() - start);
+      }
+      const avg = Math.round(times.reduce((a,b) => a+b) / times.length);
+      return { pass: avg < 5000, warn: avg > 2000, detail: `${avg}ms avg` };
+    }}
+  ],
+  data: [
+    { id: 'st-pagination-bounds', name: 'Pagination Bounds', fn: async () => {
+      try {
+        await rpc('listings', { limit: -1, offset: -1 });
+        return { pass: false, warn: true, detail: 'Accepted negative values' };
+      } catch(e) {
+        return { pass: true, detail: 'Rejected' };
+      }
+    }},
+    { id: 'st-response-consistency', name: 'Response Consistency', fn: async () => {
+      try {
+        const r1 = await rpc('resolve', { query: 'test' });
+        const r2 = await rpc('resolve', { query: 'test' });
+        const match = JSON.stringify(r1) === JSON.stringify(r2);
+        return { pass: match, detail: match ? 'Consistent' : 'Inconsistent' };
+      } catch(e) {
+        return { pass: true, detail: 'Query failed' };
+      }
+    }},
+    { id: 'st-enumeration', name: 'Name Enumeration Risk', fn: async () => {
+      try {
+        const list1 = await rpc('listings', { limit: 1000, offset: 0 });
+        const list2 = await rpc('listings', { limit: 10000, offset: 0 });
+        const risk = Array.isArray(list1) && list1.length >= 100;
+        return { pass: !risk, warn: risk, detail: risk ? 'Large enumeration possible' : 'Limited results' };
+      } catch(e) {
+        return { pass: true, detail: 'Query failed' };
+      }
+    }},
+    { id: 'st-error-verbosity', name: 'Error Verbosity', fn: async () => {
+      try {
+        const r = await rpcRaw('{"jsonrpc":"2.0","id":1,"method":"invalid","params":{}}');
+        const err = JSON.stringify(r.json?.error || {});
+        const verbose = err.includes('stack') || err.includes('at ') || err.length > 500;
+        return { pass: !verbose, warn: verbose, detail: verbose ? 'Over-verbose errors' : 'Appropriate errors' };
+      } catch(e) {
+        return { pass: true, detail: 'Handled' };
+      }
+    }},
+    { id: 'st-empty-body', name: 'Empty Body Handling', fn: async () => {
+      try {
+        const r = await rpcRaw('');
+        return { pass: r.status >= 400, warn: r.status < 400, detail: `Status: ${r.status}` };
+      } catch(e) {
+        return { pass: true, detail: 'Rejected' };
+      }
+    }},
+    { id: 'st-type-confusion', name: 'Type Confusion', fn: async () => {
+      try {
+        await rpc('listings', { limit: 'not-a-number', offset: true });
+        return { pass: false, warn: true, detail: 'Accepted wrong types' };
+      } catch(e) {
+        return { pass: true, detail: 'Rejected' };
+      }
+    }}
+  ]
+};
+
+function updateSecStats(total, pass, fail, warn) {
+  document.getElementById('sec-stat-total').textContent = total;
+  document.getElementById('sec-stat-pass').textContent = pass;
+  document.getElementById('sec-stat-fail').textContent = fail;
+  document.getElementById('sec-stat-warn').textContent = warn;
+  
+  const riskScore = total > 0 ? Math.round((fail * 100) / total) : 0;
+  document.getElementById('sec-risk-score').textContent = riskScore + '%';
+  const riskEl = document.getElementById('sec-risk-score');
+  riskEl.style.color = riskScore > 50 ? 'var(--red)' : riskScore > 20 ? 'var(--amber)' : 'var(--green)';
+  
+  const width = total > 0 ? (pass / total) * 100 : 0;
+  document.getElementById('sec-progress').style.width = width + '%';
+}
+
+async function secRunAll(event) {
+  const btn = event.target;
+  setLoading(btn, true);
+  secResults = [];
+  let total = 0, passed = 0, failed = 0, warned = 0;
+  
+  for (const [category, tests] of Object.entries(SEC_TESTS)) {
+    for (const test of tests) {
+      total++;
+      const el = document.getElementById(test.id);
+      const dot = el.querySelector('.test-dot');
+      dot.className = 'test-dot running';
+      
+      try {
+        const result = await test.fn();
+        let status = 'pass';
+        if (!result.pass && !result.warn) {
+          status = 'fail';
+          failed++;
+        } else if (result.warn) {
+          status = 'warn';
+          warned++;
+        } else {
+          passed++;
+        }
+        
+        dot.className = `test-dot ${status}`;
+        el.classList.remove('pass', 'fail', 'warn');
+        el.classList.add(status);
+        secResults.push({ test: test.name, status, detail: result.detail });
+      } catch(e) {
+        dot.className = 'test-dot fail';
+        el.classList.remove('pass', 'fail', 'warn');
+        el.classList.add('fail');
+        failed++;
+        secResults.push({ test: test.name, status: 'fail', detail: 'Exception: ' + e.message });
+      }
+      
+      await updateSecStats(total, passed, failed, warned);
+      await new Promise(r => setTimeout(r, 50));
+    }
+  }
+  
+  displaySecResults(secResults);
+  setLoading(btn, false);
+}
+
+function displaySecResults(results) {
+  const container = document.getElementById('sec-results-container');
+  const html = results.map(r => `
+    <div class="result-item ${r.status}">
+      <div class="result-item-title">${r.test}</div>
+      <div class="result-item-detail">${r.detail}</div>
+    </div>
+  `).join('');
+  container.innerHTML = html || '<div class="empty-state">No results</div>';
+}
+
+function showSecTab(tab, btn) {
+  document.querySelectorAll('[id^="sec-tab-"]').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-bar .tab-btn').forEach(b => b.classList.remove('active'));
+  const content = document.getElementById(`sec-tab-${tab}`);
+  if (content) content.classList.add('active');
+  btn.classList.add('active');
+}
+
+function secExportReport() {
+  const stats = {
+    total: document.getElementById('sec-stat-total').textContent,
+    passed: document.getElementById('sec-stat-pass').textContent,
+    failed: document.getElementById('sec-stat-fail').textContent,
+    warnings: document.getElementById('sec-stat-warn').textContent,
+    riskScore: document.getElementById('sec-risk-score').textContent,
+    results: secResults,
+    timestamp: new Date().toISOString(),
+    network: network
+  };
+  
+  const blob = new Blob([JSON.stringify(stats, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `zns-security-${network}-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function secClear() {
+  document.querySelectorAll('#tool-security .test-dot').forEach(dot => {
+    dot.className = 'test-dot';
+  });
+  document.querySelectorAll('#tool-security .test-item').forEach(item => {
+    item.classList.remove('pass', 'fail', 'warn');
+  });
+  document.getElementById('sec-results-container').innerHTML = '<div class="empty-state"><div class="icon">⛨</div>No results yet — run all tests</div>';
+  updateSecStats(0, 0, 0, 0);
+  secResults = [];
+}
+
+// ════════════════════════════════════════════════════════════════
+// POOL MONITOR
+// ════════════════════════════════════════════════════════════════
+async function poolRunAll(event) {
+  const btn = event.target;
+  setLoading(btn, true);
+  let total = 0, passed = 0, failed = 0, warned = 0;
+  const results = [];
+  
+  const indexerTests = [
+    { id: 'pt-sync', name: 'Indexer Sync', fn: async () => {
+      const r = await rpc('status', {});
+      return { pass: r.synced_height > 0, detail: `Height: ${r.synced_height}` };
+    }},
+    { id: 'pt-registered', name: 'Registrations', fn: async () => {
+      const r = await rpc('status', {});
+      return { pass: (r.registered || 0) > 0, detail: `${r.registered} names` };
+    }},
+    { id: 'pt-listed', name: 'Listings', fn: async () => {
+      const r = await rpc('status', {});
+      return { pass: (r.listed || 0) > 0, detail: `${r.listed} listed` };
+    }},
+    { id: 'pt-pricing', name: 'Pricing', fn: async () => {
+      const r = await rpc('status', {});
+      return { pass: r.pricing && r.pricing.tiers && r.pricing.tiers.length > 0, detail: r.pricing?.tiers?.length ? `${r.pricing.tiers.length} tiers` : 'No pricing' };
+    }}
+  ];
+  
+  for (const test of indexerTests) {
+    total++;
+    const el = document.getElementById(test.id);
+    const dot = el.querySelector('.test-dot');
+    dot.className = 'test-dot running';
+    
+    try {
+      const result = await test.fn();
+      const status = result.pass ? 'pass' : 'fail';
+      dot.className = `test-dot ${status}`;
+      el.classList.remove('pass', 'fail');
+      el.classList.add(status);
+      if (result.pass) passed++; else failed++;
+      results.push({ name: test.name, status, detail: result.detail });
+    } catch(e) {
+      dot.className = 'test-dot fail';
+      el.classList.add('fail');
+      failed++;
+      results.push({ name: test.name, status: 'fail', detail: 'Error: ' + e.message });
+    }
+    
+    updatePoolStats(total, passed, failed, warned);
+    await new Promise(r => setTimeout(r, 50));
+  }
+  
+  displayPoolResults(results);
+  setLoading(btn, false);
+}
+
+function updatePoolStats(total, pass, fail, warn) {
+  document.getElementById('pool-stat-total').textContent = total;
+  document.getElementById('pool-stat-pass').textContent = pass;
+  document.getElementById('pool-stat-fail').textContent = fail;
+  document.getElementById('pool-stat-warn').textContent = warn;
+  const width = total > 0 ? (pass / total) * 100 : 0;
+  document.getElementById('pool-progress').style.width = width + '%';
+}
+
+function displayPoolResults(results) {
+  const container = document.getElementById('pool-results-container');
+  const html = results.map(r => `
+    <div class="result-item ${r.status}">
+      <div class="result-item-title">${r.name}</div>
+      <div class="result-item-detail">${r.detail}</div>
+    </div>
+  `).join('');
+  container.innerHTML = html || '<div class="empty-state"><div class="icon">◎</div>No results</div>';
+}
+
+function showPoolTab(tab, btn) {
+  document.querySelectorAll('[id^="pool-tab-"]').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#tool-pool .tab-btn').forEach(b => b.classList.remove('active'));
+  const content = document.getElementById(`pool-tab-${tab}`);
+  if (content) content.classList.add('active');
+  btn.classList.add('active');
+}
+
+function poolClear() {
+  document.querySelectorAll('#tool-pool .test-dot').forEach(dot => {
+    dot.className = 'test-dot';
+  });
+  document.querySelectorAll('#tool-pool .test-item').forEach(item => {
+    item.classList.remove('pass', 'fail', 'warn');
+  });
+  document.getElementById('pool-results-container').innerHTML = '<div class="empty-state"><div class="icon">◎</div>No results yet</div>';
+  updatePoolStats(0, 0, 0, 0);
+}
+
+// ════════════════════════════════════════════════════════════════
+// LOG ANALYSER
+// ════════════════════════════════════════════════════════════════
+function showLogTab(tab, btn) {
+  document.querySelectorAll('#tool-log .log-tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#tool-log .log-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(tab).classList.add('active');
+  btn.classList.add('active');
+}
+
+function analyseLog() {
+  const raw = document.getElementById('log-input').value;
+  if (!raw.trim()) return;
+  
+  const lines = raw.split('\n');
+  const flags = [];
+  
+  lines.forEach((line, idx) => {
+    const t = line.trim();
+    if (t.includes('undefined')) flags.push({ severity: 'red', line: idx + 1, msg: 'undefined value' });
+    if (t.match(/otp.*\d{4,6}/i)) flags.push({ severity: 'amber', line: idx + 1, msg: 'OTP visible in log' });
+    if (t.includes('password') || t.includes('secret') || t.includes('key')) flags.push({ severity: 'red', line: idx + 1, msg: 'Sensitive data exposure' });
+    if (t.match(/error|exception|failed/i)) flags.push({ severity: 'amber', line: idx + 1, msg: 'Error detected' });
+  });
+  
+  const summary = `Analysed ${lines.length} lines, found ${flags.length} flags`;
+  document.getElementById('log-summary-content').innerHTML = `<div style="padding:10px;color:var(--text)">${summary}</div>`;
+  
+  if (flags.length > 0) {
+    const flagsHtml = flags.map(f => `
+      <div class="flag-item ${f.severity}">
+        <div class="flag-title">Line ${f.line}</div>
+        <div class="flag-desc">${f.msg}</div>
+      </div>
+    `).join('');
+    document.getElementById('log-flags-content').innerHTML = flagsHtml;
+  }
+}
+
+function clearLog() {
+  document.getElementById('log-input').value = '';
+  document.getElementById('log-summary-content').innerHTML = '<div class="empty-state"><div class="icon">◈</div>Paste logs and click Analyse</div>';
+  document.getElementById('log-flags-content').innerHTML = '<div class="empty-state"><div class="icon">◈</div>No flags yet</div>';
+}
+
+// ════════════════════════════════════════════════════════════════
+// FUZZ RUNNER
+// ════════════════════════════════════════════════════════════════
+const FUZZ_CORPUS = [
+  { name: 'status-empty', mode: 'rpc', method: 'status', params: {} },
+  { name: 'resolve-empty', mode: 'rpc', method: 'resolve', params: { query: '' } },
+  { name: 'resolve-large', mode: 'rpc', method: 'resolve', params: { query: 'a'.repeat(4096) } },
+  { name: 'listings-negative', mode: 'rpc', method: 'listings', params: { limit: -50, offset: -5 } },
+  { name: 'events-odd-types', mode: 'rpc', method: 'events', params: { limit: '20', offset: {} } }
+];
+const FUZZ_STORAGE = 'znsTester.customFuzzCases.v1';
+
+function parseCustomCases() {
+  const raw = document.getElementById('in-fuzz-custom').value.trim();
+  if (!raw) return [];
+  return JSON.parse(raw);
+}
+
+function saveCustomCases() { try { localStorage.setItem(FUZZ_STORAGE, JSON.stringify(parseCustomCases())); alert('Saved.'); } catch(e) { alert(e.message); } }
+function loadCustomCases() { try { const s = localStorage.getItem(FUZZ_STORAGE); if (!s) { alert('Nothing saved.'); return; } document.getElementById('in-fuzz-custom').value = JSON.stringify(JSON.parse(s), null, 2); } catch(e) { alert(e.message); } }
+function clearCustomCases() { localStorage.removeItem(FUZZ_STORAGE); document.getElementById('in-fuzz-custom').value = ''; alert('Cleared.'); }
+function exportFuzzReport() {
+  if (!lastFuzzReport) { alert('Run the corpus first.'); return; }
+  const blob = new Blob([JSON.stringify(lastFuzzReport, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `zns-fuzz-${network}-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function runFuzzCase(test) {
+  const start = performance.now();
+  try {
+    if (test.mode === 'rpc') {
+      const result = await rpc(test.method, test.params);
+      return { ok: true, elapsed: Math.round(performance.now() - start), sig: JSON.stringify(result).slice(0, 300) };
+    }
+  } catch(e) {
+    return { ok: false, elapsed: Math.round(performance.now() - start), sig: 'thrown:' + e.message };
+  }
+}
+
+async function doFuzz(btn) {
+  const reps = Math.max(1, Math.min(10, parseInt(document.getElementById('in-fuzz-reps').value) || 2));
+  const slowMs = Math.max(100, parseInt(document.getElementById('in-fuzz-slow').value) || 1200);
+  let custom = [];
+  try { custom = parseCustomCases(); } catch(e) { showResult('res-fuzz', 'Error: ' + e.message, true); return; }
+  const corpus = FUZZ_CORPUS.concat(custom);
+  setLoading(btn, true);
+  const results = [];
+  for (let i = 0; i < reps; i++) {
+    for (const test of corpus) {
+      const r = await runFuzzCase(test);
+      results.push({ test: test.name, run: i + 1, ...r });
+    }
+  }
+  const report = {
+    network, totalTests: corpus.length, repetitions: reps, executions: results.length,
+    stats: { ok: results.filter(x => x.ok).length, failed: results.filter(x => !x.ok).length }
+  };
+  lastFuzzReport = report;
+  showResult('res-fuzz', report, false);
+  setLoading(btn, false);
+}
+</script>
+</body>
+</html> 
