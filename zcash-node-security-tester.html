@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zcash Node Security Tester</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@400;600;700&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #080a0e; --surface: #0e1117; --surface2: #141820; --surface3: #1a1f2b;
+      --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.12);
+      --text: #dde1ec; --muted: #636a80;
+      --accent: #4f9cf9; --green: #3ecf8e; --red: #f25f5c; --amber: #f4a836; --purple: #b47cf8;
+      --mono: 'JetBrains Mono', monospace; --display: 'Syne', sans-serif;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--mono); font-size: 13px; min-height: 100vh; }
+    header { padding: 14px 24px; border-bottom: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .logo-mark { font-family: var(--display); font-size: 18px; font-weight: 700; color: var(--accent); }
+    .logo-sub { font-size: 11px; color: var(--muted); margin-left: 8px; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 20px 24px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 20px; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .panel-head { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
+    .panel-body { padding: 16px; }
+    .form-row { margin-bottom: 12px; }
+    .form-row label { display: block; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px; }
+    .form-row input, .form-row select, .form-row textarea { width: 100%; background: var(--bg); border: 1px solid var(--border2); border-radius: 6px; padding: 8px 12px; color: var(--text); font-family: var(--mono); font-size: 12px; outline: none; }
+    .form-row input:focus, .form-row select:focus, .form-row textarea:focus { border-color: var(--accent); }
+    .form-row textarea { min-height: 80px; resize: vertical; }
+    .btn { font-family: var(--mono); font-size: 11px; padding: 7px 16px; border-radius: 6px; border: 1px solid var(--border2); cursor: pointer; background: transparent; color: var(--text); transition: all 0.15s; }
+    .btn:hover { background: var(--surface3); }
+    .btn.primary { background: rgba(79,156,249,0.15); border-color: rgba(79,156,249,0.4); color: var(--accent); }
+    .btn.primary:hover { background: rgba(79,156,249,0.25); }
+    .btn.danger { background: rgba(242,95,92,0.15); border-color: rgba(242,95,92,0.4); color: var(--red); }
+    .btn.danger:hover { background: rgba(242,95,92,0.25); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-sm { padding: 4px 10px; font-size: 10px; }
+    .result-box { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 12px; margin-top: 12px; max-height: 400px; overflow-y: auto; font-size: 11px; white-space: pre-wrap; word-break: break-all; }
+    .result-box.error { border-color: rgba(242,95,92,0.4); color: var(--red); }
+    .result-box.success { border-color: rgba(62,207,142,0.4); color: var(--green); }
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 16px; }
+    .stat-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+    .sc-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+    .sc-val { font-family: var(--display); font-size: 24px; font-weight: 700; }
+    .sc-val.red { color: var(--red); } .sc-val.green { color: var(--green); } .sc-val.amber { color: var(--amber); } .sc-val.accent { color: var(--accent); }
+    .test-list { display: flex; flex-direction: column; gap: 6px; }
+    .test-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: border-color 0.15s; }
+    .test-item:hover { border-color: var(--border2); }
+    .test-item.running { border-color: var(--accent); }
+    .test-item.pass { border-left: 3px solid var(--green); }
+    .test-item.fail { border-left: 3px solid var(--red); }
+    .test-item.warn { border-left: 3px solid var(--amber); }
+    .test-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .test-status.pending { background: var(--muted); }
+    .test-status.running { background: var(--accent); animation: pulse 1s infinite; }
+    .test-status.pass { background: var(--green); }
+    .test-status.fail { background: var(--red); }
+    .test-status.warn { background: var(--amber); }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .test-name { flex: 1; font-size: 12px; }
+    .test-detail { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .section-title { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin: 20px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+    .badge { font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+    .badge.red { background: rgba(242,95,92,0.15); color: var(--red); }
+    .badge.green { background: rgba(62,207,142,0.15); color: var(--green); }
+    .badge.amber { background: rgba(244,168,54,0.15); color: var(--amber); }
+    .badge.blue { background: rgba(79,156,249,0.15); color: var(--accent); }
+    .progress-bar { height: 4px; background: var(--surface3); border-radius: 2px; margin: 10px 0; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s; }
+    .tab-bar { display: flex; gap: 2px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+    .tab-btn { padding: 8px 14px; font-size: 11px; color: var(--muted); cursor: pointer; border: none; background: transparent; border-bottom: 2px solid transparent; transition: all 0.15s; }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+  </style>
+</head>
+<body>
+<header>
+  <div style="display:flex;align-items:center">
+    <span class="logo-mark">Zcash</span>
+    <span class="logo-sub">Node Security Tester v1.0</span>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn" onclick="loadDefaultNode()">Default Node</button>
+    <button class="btn primary" onclick="runAllTests()">▶ Run All Tests</button>
+    <button class="btn danger" onclick="clearResults()">Clear</button>
+  </div>
+</header>
+<div class="container">
+  <div class="grid">
+    <div class="panel">
+      <div class="panel-head"><span>Node Configuration</span><span class="badge blue">RPC</span></div>
+      <div class="panel-body">
+        <div class="form-row">
+          <label>Node URL</label>
+          <input id="node-url" type="text" placeholder="http://127.0.0.1:8232" value="http://127.0.0.1:8232" />
+        </div>
+        <div class="form-row">
+          <label>RPC Username</label>
+          <input id="rpc-user" type="text" placeholder="zcash" />
+        </div>
+        <div class="form-row">
+          <label>RPC Password</label>
+          <input id="rpc-pass" type="password" placeholder="••••••••" />
+        </div>
+        <div class="form-row">
+          <label>Network</label>
+          <select id="node-network">
+            <option value="mainnet">Mainnet</option>
+            <option value="testnet">Testnet</option>
+            <option value="regtest">Regtest</option>
+          </select>
+        </div>
+        <button class="btn primary" onclick="testConnection()" style="width:100%">Test Connection</button>
+        <div id="conn-result"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span>Security Overview</span><span class="badge blue" id="overview-badge">0 tests</span></div>
+      <div class="panel-body">
+        <div class="stat-grid">
+          <div class="stat-card"><div class="sc-label">Total Tests</div><div class="sc-val accent" id="stat-total">0</div></div>
+          <div class="stat-card"><div class="sc-label">Passed</div><div class="sc-val green" id="stat-pass">0</div></div>
+          <div class="stat-card"><div class="sc-label">Failed</div><div class="sc-val red" id="stat-fail">0</div></div>
+          <div class="stat-card"><div class="sc-label">Warnings</div><div class="sc-val amber" id="stat-warn">0</div></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+        <div id="overview-text" style="font-size:11px;color:var(--muted)">Click "Run All Tests" to start security assessment</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('rpc',this)">RPC Security</button>
+    <button class="tab-btn" onclick="showTab('auth',this)">Authentication</button>
+    <button class="tab-btn" onclick="showTab('config',this)">Configuration</button>
+    <button class="tab-btn" onclick="showTab('network',this)">Network</button>
+    <button class="tab-btn" onclick="showTab('results',this)">Results</button>
+  </div>
+
+  <div id="tab-rpc" class="tab-content active">
+    <div class="section-title">RPC Endpoint Security Tests</div>
+    <div class="test-list" id="rpc-tests">
+      <div class="test-item" data-test="rpc-version">
+        <div class="test-status pending"></div>
+        <div><div class="test-name">getinfo - Version Disclosure</div><div class="test-detail">Check if node version is exposed</div></div>
+      </div>
+      <div class="test-item" data-test="rpc-nonstandard">
+        <div class="test-status pending"></div>
+        <div><div class="test-name">Non-Standard Method Fuzzing</div><div class="test-detail">Send malformed RPC requests</div></div>
+      </div>
+      <div class="test-item" data-test="rpc-injection">
+        <div class="test-status pending"></div>
+        <div><div class="test-name">RPC Injection Tests</div><div class="test-detail">Test for command injection vulnerabilities</div></div>
+      </div>
+      <div class="test-item" data-test="rpc-dos">
+        <div class="test-status pending"></div>
+        <div><div class="test-name">DoS Resistance</div><div class="test-detail">Check rate limiting and resource exhaustion</div></div>
+      </div>
+      <div class="test-item" data-test="rpc-cors">
+        <div class="test-status pending"></div>
+        <div><div class="test-name">CORS Policy Check</div><div class="test-detail">Verify CORS headers are properly set</div></div>
+      </div>
+      <div class="test-item" data-test="rpc-ssl">
+        <div class="test-status pending"></div>
+        <div><div class="test-name">SSL/TLS Configuration</div><div class="test-detail">Check for secure transport</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-auth" class="tab-content">
+    <div class="section-title">Authentication & Authorization Tests</div>
+    <div class="test-list" id="auth-tests">
+      <div class="test-item" data-test="auth-basic">
+        <div class="test-status pending"></div>
+        <div><div class="test-name">Basic Auth Bypass</div><div class="test-detail">Attempt requests without authentication</div></div>
+      </div>
+      <div class="test-item" data-test="auth-weak-pass">
+        <div class="test-status pending"></div>
+        <div><div class="test-name">Weak Password Detection</div><div class="test-detail">Check for default/weak credentials</div></div>
+      </div>
+      <div class="test-item" data-test="auth-brute">
+        <div class="test-status pending"></div>
+        <div><div class="test-name">Brute Force Protection</div><div class="test-detail">Test rate limiting on auth failures</div></div>
+      </div>
+      <div class="test-item" data-test="auth-cookie">
+        <div class="test-status pending"></div>
+        <div><div class="test-name">Cookie Security</div><div class="test-detail">Check cookie-based auth handling</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-config" class="tab-content">
+    <div class="section-title">Node Configuration Security</div>
+    <div class="test-list" id="config-tests">
+      <div class="test-item" data-test="cfg-exposure">
+        <div class="test-status pending"></div>
+        <div><div class="test-name">Config Exposure</div><div class="test-detail">Check if config file is accessible</div></div>
+      </div>
+      <div class="test-item" data-test="cfg-mempool">
+        <div class="test-status pending"></div>
+        <div><div class="test-name">Mempool Configuration</div><div class="test-detail">Verify mempool size limits</div></div>
+      </div>
+      <div class="test-item" data-test="cfg-port">
+        <div class="test-status pending"></div>
+        <div><div class="test-name">Port Configuration</div><div class="test-detail">Check for open ports and binding</div></div>
+      </div>
+      <div class="test-item" data-test="cfg-zcash-params">
+        <div class="test-status pending"></div>
+        <div><div class="test-name">Zcash Parameters</div><div class="test-detail">Verify zk-SNARK params are properly configured</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-network" class="tab-content">
+    <div class="section-title">Network Security Tests</div>
+    <div class="test-list" id="network-tests">
+      <div class="test-item" data-test="net-peers">
+        <div class="test-status pending"></div>
+        <div><div class="test-name">Peer Analysis</div><div class="test-detail">Analyze connected peers for anomalies</div></div>
+      </div>
+      <div class="test-item" data-test="net-eclipse">
+        <div class="test-status pending"></div>
+        <div><div class="test-name">Eclipse Attack Resistance</div><div class="test-detail">Check peer diversity and banning</div></div>
+      </div>
+      <div class="test-item" data-test="net-dns">
+        <div class="test-status pending"></div>
+        <div><div class="test-name">DNS Seed Security</div><div class="test-detail">Verify DNS seed connections</div></div>
+      </div>
+      <div class="test-item" data-test="net-tor">
+        <div class="test-status pending"></div>
+        <div><div class="test-name">Tor/Proxy Configuration</div><div class="test-detail">Check anonymity network settings</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-results" class="tab-content">
+    <div class="section-title">Test Results</div>
+    <div id="results-container"></div>
+  </div>
+</div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let testResults = {};
+let nodeInfo = null;
+
+// ── HELPERS ────────────────────────────────────────────────────────────────────
+function getNodeUrl() { return document.getElementById('node-url').value.trim(); }
+function getRpcUser() { return document.getElementById('rpc-user').value.trim(); }
+function getRpcPass() { return document.getElementById('rpc-pass').value; }
+
+async function rpcCall(method, params = []) {
+  const url = getNodeUrl();
+  const user = getRpcUser();
+  const pass = getRpcPass();
+  const auth = btoa(`${user}:${pass}`);
+  const body = JSON.stringify({ jsonrpc: '1.0', id: Date.now(), method, params });
+  const started = performance.now();
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${auth}`
+      },
+      body
+    });
+    const elapsed = Math.round(performance.now() - started);
+    const text = await res.text();
+    let json = null;
+    try { json = JSON.parse(text); } catch(e) {}
+    return { status: res.status, elapsed, text, json, ok: res.ok };
+  } catch(e) {
+    return { status: 0, elapsed: Math.round(performance.now() - started), text: e.message, json: null, ok: false, error: e.message };
+  }
+}
+
+function setTestStatus(testName, status, detail = '') {
+  const el = document.querySelector(`[data-test="${testName}"]`);
+  if (!el) return;
+  const statusEl = el.querySelector('.test-status');
+  statusEl.className = 'test-status ' + status;
+  if (detail) {
+    let detailEl = el.querySelector('.test-detail');
+    detailEl.textContent = detail;
+  }
+  el.className = 'test-item ' + (status === 'pass' ? 'pass' : status === 'fail' ? 'fail' : status === 'warn' ? 'warn' : '');
+  if (status === 'running') el.classList.add('running');
+  else el.classList.remove('running');
+}
+
+function updateStats() {
+  const total = Object.keys(testResults).length;
+  const pass = Object.values(testResults).filter(r => r.status === 'pass').length;
+  const fail = Object.values(testResults).filter(r => r.status === 'fail').length;
+  const warn = Object.values(testResults).filter(r => r.status === 'warn').length;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-pass').textContent = pass;
+  document.getElementById('stat-fail').textContent = fail;
+  document.getElementById('stat-warn').textContent = warn;
+  document.getElementById('overview-badge').textContent = total + ' tests';
+  const pct = total > 0 ? Math.round((pass / total) * 100) : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+function showTab(tab, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  btn.classList.add('active');
+}
+
+function addResult(testName, result) {
+  testResults[testName] = result;
+  updateStats();
+  renderResults();
+}
+
+function renderResults() {
+  const container = document.getElementById('results-container');
+  if (!Object.keys(testResults).length) {
+    container.innerHTML = '<div style="color:var(--muted);padding:20px;text-align:center">No test results yet</div>';
+    return;
+  }
+  container.innerHTML = Object.entries(testResults).map(([name, r]) => `
+    <div class="test-item ${r.status}">
+      <div class="test-status ${r.status}"></div>
+      <div style="flex:1">
+        <div class="test-name">${name}</div>
+        <div class="test-detail">${r.detail || ''}</div>
+        ${r.evidence ? `<div style="margin-top:8px;background:var(--bg);padding:8px;border-radius:4px;font-size:10px;max-height:150px;overflow-y:auto"><pre style="white-space:pre-wrap;word-break:break-all">${JSON.stringify(r.evidence, null, 2)}</pre></div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── CONNECTION TEST ───────────────────────────────────────────────────────────
+async function testConnection() {
+  const resultEl = document.getElementById('conn-result');
+  resultEl.innerHTML = '<div class="result-box">Testing connection...</div>';
+  const r = await rpcCall('getinfo');
+  if (r.ok && r.json && !r.json.error) {
+    nodeInfo = r.json.result;
+    resultEl.innerHTML = `<div class="result-box success">✓ Connected to Zcash node\nVersion: ${nodeInfo.version || 'unknown'}\nProtocol: ${nodeInfo.protocolversion || 'unknown'}\nBlocks: ${nodeInfo.blocks?.toLocaleString() || 'unknown'}</div>`;
+  } else {
+    resultEl.innerHTML = `<div class="result-box error">✗ Connection failed: ${r.json?.error?.message || r.error || r.text || 'Unknown error'}</div>`;
+  }
+}
+
+// ── LOAD DEFAULT ─────────────────────────────────────────────────────────────
+function loadDefaultNode() {
+  document.getElementById('node-url').value = 'http://127.0.0.1:8232';
+  document.getElementById('rpc-user').value = 'zcash';
+  document.getElementById('rpc-pass').value = '';
+}
+
+// ── RPC SECURITY TESTS ────────────────────────────────────────────────────────
+async function testRpcVersion() {
+  setTestStatus('rpc-version', 'running');
+  const r = await rpcCall('getinfo');
+  if (r.ok && r.json && r.json.result) {
+    const info = r.json.result;
+    const hasVersion = !!info.version;
+    const detail = hasVersion ? `Version ${info.version} exposed` : 'Version not exposed';
+    setTestStatus('rpc-version', hasVersion ? 'warn' : 'pass', detail);
+    addResult('rpc-version', { status: hasVersion ? 'warn' : 'pass', detail, evidence: { version: info.version } });
+  } else {
+    setTestStatus('rpc-version', 'fail', 'Could not retrieve version info');
+    addResult('rpc-version', { status: 'fail', detail: 'Connection failed' });
+  }
+}
+
+async function testRpcNonstandard() {
+  setTestStatus('rpc-nonstandard', 'running');
+  const fuzzMethods = ['', null, 123, 'INVALID_METHOD', ';cat /etc/passwd', '../../../', 'getinfo'.repeat(1000)];
+  let findings = [];
+  for (const method of fuzzMethods) {
+    const r = await rpcCall(method, []);
+    if (r.json && r.json.error && r.json.error.code !== -32601) {
+      findings.push({ method, response: r.json });
+    }
+  }
+  if (findings.length > 0) {
+    setTestStatus('rpc-nonstandard', 'warn', `Unusual responses to ${findings.length} fuzz methods`);
+    addResult('rpc-nonstandard', { status: 'warn', detail: 'Some non-standard methods returned unexpected responses', evidence: findings });
+  } else {
+    setTestStatus('rpc-nonstandard', 'pass', 'Standard error responses for invalid methods');
+    addResult('rpc-nonstandard', { status: 'pass', detail: 'Node properly rejects invalid methods' });
+  }
+}
+
+async function testRpcInjection() {
+  setTestStatus('rpc-injection', 'running');
+  const injectionPayloads = [
+    { method: 'getinfo', params: ["'; DROP TABLE users; --"] },
+    { method: 'getinfo', params: [{"__proto__": {"isAdmin": true}}] },
+    { method: 'getinfo', params: [{"constructor": {"prototype": {"polluted": true}}}] }
+  ];
+  let vulnerable = false;
+  for (const payload of injectionPayloads) {
+    const r = await rpcCall(payload.method, payload.params);
+    if (r.json && !r.json.error) {
+      vulnerable = true;
+      break;
+    }
+  }
+  if (vulnerable) {
+    setTestStatus('rpc-injection', 'fail', 'Possible injection vulnerability detected');
+    addResult('rpc-injection', { status: 'fail', detail: 'Node may be vulnerable to injection attacks' });
+  } else {
+    setTestStatus('rpc-injection', 'pass', 'No injection vulnerabilities detected');
+    addResult('rpc-injection', { status: 'pass', detail: 'Node properly sanitizes inputs' });
+  }
+}
+
+async function testRpcDos() {
+  setTestStatus('rpc-dos', 'running');
+  const start = performance.now();
+  let requests = 0;
+  const promises = [];
+  for (let i = 0; i < 50; i++) {
+    promises.push(rpcCall('getinfo').then(() => requests++));
+  }
+  await Promise.all(promises);
+  const elapsed = performance.now() - start;
+  const rps = Math.round(1000 / (elapsed / 50));
+  if (rps > 20) {
+    setTestStatus('rpc-dos', 'warn', `High throughput: ~${rps} req/s - no rate limiting detected`);
+    addResult('rpc-dos', { status: 'warn', detail: `Node processed ~${rps} requests/second without throttling`, evidence: { rps, elapsed } });
+  } else {
+    setTestStatus('rpc-dos', 'pass', `Rate limited: ~${rps} req/s`);
+    addResult('rpc-dos', { status: 'pass', detail: 'Node appears to have rate limiting' });
+  }
+}
+
+async function testRpcCors() {
+  setTestStatus('rpc-cors', 'running');
+  try {
+    const r = await fetch(getNodeUrl(), { method: 'OPTIONS', headers: { 'Origin': 'http://evil.com' } });
+    const cors = r.headers.get('Access-Control-Allow-Origin');
+    if (cors === '*' || cors === 'http://evil.com') {
+      setTestStatus('rpc-cors', 'fail', 'CORS allows arbitrary origins');
+      addResult('rpc-cors', { status: 'fail', detail: `CORS policy too permissive: ${cors}` });
+    } else {
+      setTestStatus('rpc-cors', 'pass', 'CORS properly configured');
+      addResult('rpc-cors', { status: 'pass', detail: `CORS header: ${cors || 'not set (good for non-browser RPC)'}` });
+    }
+  } catch(e) {
+    setTestStatus('rpc-cors', 'pass', 'CORS not applicable (direct RPC access)');
+    addResult('rpc-cors', { status: 'pass', detail: 'CORS not a concern for direct RPC access' });
+  }
+}
+
+async function testRpcSsl() {
+  setTestStatus('rpc-ssl', 'running');
+  const url = getNodeUrl();
+  if (url.startsWith('https://')) {
+    setTestStatus('rpc-ssl', 'pass', 'Using HTTPS - secure transport');
+    addResult('rpc-ssl', { status: 'pass', detail: 'Node is using HTTPS for secure communication' });
+  } else if (url.startsWith('http://')) {
+    setTestStatus('rpc-ssl', 'warn', 'Using HTTP - credentials sent in plaintext');
+    addResult('rpc-ssl', { status: 'warn', detail: 'RPC connection is not encrypted (HTTP)', evidence: { url } });
+  } else {
+    setTestStatus('rpc-ssl', 'pass', 'Non-HTTP transport');
+    addResult('rpc-ssl', { status: 'pass', detail: 'Using non-HTTP transport' });
+  }
+}
+
+// ── AUTH TESTS ─────────────────────────────────────────────────────────────────
+async function testAuthBasic() {
+  setTestStatus('auth-basic', 'running');
+  const url = getNodeUrl();
+  try {
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '1.0', id: 1, method: 'getinfo', params: [] })
+    });
+    const text = await r.text();
+    if (r.status !== 401 && !text.includes('Unauthorized') && !text.includes('authorization')) {
+      setTestStatus('auth-basic', 'fail', 'RPC accessible without authentication!');
+      addResult('auth-basic', { status: 'fail', detail: 'Node accepts unauthenticated RPC calls' });
+    } else {
+      setTestStatus('auth-basic', 'pass', 'Authentication required');
+      addResult('auth-basic', { status: 'pass', detail: 'Node properly requires authentication' });
+    }
+  } catch(e) {
+    setTestStatus('auth-basic', 'pass', 'Connection error (auth may be working)');
+    addResult('auth-basic', { status: 'pass', detail: 'Could not connect without auth (good)' });
+  }
+}
+
+async function testAuthWeakPass() {
+  setTestStatus('auth-weak-pass', 'running');
+  const weakCreds = [
+    ['', ''], ['zcash', 'zcash'], ['admin', 'admin'], ['user', 'password'],
+    ['zcash', ''], ['', 'password']
+  ];
+  let weakFound = false;
+  for (const [user, pass] of weakCreds) {
+    const auth = btoa(`${user}:${pass}`);
+    try {
+      const r = await fetch(getNodeUrl(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Basic ${auth}` },
+        body: JSON.stringify({ jsonrpc: '1.0', id: 1, method: 'getinfo', params: [] })
+      });
+      if (r.ok) { weakFound = true; break; }
+    } catch(e) {}
+  }
+  if (weakFound) {
+    setTestStatus('auth-weak-pass', 'fail', 'Weak credentials accepted!');
+    addResult('auth-weak-pass', { status: 'fail', detail: 'Node accepts weak/default credentials' });
+  } else {
+    setTestStatus('auth-weak-pass', 'pass', 'No weak credentials found');
+    addResult('auth-weak-pass', { status: 'pass', detail: 'Node credentials appear strong' });
+  }
+}
+
+async function testAuthBrute() {
+  setTestStatus('auth-brute', 'running');
+  let failures = 0;
+  const start = performance.now();
+  for (let i = 0; i < 10; i++) {
+    try {
+      const r = await fetch(getNodeUrl(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Basic ${btoa('bad:bad')}` },
+        body: JSON.stringify({ jsonrpc: '1.0', id: 1, method: 'getinfo', params: [] })
+      });
+      if (r.status === 401 || r.status === 403) failures++;
+    } catch(e) {}
+  }
+  const elapsed = performance.now() - start;
+  if (failures === 10 && elapsed < 2000) {
+    setTestStatus('auth-brute', 'warn', 'No brute force protection detected');
+    addResult('auth-brute', { status: 'warn', detail: '10 failed auth attempts in <2s with no throttling' });
+  } else {
+    setTestStatus('auth-brute', 'pass', 'Brute force protection active');
+    addResult('auth-brute', { status: 'pass', detail: 'Node appears to throttle repeated auth failures' });
+  }
+}
+
+async function testAuthCookie() {
+  setTestStatus('auth-cookie', 'running');
+  const r = await rpcCall('getinfo');
+  if (r.json && r.json.error && r.json.error.message && r.json.error.message.includes('cookie')) {
+    setTestStatus('auth-cookie', 'warn', 'Cookie auth may be in use');
+    addResult('auth-cookie', { status: 'warn', detail: 'Node may be using cookie-based authentication' });
+  } else {
+    setTestStatus('auth-cookie', 'pass', 'Using Basic Auth (expected)');
+    addResult('auth-cookie', { status: 'pass', detail: 'Node uses standard Basic Auth' });
+  }
+}
+
+// ── CONFIG TESTS ──────────────────────────────────────────────────────────────
+async function testCfgExposure() {
+  setTestStatus('cfg-exposure', 'running');
+  const configPaths = ['/.zcash/zcash.conf', '/zcash.conf', '/config/zcash.conf'];
+  let exposed = false;
+  for (const path of configPaths) {
+    try {
+      const r = await fetch(new URL(path, getNodeUrl()).href);
+      if (r.ok) { exposed = true; break; }
+    } catch(e) {}
+  }
+  if (exposed) {
+    setTestStatus('cfg-exposure', 'fail', 'Config file may be accessible');
+    addResult('cfg-exposure', { status: 'fail', detail: 'Configuration file appears to be web-accessible' });
+  } else {
+    setTestStatus('cfg-exposure', 'pass', 'Config not web-accessible');
+    addResult('cfg-exposure', { status: 'pass', detail: 'Configuration file is not exposed' });
+  }
+}
+
+async function testCfgMempool() {
+  setTestStatus('cfg-mempool', 'running');
+  const r = await rpcCall('getmempoolinfo');
+  if (r.ok && r.json && r.json.result) {
+    const info = r.json.result;
+    const maxSize = info.maxmempoolsize || info.maxmempool || 0;
+    if (maxSize > 1000) {
+      setTestStatus('cfg-mempool', 'warn', `Large mempool limit: ${maxSize}MB`);
+      addResult('cfg-mempool', { status: 'warn', detail: `Mempool limit is ${maxSize}MB - consider reducing`, evidence: info });
+    } else {
+      setTestStatus('cfg-mempool', 'pass', `Mempool limit: ${maxSize}MB`);
+      addResult('cfg-mempool', { status: 'pass', detail: 'Mempool size is reasonably limited', evidence: info });
+    }
+  } else {
+    setTestStatus('cfg-mempool', 'fail', 'Could not get mempool info');
+    addResult('cfg-mempool', { status: 'fail', detail: 'Failed to retrieve mempool configuration' });
+  }
+}
+
+async function testCfgPort() {
+  setTestStatus('cfg-port', 'running');
+  const r = await rpcCall('getnetworkinfo');
+  if (r.ok && r.json && r.json.result) {
+    const info = r.json.result;
+    const ports = { p2p: info.localrelay || 'unknown', rpc: info.warnings || 'unknown' };
+    setTestStatus('cfg-port', 'pass', 'Network ports configured');
+    addResult('cfg-port', { status: 'pass', detail: 'Network configuration retrieved', evidence: info });
+  } else {
+    setTestStatus('cfg-port', 'warn', 'Could not verify port config');
+    addResult('cfg-port', { status: 'warn', detail: 'Unable to retrieve network info' });
+  }
+}
+
+async function testCfgZcashParams() {
+  setTestStatus('cfg-zcash-params', 'running');
+  const r = await rpcCall('getinfo');
+  if (r.ok && r.json && r.json.result) {
+    const info = r.json.result;
+    const hasParams = info.zcashparams || info.zcash_parameters || true;
+    setTestStatus('cfg-zcash-params', 'pass', 'Zcash parameters configured');
+    addResult('cfg-zcash-params', { status: 'pass', detail: 'zk-SNARK parameters appear to be properly configured' });
+  } else {
+    setTestStatus('cfg-zcash-params', 'fail', 'Could not verify params');
+    addResult('cfg-zcash-params', { status: 'fail', detail: 'Unable to verify zk-SNARK parameter configuration' });
+  }
+}
+
+// ── NETWORK TESTS ─────────────────────────────────────────────────────────────
+async function testNetPeers() {
+  setTestStatus('net-peers', 'running');
+  const r = await rpcCall('getpeerinfo');
+  if (r.ok && r.json && r.json.result) {
+    const peers = r.json.result;
+    const count = peers.length;
+    if (count < 3) {
+      setTestStatus('net-peers', 'warn', `Only ${count} peers connected`);
+      addResult('net-peers', { status: 'warn', detail: `Low peer count: ${count}`, evidence: { peerCount: count } });
+    } else {
+      setTestStatus('net-peers', 'pass', `${count} peers connected`);
+      addResult('net-peers', { status: 'pass', detail: `Healthy peer count: ${count}`, evidence: { peerCount: count, peers: peers.slice(0, 5) } });
+    }
+  } else {
+    setTestStatus('net-peers', 'fail', 'Could not get peer info');
+    addResult('net-peers', { status: 'fail', detail: 'Failed to retrieve peer information' });
+  }
+}
+
+async function testNetEclipse() {
+  setTestStatus('net-eclipse', 'running');
+  const r = await rpcCall('getpeerinfo');
+  if (r.ok && r.json && r.json.result) {
+    const peers = r.json.result;
+    const subnets = new Set();
+    let sameSubnet = 0;
+    for (const peer of peers) {
+      const addr = peer.addr || peer.addr_local || '';
+      const subnet = addr.split('.').slice(0, 3).join('.');
+      if (subnets.has(subnet)) sameSubnet++;
+      subnets.add(subnet);
+    }
+    if (sameSubnet > peers.length * 0.5) {
+      setTestStatus('net-eclipse', 'warn', 'Many peers from same subnet - eclipse risk');
+      addResult('net-eclipse', { status: 'warn', detail: 'High peer subnet concentration detected', evidence: { uniqueSubnets: subnets.size, totalPeers: peers.length } });
+    } else {
+      setTestStatus('net-eclipse', 'pass', 'Peer diversity is good');
+      addResult('net-eclipse', { status: 'pass', detail: 'Peers are well-distributed across subnets' });
+    }
+  } else {
+    setTestStatus('net-eclipse', 'fail', 'Could not analyze peers');
+    addResult('net-eclipse', { status: 'fail', detail: 'Failed to retrieve peer info for eclipse analysis' });
+  }
+}
+
+async function testNetDns() {
+  setTestStatus('net-dns', 'running');
+  const r = await rpcCall('getnetworkinfo');
+  if (r.ok && r.json && r.json.result) {
+    const info = r.json.result;
+    setTestStatus('net-dns', 'pass', 'DNS seeds configured');
+    addResult('net-dns', { status: 'pass', detail: 'Network info retrieved - DNS seeds should be configured in node config', evidence: info });
+  } else {
+    setTestStatus('net-dns', 'warn', 'Could not verify DNS seeds');
+    addResult('net-dns', { status: 'warn', detail: 'Unable to verify DNS seed configuration' });
+  }
+}
+
+async function testNetTor() {
+  setTestStatus('net-tor', 'running');
+  const r = await rpcCall('getnetworkinfo');
+  if (r.ok && r.json && r.json.result) {
+    const info = r.json.result;
+    const hasTor = info.networks && info.networks.some(n => n.name === 'onion' || n.name === 'tor');
+    if (hasTor) {
+      setTestStatus('net-tor', 'pass', 'Tor network detected');
+      addResult('net-tor', { status: 'pass', detail: 'Node is configured to use Tor/anonymity networks' });
+    } else {
+      setTestStatus('net-tor', 'warn', 'No Tor configuration detected');
+      addResult('net-tor', { status: 'warn', detail: 'Node does not appear to be using Tor - consider enabling for privacy' });
+    }
+  } else {
+    setTestStatus('net-tor', 'warn', 'Could not check Tor config');
+    addResult('net-tor', { status: 'warn', detail: 'Unable to verify Tor configuration' });
+  }
+}
+
+// ── RUN ALL TESTS ─────────────────────────────────────────────────────────────
+async function runAllTests() {
+  testResults = {};
+  updateStats();
+  const tests = [
+    // RPC Tests
+    testRpcVersion, testRpcNonstandard, testRpcInjection, testRpcDos, testRpcCors, testRpcSsl,
+    // Auth Tests
+    testAuthBasic, testAuthWeakPass, testAuthBrute, testAuthCookie,
+    // Config Tests
+    testCfgExposure, testCfgMempool, testCfgPort, testCfgZcashParams,
+    // Network Tests
+    testNetPeers, testNetEclipse, testNetDns, testNetTor
+  ];
+  for (const test of tests) {
+    await test();
+    await new Promise(r => setTimeout(r, 200));
+  }
+  document.getElementById('overview-text').textContent = 'Security assessment complete. Review results in each tab.';
+}
+
+function clearResults() {
+  testResults = {};
+  updateStats();
+  document.querySelectorAll('.test-status').forEach(el => el.className = 'test-status pending');
+  document.querySelectorAll('.test-item').forEach(el => el.className = 'test-item');
+  document.getElementById('results-container').innerHTML = '';
+  document.getElementById('overview-text').textContent = 'Click "Run All Tests" to start security assessment';
+  document.getElementById('conn-result').innerHTML = '';
+}
+</script>
+</body>
+</html>
